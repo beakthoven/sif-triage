@@ -1,0 +1,436 @@
+{
+ "blocks": [
+  {
+   "ps": "26043",
+   "role": "data_auditor_scout",
+   "go_no_go": 8,
+   "severity": 0,
+   "feasibility": 8,
+   "data_risk": 3
+  },
+  {
+   "ps": "SIH26043",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 3
+  },
+  {
+   "ps": "26043",
+   "role": "full-stack-architect",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 2
+  },
+  {
+   "ps": "26043",
+   "role": "methodology_redteamer",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 2
+  },
+  {
+   "ps": "26083",
+   "role": "data-auditor",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 6
+  },
+  {
+   "ps": "26083",
+   "role": "ML/Training Engineer",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 7
+  },
+  {
+   "ps": "26083",
+   "role": "fullstack_architect",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 3
+  },
+  {
+   "ps": "26083",
+   "role": "methodology_red_teamer",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 7
+  },
+  {
+   "ps": "26046",
+   "role": "data-auditor",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 6
+  },
+  {
+   "ps": "26046",
+   "role": "ML/TRAINING ENGINEER",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 4
+  },
+  {
+   "ps": "26046",
+   "role": "fullstack-architect",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 2
+  },
+  {
+   "ps": "26046",
+   "role": "methodology_red_teamer",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 4
+  },
+  {
+   "ps": "26092",
+   "role": "data_auditor",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 3
+  },
+  {
+   "ps": "26092",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 4
+  },
+  {
+   "ps": "26092",
+   "role": "full-stack architect",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 5
+  },
+  {
+   "ps": "26092",
+   "role": "methodology_red_teamer",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 4
+  },
+  {
+   "ps": "26089",
+   "role": "data-auditor",
+   "go_no_go": 7,
+   "severity": 0,
+   "feasibility": 8,
+   "data_risk": 6
+  },
+  {
+   "ps": "26089",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 9
+  },
+  {
+   "ps": "26089",
+   "role": "full-stack architect",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 3
+  },
+  {
+   "ps": "26089",
+   "role": "methodology-red-teamer",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 3
+  },
+  {
+   "ps": "26101",
+   "role": "data-auditor/scout",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 8,
+   "data_risk": 4
+  },
+  {
+   "ps": "26101",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 0,
+   "feasibility": 7,
+   "data_risk": 6
+  },
+  {
+   "ps": "26101",
+   "role": "full-stack-architect",
+   "go_no_go": 6,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 5
+  },
+  {
+   "ps": "26101",
+   "role": "methodology-red-teamer",
+   "go_no_go": 5,
+   "severity": 2,
+   "feasibility": 6,
+   "data_risk": 8
+  },
+  {
+   "ps": "26155",
+   "role": "data_auditor",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 5
+  },
+  {
+   "ps": "26155",
+   "role": "ml_training_engineer",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 4
+  },
+  {
+   "ps": "26155",
+   "role": "full-stack-architect",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 4
+  },
+  {
+   "ps": "26155",
+   "role": "methodology_red_team",
+   "go_no_go": 6,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 5
+  },
+  {
+   "ps": "26097",
+   "role": "data-auditor",
+   "go_no_go": 8,
+   "severity": 0,
+   "feasibility": 7,
+   "data_risk": 3
+  },
+  {
+   "ps": "SIH26097",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 8,
+   "data_risk": 6
+  },
+  {
+   "ps": "26097",
+   "role": "fullstack-architect",
+   "go_no_go": 6,
+   "severity": 3,
+   "feasibility": 6,
+   "data_risk": 7
+  },
+  {
+   "ps": "26097",
+   "role": "methodology-red-teamer",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 9
+  },
+  {
+   "ps": "26102",
+   "role": "ML/TRAINING_ENGINEER",
+   "go_no_go": 5,
+   "severity": 2,
+   "feasibility": 7,
+   "data_risk": 8
+  },
+  {
+   "ps": "26102",
+   "role": "full-stack-architect",
+   "go_no_go": 6,
+   "severity": 2,
+   "feasibility": 6,
+   "data_risk": 7
+  },
+  {
+   "ps": "SIH26102",
+   "role": "methodology-red-teamer",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 6,
+   "data_risk": 6
+  },
+  {
+   "ps": "26165",
+   "role": "data_auditor",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 6
+  },
+  {
+   "ps": "26165",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 2,
+   "feasibility": 8,
+   "data_risk": 6
+  },
+  {
+   "ps": "SIH26165",
+   "role": "full-stack-architect",
+   "go_no_go": 7,
+   "severity": 0,
+   "feasibility": 7,
+   "data_risk": 6
+  },
+  {
+   "ps": "SIH26165",
+   "role": "methodology-red-teamer",
+   "go_no_go": 5,
+   "severity": 2,
+   "feasibility": 6,
+   "data_risk": 8
+  },
+  {
+   "ps": "26101",
+   "role": "ML/Training Engineer",
+   "go_no_go": 7,
+   "severity": 0,
+   "feasibility": 7,
+   "data_risk": 5
+  }
+ ],
+ "summary": [
+  {
+   "ps": "26043",
+   "composite": 11.25,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 2.5,
+    "feasibility": 7.75,
+    "go_no_go": 7.0,
+    "severity": 1.0
+   }
+  },
+  {
+   "ps": "26092",
+   "composite": 9.5,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 4.0,
+    "feasibility": 7.5,
+    "go_no_go": 7.0,
+    "severity": 1.0
+   }
+  },
+  {
+   "ps": "26046",
+   "composite": 9.25,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 4.0,
+    "feasibility": 7.5,
+    "go_no_go": 7.0,
+    "severity": 1.25
+   }
+  },
+  {
+   "ps": "26089",
+   "composite": 8.75,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 5.25,
+    "feasibility": 7.75,
+    "go_no_go": 7.0,
+    "severity": 0.75
+   }
+  },
+  {
+   "ps": "26155",
+   "composite": 7.5,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 4.5,
+    "feasibility": 7.0,
+    "go_no_go": 6.75,
+    "severity": 1.75
+   }
+  },
+  {
+   "ps": "26101",
+   "composite": 6.8,
+   "n_agents": 5,
+   "means": {
+    "data_risk": 5.6,
+    "feasibility": 7.0,
+    "go_no_go": 6.4,
+    "severity": 1.0
+   }
+  },
+  {
+   "ps": "26083",
+   "composite": 6.5,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 5.75,
+    "feasibility": 7.0,
+    "go_no_go": 6.25,
+    "severity": 1.0
+   }
+  },
+  {
+   "ps": "26097",
+   "composite": 6.0,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 6.25,
+    "feasibility": 7.0,
+    "go_no_go": 6.75,
+    "severity": 1.5
+   }
+  },
+  {
+   "ps": "26165",
+   "composite": 5.5,
+   "n_agents": 4,
+   "means": {
+    "data_risk": 6.5,
+    "feasibility": 7.0,
+    "go_no_go": 6.25,
+    "severity": 1.25
+   }
+  },
+  {
+   "ps": "26102",
+   "composite": 3.33,
+   "n_agents": 3,
+   "means": {
+    "data_risk": 7.0,
+    "feasibility": 6.33,
+    "go_no_go": 5.67,
+    "severity": 1.67
+   }
+  }
+ ]
+}

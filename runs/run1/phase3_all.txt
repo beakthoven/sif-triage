@@ -1,0 +1,647 @@
+<agent_swarm_result>
+<summary>completed: 29</summary>
+<subagent agent_id="agent-137" item="ROLE: ADVOCATE-REBUTTAL for PS 26043 (Jharkhand crowdsourced-challenges platform, Govt of Jharkhand). In Debate R1 your side scored it top on feasibility (9) but the prosecutor gave win_prob 2 ('yet another portal'). Engineering pre-mortem found: no real citizen-challenge data exists (HF 'grievance' datasets verified synthetic junk; CPGRAMS login-gated — mitigation: LLM-seed 300-500 challenges grounded in real data.gov.in district statistics); SEV1s: scope overreach, SMS/OTP login complexity, DIFFERENTIATION COLLAPSE ('this is just CPGRAMS/MyGov'), AI-washing exposure (AI is decoration), unclaimable metrics, puppet-theater demo risk. TASK: For each finding, either rebut it with evidence or state exactly how the plan changes to absorb it. End with the revised demo script and your final win_prob. Cap 400 words." outcome="completed"># APPEAL R2 — ADVOCATE-REBUTTAL: PS 26043 (Jharkhand Societal Innovation Portal)
+
+**1. No real challenge data → ABSORB, then weaponize.** Correct that no bulk citizen-challenge corpus exists — because the platform *is* the collection mechanism; the PS ships no dataset by design. Fix stands: 300–500 LLM-seeded challenges across the PS's own 10 sectors × Jharkhand's 24 districts, grounded in data.gov.in Jharkhand statistics (API re-verified live today, HTTP 200, 287,810 resources). Adding Census 2011 District Handbooks + NFHS-5 district factsheets as second grounding source. Ship an "About the data" methodology page — hostile Q&A becomes our credibility moment.
+
+**2. Scope overreach (SEV1) → ABSORB the cut-line fully.** 16.5 pw cut version fits 3 devs × 4 weeks. One golden path, deeply polished: submit → AI triage → expert score → HEI assign → milestones → dashboard. Cut: mobile app, video, SMS, IP module, separate industry portal. Seven shallow modules lose; one deep path wins.
+
+**3. SMS/OTP (SEV1) → ABSORB.** Email/password + magic links. DLT is genuinely unavailable to students; engineering is right; demo impact zero.
+
+**4. Differentiation collapse (SEV1) → REBUT.** CPGRAMS is closed-loop grievance redress: complaint → department → resolved ticket. MyGov is consultations/surveys. Neither has expertise-based university routing, multidisciplinary team formation, industry mentorship/funding, or research→startup outcomes. This is an *innovation supply chain*, not a complaint box. Differentiator slide: "CPGRAMS closes tickets. We open research projects." And the PS's own department (Higher & Technical Education) specified exactly these modules — we build to spec, they don't.
+
+**5. AI-washing (SEV1) → ABSORB.** Make AI measured, not decorative: zero-shot classification + precision-tuned embedding dedup + transparent prioritization rubric. 120-item gold set week 1; live eval panel (per-class P/R) shown in demo. Numbers on stage kill the "what did you build?" attack.
+
+**6. Unclaimable metrics (SEV1) → ABSORB.** Claim only measured things: gold-set accuracy with CI, dedup precision ≥0.9. Dashboard shows counts/distributions, never fabricated "social impact."
+
+**7. Puppet-theater demo (SEV1) → ABSORB with upgrade.** Offline docker, seeded data, LLM responses hash-cached — but one live lane: a judge types a fresh challenge, live triage runs, cache fallback if >5s. Live-but-safe.
+
+**Revised demo:** (1) judge submits Hindi/English challenge live → instant category, dedup flag, rubric score; (2) expert scores it; (3) admin routes to HEI by expertise map; (4) dashboard: district heatmap from grounded seed data + eval panel.
+
+**win_prob: 5** (up from prosecutor's 2 — differentiation and demo-fragility were the real killers; both now have engineered answers). "Portal fatigue" caps upside; uniqueness stays the honest weak axis.
+
+<<SCORES {"ps":"26043","role":"advocate-rebuttal","feasibility":8,"data_risk":3,"demo_wow":5,"uniqueness":4,"punch":6,"win_prob":5}>></subagent>
+<subagent agent_id="agent-138" item="ROLE: PROSECUTOR-APPEAL against PS 26043 (Jharkhand crowdsourced-challenges platform). New ammunition from the engineering pre-mortem: no real challenge data exists anywhere (verified — CPGRAMS login-gated, HF datasets synthetic junk; seed data must be LLM-fabricated); SEV1 differentiation collapse — judges will say 'this is CPGRAMS/MyGov with a new skin'; AI-washing exposure — the AI is categorization glue, decoration; unclaimable metrics; puppet-theater demo (fake users posting fake problems). TASK: argue this project dies unless each mitigation is MANDATORY, attack the mitigations themselves as infeasible/dishonest, and deliver your final win_prob with the kill-question. Cap 400 words." outcome="completed"># PROSECUTOR-APPEAL — PS 26043: The Mitigations Are the Confession
+
+The engineering pre-mortem didn't find bugs; it found that the *premise* is false, verified live: Unnat Bharat Abhiyan, MyGov, CPGRAMS (₹128cr, v8.0), and Manthan already do citizen-problem → HEI → solution. Round 1 verified 26+ public GitHub repos building this exact PS. The defense's four mitigations, examined:
+
+**1. "Reframe as the missing lifecycle layer, Jharkhand-scoped."** Infeasible and dishonest. The "missing layer" is Manthan's literal mandate (challenge-to-research-institution matching with outcome tracking, Office of PSA, GoI). And "integration points into existing portals" is vapor — CPGRAMS/MyGov expose no student-accessible APIs; the team would be claiming integrations it cannot demo. That's not a mitigation, it's a scripted overclaim with extra steps.
+
+**2. "Incumbent-comparison slide, week 1."** This is an *admission* slide. It stands up and says: "Four government platforms predate us; our moat is a state border and a Gantt chart." You don't neutralize SEV1 differentiation collapse by presenting it in 16:9.
+
+**3. "Hard claim discipline — the never-say list."** Damage control masquerading as strategy. The red-teamer's own survivable claim boundary — "working workflow + F1 on ~200 hand-labeled statements" — is a CRUD portal with a 10-class classifier. Surviving Q&A is not winning; the ceiling this mitigation buys is "not humiliated."
+
+**4. "Seed 200 LLM-fabricated challenges, measure F1."** Circular validation. LLM writes the statements, LLM-flavored labels grade them; one judge asking "who labeled these, and against what ground truth?" exposes synthetic-in/synthetic-out. There is no real data anywhere — CPGRAMS login-gated, HF junk — so every metric on stage is unfalsifiable theater, and judges know unfalsifiable when they see it.
+
+**The multiplicative noose.** Each mitigation must ALL hold: perfect reframe, perfect discipline, perfect slide, no incumbent-aware judge, no judge who prods the seed data, no rival team (of 26+) demoing the identical portal with glossier UI. These aren't independent risks to manage; they're correlated failures — one curious judge collapses all of them at once.
+
+The AI is decoration the PS only *names*; the platform's real value (network effects) is definitionally undemoable in a seeded demo; the metrics the PS demands (patents, startups, social outcomes) are 3–5-year horizons no team can show. You are left demoing fake citizens posting fake problems to fake universities — for a problem statement whose own sponsoring government already operates the solution.
+
+**Kill-question:** *"Manthan and Unnat Bharat Abhiyan already route societal challenges to HEIs with tracking. Your users are seeded and your data is synthetic. Name one capability here a Jharkhand nodal officer couldn't replicate this month with a MyGov task and a Google Form."* No honest answer survives.
+
+<<SCORES {"ps":"26043","role":"prosecutor-appeal","feasibility":7,"data_risk":8,"demo_wow":2,"uniqueness":1,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-139" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26043 (Jharkhand crowdsourced-challenges platform). You receive both rounds. Debate: advocate loved feasibility (9/10), prosecutor gave win_prob 2. Engineering: zero real data (seed via LLM+data.gov.in grounding), SEV1s = scope overreach, SMS/OTP login, CPGRAMS-clone collapse, AI-washing. TASK: merge into a final verdict — revised MVP scope (cut list explicit), the mandatory conditions, the ONE differentiator that survives 'isn't this CPGRAMS?', and final go_no_go + win_prob. Cap 400 words." outcome="completed">## ARCHITECT-ADJUDICATOR VERDICT — PS 26043 (Jharkhand Societal Innovation Portal)
+
+**Evidence weighed:** Advocate (feas 9, uniq 4, win 6) vs Prosecutor (uniq 1, win 2). Engineering composite: go 7.0, feasibility 7.67, data_risk 2.33, severity 1.0 — four independent engineers, no showstopper. PS picked 0/500 times: low crowding, but also a "boring portal" signal.
+
+**Adjudication of each SEV1:**
+
+1. **Zero real data — SURVIVABLE.** This is a platform problem, not a data problem. Seed ~200 LLM-generated challenges grounded in data.gov.in Jharkhand district statistics and real CPGRAMS complaint themes. Mandatory rule: never say "trained"; say "LLM-assisted triage with human validation queue."
+2. **Scope overreach — UPHELD, enforce cuts.** Seven modules, four user roles, one month. Cut list (explicit): industry-partnership module → reduced to a read-only "interest" flag; IP/patent/startup-outcome tracking → cut; CSR/funding workflows → cut; native mobile → responsive web only; video upload → photo + text; OTP/SMS → pluggable stub interface (MSG91 adapter), seeded demo accounts; email notifications → in-app only. Keep: citizen submission, LLM classify/dedup/route, university accept→team→proposal→milestone spine, one admin dashboard.
+3. **CPGRAMS-clone collapse — REAL but answerable.** CPGRAMS ends at grievance *disposal*; this PS's spine is *solver adoption*. The ONE differentiator that survives: **problem-to-solver matchmaking with a visible adoption pipeline** — live demo of one citizen challenge deduplicated against 200 similar ones (embeddings panel shown on-screen), matched to a specific university department via faculty-expertise tags, a team forming, and a milestone tracked. CPGRAMS has no concept of matching problems to solvers; make that handoff the demo's centerpiece. Scrub all "ticket/status/grievance" language from the UI.
+4. **AI-washing — FIX BY DESIGN.** Only two AI features, both live-demoable with visible confidence + keyword fallback if the API key dies: classification and embedding-dedup ("similar challenges" panel catches a duplicate in real time — this is your demo-wow moment).
+
+**Mandatory conditions:** full pipeline runs live in <5 min; graceful no-API-key degradation; no SMS dependency; seeded corpus committed to repo.
+
+**Verdict: CONDITIONAL GO.** Prosecutor's 2 was too harsh — the differentiator is functionally real. Advocate's 6 was too rosy — uniqueness is weak and portal entries rarely beat flashier ML demos. Feasibility after cuts is genuinely high; win probability is middling. Take it only if the team wants a safe, buildable entry over a high-variance ML one.
+
+<<SCORES {"ps":"26043","role":"architect_adjudicator","feasibility":8,"data_risk":3,"demo_wow":6,"uniqueness":3,"punch":5,"win_prob":4}>></subagent>
+<subagent agent_id="agent-140" item="ROLE: ADVOCATE-REBUTTAL for PS 26092 (Scheme Matching for SC entrepreneurs, MoSJE). Engineering found: SEV1 — the fund-utilization-aware partner routing is unfakeable (no public NPA/utilization data; any demo of it is fabricated); fake-AI credibility collapse (rule engine wearing AI costume — but owning 'rules + LLM explanation' honestly converts it); LLM eligibility hallucination (mitigate: LLM never decides, only explains; deterministic rule engine); myScheme.gov.in pre-exists (govt's own eligibility matcher). TASK: rebut or absorb each. In particular defend the fund-utilization feature (label 'admin-fed demo data'? cut it?) and differentiate from myScheme. Final revised demo + win_prob. Cap 400 words." outcome="completed">## ADVOCATE-REBUTTAL — PS 26092 (AI-Driven Scheme Matching for Marginalized Entrepreneurs, MoSJE)
+
+**Verified facts:** PS text (`data/software_ps.json`, id 26092) explicitly demands routing "based on the partner's current fund utilization eligibility (high NPAs/overdues)." Live check of [myScheme.gov.in](https://www.myscheme.gov.in/) confirms it is a *discovery directory*: demographic match → scheme list → FAQ → apply link. Nothing more.
+
+**1. SEV1 fund-utilization routing — ABSORB, don't cut, don't fake.** Engineering is right that NPA/utilization data isn't public, and cutting the feature guts Expected Solution #3. The fix: split it. Partner *identity/location/category* data is genuinely public (NSFDC publishes its SCA/channel-partner lists) — the geospatial locator is real end-to-end. The utilization flag becomes an **admin-fed eligibility field**: a ministry-side console sets partner status (Active / Utilization-capped / NPA-suspended); the router consumes it live. Demo shows admin toggling a partner → ranking re-computes instantly. One slide: "Seed data is illustrative; in production this field is fed by the ministry MIS." That's an integration-ready interface, not fabricated data — the architecture judges actually grade. This turns SEV1 into proof we understand deployment realities.
+
+**2. Fake-AI collapse — WEAPONIZE.** Reframe as the core pitch: "eligibility a government auditor can sign off on." Deterministic rule engine *decides* (auditable — ministries legally need this); LLM *intakes* (multilingual free-text → structured profile, extraction shown on screen) and *explains*. A black-box "AI" making credit-eligibility calls for SC beneficiaries would be disqualifying in production. We're not wearing a costume; we're the only honest architecture.
+
+**3. LLM hallucination — ALREADY DEAD.** Engine emits a rule trace ("income ≤ ₹5L ∧ project ≤ ₹50L → Term Loan, guideline §x"); the LLM is constrained to verbalize that trace, with a 30-case eligibility eval set. Nothing to rebut.
+
+**4. myScheme — DIFFERENTIATED (verified).** It has zero: loan-product selection (Micro Finance vs Term Loan vs Education), EMI/moratorium calculators, channel-partner locating/routing, conversational multilingual intake. Worse, the PS's named bottleneck — direct applications aren't accepted, funds route through 100+ channel partners — is exactly what myScheme *doesn't* solve. We're a vertical workflow; it's a horizontal phonebook.
+
+**Revised demo (5 min):** Hindi voice intake → LLM extraction card → rule-engine match + trace → EMI/moratorium calculator → map of nearest eligible partners → admin toggles utilization flag → live re-route → vernacular explanation citing rules.
+
+**Win probability:** 0/500 ideas submitted, perfect team fit (full-stack + LLM, no vision, no GPU), real ministry pain. Strong.
+
+<<SCORES {"ps":"26092","role":"advocate-rebuttal","feasibility":8,"data_risk":7,"demo_wow":7,"uniqueness":7,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-141" item="ROLE: PROSECUTOR-APPEAL against PS 26092 (Scheme Matching, MoSJE). New ammunition: myScheme.gov.in (MeitY, live since 2022) already does eligibility matching across hundreds of schemes — this PS is a 3-product subset; fund-utilization routing data is not public so the differentiating feature must be fabricated; 'AI/rule-based' confession in the PS itself. TASK: argue death unless mitigations are mandatory; attack each mitigation (is 'admin-fed mock data' honest enough for MoSJE judges? is voice-first UX really a moat when anyone can add Sarvam in a weekend?). Final win_prob + kill-question. Cap 400 words." outcome="completed"># Prosecutor-Appeal vs PS 26092 — "AI-Driven Scheme Matching" (MoSJE)
+
+## The case for death
+
+**1. The incumbent is alive, verified, and exact.** I just fetched [myScheme.gov.in](https://www.myscheme.gov.in/): MeitY's national platform, live since 2022, doing *precisely* the core feature — user enters demographic/income/category details, engine returns eligible schemes from "hundreds of government schemes," with eligibility, benefits, and application routing. Feature 1 of this PS (Smart Scheme Recommender) is a 3-product subset of a shipped government product with a national brand. MoSJE judges know myScheme exists; half the competing teams will demo a myScheme clone. Uniqueness: dead on arrival.
+
+**2. The PS confesses it doesn't need AI.** "An **AI/rule-based** engine" — the ministry itself says a decision tree suffices. Our claimed strength is LLM; the PS's ceiling is `if income <= 5L and project_cost <= 1.4L: recommend micro_finance`. No GPU-hours needed, no moat, nothing to distinguish us from 200 other teams' form-fillers.
+
+**3. The differentiating feature is unbuildable.** Feature 3 routes by partners' "current fund utilization eligibility" and NPA status. I verified [nsfdc.nic.in](https://nsfdc.nic.in/) is live — but per-partner fund-utilization/NPA data is **not published anywhere public**. It's internal to NSFDC/SCAs. The one feature that isn't a myScheme clone must run on fabricated data.
+
+## Rebutting the mitigations
+
+- **"Admin-fed mock data"** — dishonest framing risk. MoSJE judges will ask "where does utilization come from?" and the answer is "we typed it into an admin panel." That's a demo prop, not a system; it proves the routing logic works on data the ministry must hand us post-win, which is exactly what every vaporware pitch says. It also inverts the demo: the wow-feature becomes the *least* credible feature.
+- **"Voice-first multilingual UX as moat"** — Sarvam/Bhashini integration is a documented afternoon of work. Any of the 200 competing teams can bolt it on; several will. A weekend feature that everyone ships is table stakes, not a moat.
+- **"EMI calculator"** — a formula. Contributes zero win probability.
+
+## Verdict
+
+Feasible (7), safe data-wise only *because* the hard part is faked, but strategically doomed: commodity core + fabricated differentiator + no AI depth. The Round-1 engineering panel scored it composite 9.5 — second place — by rating feasibility, not winnability. Kill it; spend the month on a PS where LLM strength is load-bearing.
+
+**Kill-question for the defense:** *Name one feature a judge sees in our demo that they cannot already see on myScheme.gov.in today — that does not depend on data MoSJE has never published.*
+
+<<SCORES {"ps":"26092","role":"prosecutor-appeal","feasibility":7,"data_risk":6,"demo_wow":3,"uniqueness":2,"punch":4,"win_prob":3}>></subagent>
+<subagent agent_id="agent-142" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26092 (Scheme Matching, MoSJE). Debate: advocate 9 feasibility, strong voice-first demo; prosecutor: myScheme kill-question, 3-row lookup table. Engineering: fund-utilization unfakeable; LLM must never decide eligibility; rule provenance needs versioned rules file. TASK: final verdict — MVP scope, mandatory conditions, honest positioning vs myScheme, final go_no_go + win_prob. Cap 400 words." outcome="completed">## FINAL VERDICT — PS 26092 (NSFDC Scheme Matching, MoSJE)
+
+**Adjudication of Round-1 claims.** Advocate's feasibility 9 is rejected: the architect's effort table consumes exactly 12 person-weeks with zero slack — feasibility 7, and only for a 3-4 person team. Prosecutor's crowding kill-shot is upheld (live check today: 10+ public SIH26092 repos, plus NSFDC-branded prior art from Jan 2026). The "3-row lookup table" jab is technically true and irrelevant: no judge scores the engine, they score the last mile around it.
+
+**Engineering findings — all accepted as binding, none rebuttable:**
+1. Per-partner fund-utilization/NPA data does not exist publicly (verified by two independent specialists). The demo's greyed-out "fund exhausted, rerouted" beat may ship ONLY as a labeled illustrative feed ("seeded pending NSFDC API"). Unlabeled = fabricated data on a government system = fatal.
+2. LLM never decides eligibility and never emits a number. Versioned rules JSON (scheme caps, rates, moratoria) owns all figures; LLM does vernacular NLU + explanation with numbers injected from rules.
+3. Rule provenance: each rule carries source + date (NSFDC lending-policy PDF, rev. 01.04.2025), surfaced in the "why this scheme" trace. This converts the weakest feature into the auditability story MoSJE bureaucrats love.
+
+**Mandatory conditions for GO:** (a) 3-4 people; (b) week-1 acceptance of the cut-line — no accounts, no application workflow, no native app, ≤3 languages (EN+HI+1), Leaflet/OSM only; (c) labeled-seeded utilization flags; (d) rules-own-numbers architecture; (e) start partner-address scraping day 1 (critical path).
+
+**Honest positioning vs myScheme/JanSamarth** (myscheme.gov.in verified live): myScheme is a generic discovery directory; JanSamarth routes 13 central credit schemes to banks. Neither does NSFDC channel-partner routing (direct applications are barred — that's the PS's whole gap), scheme-specific EMI/moratorium math, vernacular voice intake, or an auditable rule trace. The closing line, verified: NSFDC's own homepage currently tenders for someone to build exactly this. Never say "AI-powered eligibility" — say "auditable rules, explained by AI."
+
+**Verdict: CONDITIONAL GO.** Win probability is capped by crowding; the differentiators (voice-first, rule trace, honest routing) are execution moats clones demonstrably skip.
+
+<<SCORES {"ps":"26092","role":"architect-adjudicator","feasibility":7,"data_risk":4,"demo_wow":7,"uniqueness":4,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-143" item="ROLE: ADVOCATE-REBUTTAL for PS 26046 (AIIA Clinical Trials Management System, Ministry of Ayush). Engineering found: SEV1 data-credibility collapse under hostile Q&amp;A (all trial data must be synthetic — judges may ask 'whose trials are these?'); realism gap for non-technical judges (CTMS is back-office); GCP/CDISC/FHIR compliance breadth is a research swamp. TASK: rebut or absorb. Consider: is synthetic-data generation per CDISC SDTM standards actually a FEATURE (demonstrable standards knowledge)? How does the demo wow non-technical judges (pharmacovigilance safety-signal story?). Final revised demo + win_prob. Cap 400 words." outcome="completed"># ADVOCATE-REBUTTAL — PS 26046 (AIIA CTMS)
+
+**Verdict: the SEV1 is a category error; absorb it, weaponize the rest.**
+
+## Rebuttal 1 — "Synthetic data = credibility collapse"? Wrong frame.
+This is a **workflow/integrity system**, not a diagnostic-AI PS. AIIA legally *cannot* hand student teams real patient-level trial data (DPDP Act 2023 + GCP confidentiality — the PS itself mandates DPDP compliance). Synthetic data isn't a workaround; it's the *only lawful path*, and we say so on slide one. The pre-scripted answer to "whose trials are these?": *"Synthetic, SDTM-conformant, DPDP-safe by design — the schema mirrors what AIIA's real EDC exports look like, which is exactly why the system ports to production without re-engineering."* Anchor scenarios in publicly documented real trials (AYUSH-64 COVID trials, CTRI-registered) so the narrative feels real while data stays synthetic.
+
+## Rebuttal 2 — Synthetic generation is a FEATURE (verified)
+Confirmed via live check: CDISC SDTM is the FDA-mandated submission standard with well-defined domains (DM, AE, EX, VS) and MedDRA-controlled AE terminology ([SDTM spec](https://en.wikipedia.org/wiki/SDTM)). A generator that emits valid SDTM tabulation datasets + Define-XML **is the deliverable's proof of competence** — we demo "Export → submission-ready SDTM package" live. No competing team will show regulatory-grade data modeling. This converts the SEV1 into a uniqueness moat.
+
+## Rebuttal 3 — Realism gap: the pharmacovigilance story is the fix
+AIIA hosts the National Pharmacovigilance Coordination Centre — safety is the emotional core. Revised demo arc (non-technical-proof): **inject a Serious Adverse Event live →** MedDRA auto-coding fires, NDCT reporting clock starts ticking on screen, DSMB dashboard lights red, role-based alerts cascade. Then the closer: **attempt to quietly edit the AE record → immutable ALCOA+ audit trail catches and flags the tampering.** Patient safety + anti-corruption accountability — every judge, technical or not, feels that.
+
+## Absorb — Compliance swamp: scope discipline
+The PS text itself stages the build ("core study-tracking and KPI MVP first"). We implement: FHIR R4 for 3 resources only (Patient, ResearchStudy, AdverseEvent), 4 SDTM domains, CTRI/ethics milestone tracker. Language discipline: "CDISC-*aligned*, DPDP-*informed*" — never "certified." One month fits: CRUD + RBAC + audit log + alert engine + SDTM export = squarely in full-stack wheelhouse, no vision AI, minimal GPU need.
+
+**Revised win_prob: moderate-good.** Execution risk is scope creep, not feasibility.
+
+<<SCORES {"ps":"26046","role":"advocate-rebuttal","feasibility":7,"data_risk":4,"demo_wow":7,"uniqueness":8,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-144" item="ROLE: PROSECUTOR-APPEAL against PS 26046 (AIIA Clinical Trials CTMS, Ayush). New ammunition: every row of demo data is fabricated; CDISC/FHIR/CTRI/NDCT compliance is a compliance-expert domain where doctors/regulators judge; 'real-time cloud-based GCP-compliant' demands enterprise maturity a student team fakes at best; theme is even misfiled ('Space Technology'). Demo = dashboards of fake trials for a niche audience. TASK: argue death; attack mitigations; final win_prob + kill-question. Cap 400 words." outcome="completed"># PROSECUTOR-APPEAL — PS 26046 (AIIA Clinical Trials CTMS): DEATH PENALTY CONFIRMED
+
+**Verified against the source PS text** (data/software_ps.json:26046, data/sih2026_ps.csv): every engineering finding stands, and the indictment is now stronger.
+
+## The verdict, charge by charge
+
+**1. Fabricated data is mandatory, not a choice.** The PS itself mandates "synthetic / de-identified datasets" because trial data is sensitive personal data. There is no real-data escape hatch. A "real-time" dashboard running on invented trial timelines proves nothing about the only thing that matters in a CTMS: correctness under regulatory scrutiny. The defense cannot rebut this — it's written into the problem statement.
+
+**2. The evaluation criteria are unforgeable by students.** The PS says the system "should be evaluable on data accuracy and integrity… interoperability conformance… audit completeness." Who evaluates ALCOA+ audit trails, MedDRA/WHO Drug coding, SDTM/ADaM/Define-XML exports, FHIR R4 conformance, GCP e-signature controls? A clinical-research or regulatory specialist — and to everyone else, a fake audit trail and a real one are pixel-identical. Any claimed conformance is an assertion a student team cannot validate and a judge cannot verify. That's not a buildable demo; it's a courtroom exhibit with no expert witness.
+
+**3. The scope is a compliance operating system, not an MVP.** CTRI registration, NDCT 2019 timelines, IEC oversight, AE/SAE capture with regulatory-timeline tracking, DPDP privacy controls, ISO/IEC 27001 and CERT-In hosting, staged across three release tiers. The PS's own "staged build" language is an admission the full ask is multi-quarter enterprise work. The MVP stage alone (study tracking + KPIs) reduces to... a CRUD dashboard. Which is charge 4.
+
+**4. Demo = dead.** After cutting everything the team can't credibly deliver, what remains on screen at judging: tables of fake studies, Gantt-ish timelines, KPI cards, alert toasts. Zero visual novelty, zero "wow," for a niche ministry audience. This loses the room in the first 90 seconds against any AI/generative/demo-forward competitor.
+
+**5. Theme misfile is confirmed** — "Space Technology" for an Ayurveda CTMS. Either clerical noise or a signal the PS was parked under a low-competition theme (0/500 ideas submitted supports this), which cuts both ways: low competition, yes — but also signals low mentor/judge attention and high ambiguity in evaluation rubric.
+
+## Rebutting the mitigations
+- *"Staged MVP makes it feasible"*: the MVP stage strips the differentiators; you're judged on the unimpressive 20%.
+- *"Low competition (0/500)"*: empty field because it's a compliance quagmire, not an overlooked gem.
+- *"Standards are public, so conformance is achievable"*: passing a FHIR validator ≠ GCP/ALCOA+ compliance; the hard parts have no open test harness a student can point to.
+
+## Kill-question for the defense
+"Name one element of this demo a judge can verify in five minutes that distinguishes a genuinely GCP/CDISC-conformant build from a dashboard with the word 'compliant' in the tooltip — given that all data is synthetic and no AIIA mentor will be in the room."
+
+They cannot answer it.
+
+<<SCORES {"ps":"26046","role":"prosecutor-appeal","feasibility":2,"data_risk":2,"demo_wow":2,"uniqueness":4,"punch":3,"win_prob":2}>></subagent>
+<subagent agent_id="agent-145" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26046 (AIIA CTMS, Ayush). Debate: mid-pack both sides. Engineering: synthetic-data credibility SEV1, niche audience, compliance breadth swamp; mitigations = standards-knowledge-as-feature, CTRI public registry data as real seed. TASK: final verdict — MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed"># ARCHITECT-ADJUDICATOR — Final Verdict, PS 26046 (AIIA CTMS)
+
+## Adjudication of the engineering findings
+
+I accept all four engineering pre-mortems as verified and mutually consistent (data-auditor, ML engineer, architect, red-teamer all independently GO at 7). Rulings:
+
+**SEV1 synthetic-data credibility — UPHELD, and it demotes the prosecutor's best argument.** The prosecutor's "compliance iceberg" kill shot is real, but the escape is contractual, not rhetorical: the PS itself stages the build ("core study-tracking and KPI MVP first"). The ministry pre-authorized our cut-line. The synthetic-data trap only springs if the team overclaims; the PS explicitly sanctions synthetic, and the red-teamer's surviving answer ("what's real is the enforced process") is strong.
+
+**Scope overrun SEV1 — UPHELD, this is the true project-killer.** ~16 person-weeks estimated vs 8–16 capacity means zero slack. The architect's cut-line is adopted verbatim as the binding scope, below.
+
+**MedDRA/WHODrug licensing and CTRI-no-API — UPHELD.** Both are hard external facts. They convert into rules of speech, not blockers.
+
+**Rebutting the prosecution where it's wrong:** "Why not OpenClinica/REDCap?" has an honest answer — neither ships GCP-ASU/CTRI/NDCT-aware workflows or NPvCC pharmacovigilance for ASU&H; AIIA still runs on spreadsheets, which is the PS's own stated pain. Crowding (4 repos) is real but those teams will build generic CRUD; the differentiation path — live HAPI validation, audit-trail edit-block, SAE countdown clocks — is exactly the compliance-theater rivals won't bother with.
+
+## Binding MVP scope
+
+Postgres + FastAPI + React; 4-role RBAC (Admin, PI, CRC, PV officer); study-lifecycle Kanban + enrollment KPIs with drill-down; AE/SAE forms with NDCT 24h/14-day countdown clocks and overdue alerts; hash-chained append-only audit log; FHIR R4 bundle export validated against HAPI; seed = 65 real ClinicalTrials.gov Ayurveda trials + ~50 CTRI-format synthetic studies + Synthea bundles; LLM restricted to AE-narrative→structured-field extraction with by-construction gold labels; deterministic PRR signal stats. **CUT:** ADaM, full SDTM/Define-XML, live CTRI/ABDM, real MedDRA, websockets, PKI e-sign, multi-centre.
+
+## Mandatory conditions (all, or NO-GO)
+
+1. Cut-line frozen in week 1; labeled generator built *before* any LLM feature.
+2. Banned on stage: "GCP-compliant," "detected a safety signal," "CTRI integration."
+3. Two live proofs in the demo: HAPI green check + blocked audit-edit.
+4. `docker compose up` offline demo, cached LLM responses.
+
+## Verdict
+
+**CONDITIONAL GO.** Feasibility is real only inside the cut-line; win ceiling is capped by dashboard-genre anti-wow and crowding, floor is raised by verifiable compliance proofs. Mid-pack overall — a strong execution play, not a lottery ticket.
+
+<<SCORES {"ps":"26046","role":"architect-adjudicator","feasibility":7,"data_risk":4,"demo_wow":5,"uniqueness":5,"punch":7,"win_prob":5}>></subagent>
+<subagent agent_id="agent-146" item="ROLE: ADVOCATE-REBUTTAL for PS 26089 (Cooperative Gig Services Platform, Ministry of Cooperation). Engineering found: SEV1 scope overload (10+ named features); the killer question 'why does this exist when Urban Company does it all?' — only the governance-moat answer survives ('UC owns the platform; here the workers federation does; the welfare/governance layer is the product'); never claim demand prediction or Aadhaar identity verification (legally inaccessible); the ML demand-forecasting module has zero real data. TASK: rebut/absorb each; define the 5-feature spine; final revised demo + win_prob. Cap 400 words." outcome="completed">## ADVOCATE-REBUTTAL — PS 26089 (Cooperative Gig Services Platform)
+
+**SEV1 Scope overload — ABSORBED, conceded as framed, neutralized by the spine.** The PS lists 11 features; we build 5 and demo-stub the rest. The 5-feature spine, mapped 1:1 to the PS's own "Expected Solution" list so judges see full compliance on the core:
+
+1. **Federation-administered worker registry** — verification by the cooperative society, which already vouches for its own members. This is the anti-Aadhaar move: the engineering finding is right that Aadhaar eKYC is legally inaccessible to students, so we never claim it. But this is a *feature, not a bug* — UC must pay for third-party KYC; a Labour Cooperative Federation's membership roll IS the verification layer. It's the moat made concrete.
+2. **Skill profiling + certification** (federation-issued digital skill card).
+3. **Booking + scheduling + geo-matching** (leaflet/Google Maps, PostGIS or simple haversine — 1-month feasible).
+4. **Digital payments + invoicing** (UPI test-mode / Razorpay sandbox).
+5. **Federation admin dashboard** — wage distribution, worker welfare/insurance enrollment status, commission set by the federation, not an algorithm.
+
+Dropped to demo-stub: ratings (simple star + text — trivial, actually keep it, it's 2 hours), multilingual (i18n framework + 2 languages), emergency booking (a priority flag).
+
+**Demand forecasting — REBUTTED by replacement, not denial.** Engineering is right: zero real data. I cut it entirely and reframe: **rules-based fair allocation** (rotation queue + proximity + skill match) shown *visibly in the dashboard* as "algorithmic fairness vs. UC's black-box dispatch." This converts our biggest weakness into the thesis: UC's opaqueness is the grievance; transparent, member-governed allocation is the product. Judges reward honest scoping over fake ML.
+
+**Killer question — ADJUDICATED: the governance-moat answer stands alone.** "UC does it all" is rebutted in one line in the demo script: *"On Urban Company, the platform owns the worker. Here, the workers' federation owns the platform — surplus returns to members, not shareholders."* This is the Ministry of Cooperation's literal policy agenda (Sahkar se Samriddhi, cooperative digital platforms). We're not out-featuring UC; we're the ministry's own thesis. Judge alignment with the sponsoring ministry is worth more than feature parity.
+
+**Revised demo (4 min):** Live two-sided flow — customer books an electrician on phone → federation dashboard shows the job auto-allocated by the transparent fairness algorithm → worker completes, UPI payment, invoice → dashboard shows wage split and welfare-fund contribution updating in real time. Closes with the federation admin changing the commission rate live — something no worker can do on UC.
+
+Residual risks: marketplace UX is crowded territory (uniqueness is the weak axis), and the demo needs two devices choreographed.
+
+<<SCORES {"ps":"26089","role":"advocate-rebuttal","feasibility":8,"data_risk":3,"demo_wow":7,"uniqueness":5,"punch":8,"win_prob":6}>></subagent>
+<subagent agent_id="agent-147" item="ROLE: PROSECUTOR-APPEAL against PS 26089 (Cooperative Gig Platform). New ammunition: Urban Company is a Rs 1,144 Cr public company with 40k workers — the comparison kills any tech-superiority framing; zero real worker/booking data so the 'AI demand forecasting' bullet in the PS is unfakeable; marketplace demos need fake users/workers/bookings = puppet theater; SMS/payments integrations are stage-fragile. TASK: argue death unless scope is cut to the bone; attack the governance-moat answer (will MoC judges really credit it?); final win_prob + kill-question. Cap 400 words." outcome="completed">## PROSECUTOR-APPEAL: PS 26089 — Cooperative Gig Platform
+
+The engineering findings don't soften Round 1's prosecution — they load the weapon. Verified facts, all four barrels:
+
+**1. The spec is physically unbuildable.** Architect's ledger (`runs/run1/phase2_all.txt:691-703`): 13–20 person-weeks against 6–12 available. Scope is 1.5–2× capacity *even at best case*. This isn't a risk, it's arithmetic. Every mitigation offered is a cut — which means the PS as written dies, and the only question is whether the corpse is presentable.
+
+**2. The headline "AI" is unfakeable.** ML engineer: zero bookings, zero datasets, absolute cold start; any "demand forecasting" model is fit to the team's own synthetic curves — circular, and one question ("what data did you train on?") detonates it. The honest alternative (CP-SAT + statistical baseline, clearly labeled) is engineering-respectable but reads as *scope-cutting* against a PS whose theme is Smart Automation and whose bullet says "AI-based."
+
+**3. The Urban Company comparison is now verified and fatal to any tech framing.** ₹1,144 Cr FY25 revenue, listed Sep 2025, ~40k professionals. The red-teamer concedes "We're better than Urban Company" is a never-say sentence. Also verified dead: Aadhaar eKYC (UIDAI license required), real payment settlement (business entity required), real insurance APIs. Three of the 11 features can only ever be sandbox theater.
+
+**4. Now the governance moat — the defense's last card.** It fails three ways:
+- **It's not differentiating in-room.** All ~40+ teams (9 public repos in week one, verified) read the same PS text with the same cooperative framing. Every one will pitch "worker-owned." A moat everyone has is a moat no one has.
+- **MoC judges grade against the PS checklist.** Eleven features. A team shipping 5 with honest "SYNTHETIC DATA" labels competes against teams demoing all 11 with smooth lies. Judges reward depth sometimes; they reward checklists always. Bet the panel's integrity at your own risk.
+- **It's a policy answer to a demo question.** "The workers' federation owns it" is invisible on stage. What shows is fake workers, fake bookings, fake payments — puppet theater with a governance slide stapled on.
+
+**Adjudication:** Death — unless the team accepts the 5-feature spine (register→book→geo-match→sandbox pay→dashboard), which converts an AI-themed PS into a CRUD PWA whose wow factor is an LLM-parse trick any team can bolt on. win_prob 2. Kill-question for the finals: "Show me one thing on this screen that Urban Company doesn't do better at scale — that I can *see*, not that you can *argue*."
+
+<<SCORES {"ps":"26089","role":"prosecutor-appeal","feasibility":3,"data_risk":9,"demo_wow":3,"uniqueness":1,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-148" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26089 (Cooperative Gig Platform). Debate: mid-pack. Engineering: scope overload SEV1, governance-not-technology moat, cut demand-forecasting (no data), 5-feature spine MVP. TASK: final verdict — MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed">## ARCHITECT-ADJUDICATOR — Final Verdict: PS 26089 (Cooperative Gig Platform)
+
+**Adjudication of the record.** Engineering is unanimous: 4/4 conditional GO (go_no_go 7, mean feasibility 7.75). The debate split is real and I ran a live check on the prosecution's fatal attack: `gh search repos "26089"` confirms the crowding — `saathi-sih-26089` (Sep 4), `SIH26089` (Aug 26), `SIH_26089` (Sep 7, *today*), `Hexaminds-Frontend`, plus `cooperative-gig-platform`. The advocate's uniqueness-9 is **overruled**; the prosecutor's uniqueness-1 stands. But the prosecutor's win_prob-2 also overcorrects: SIH shortlisting is per-nodal-center, not global leaderboard, and the red-teamer's killer-question answer ("the federation owns the platform; governance is the product") genuinely survives. Verdict lands between: **conditional GO, mid-pack ceiling**.
+
+**MVP scope — locked 5-feature spine + moat layer:**
+1. Registration + verification (document upload + admin approval; never claim Aadhaar eKYC)
+2. Worker skill profiles
+3. Booking/scheduling state machine (DB exclusion constraint vs double-booking) — start day 1
+4. Geo-match via PostGIS radius query (don't call it AI)
+5. Razorpay **test-mode** payment + invoice PDF (server-side mock flag)
+6. **Federation governance dashboard** — fair-wage split, worker-elected admins, welfare-scheme linkage. This is the only moat; it gets demo minutes, not leftover minutes.
+Ratings are a cheap add-on. CUT: native mobile (PWA), realtime emergency dispatch (priority flag + SMS stub), live OTP, real insurance, and any trained forecast model — pre-baked charts labeled SYNTHETIC, allocation framed as CP-SAT with an ML plug-in interface. LLM layer (vernacular request → structured booking) is the sole visible AI; fits team strength, zero GPU.
+
+**Mandatory conditions (all seven, or NO-GO):**
+1. Cut-line signed day 1; week-1 end-to-end skeleton register→book→pay.
+2. Never say "trained model," "we verify identities," or "better than Urban Company" (₹1,144 Cr, listed — you lose that comparison).
+3. Forecast slide carries the word SYNTHETIC.
+4. Offline `docker compose` demo; seeded federation; no live gov.in, keys, or network.
+5. Exactly 2 languages, fully translated.
+6. One slide weaponizing UC's verified labor-relations record vs the coop dashboard.
+7. Honest metrics with CIs on the LLM parse eval.
+
+**go_no_go: 6/10 — conditional GO.** SEV1 scope overload is fully mitigable by discipline, but discipline is a human risk, and verified crowding caps the ceiling. If the panel has a less-crowded finalist with comparable feasibility, prefer it.
+
+<<SCORES {"ps":"26089","role":"architect-adjudicator","feasibility":7,"data_risk":4,"demo_wow":4,"uniqueness":3,"punch":7,"win_prob":4}>></subagent>
+<subagent agent_id="agent-149" item="ROLE: ADVOCATE-REBUTTAL for PS 26155 (Multi-Vendor Network Security Compliance Auditor, NTRO). Engineering found: SEV1 'AI is decoration' — the honest build is rule-engine + LLM hybrid and it's FATAL if pitched as ML; parser breadth trap (ship 4 vendors deep, not 30); benchmark scope trap; determinism requirement (same config = same grade, judges hate nondeterminism). Verified assets: ComplianceAsCode/content (2.8k stars, machine-readable STIG/CIS content), batfish (1.5k stars, real config parsers), DISA STIGs public. TASK: rebut/absorb; position the LLM's role precisely (extraction/evidence-citation, never verdict); final revised demo + win_prob. Cap 400 words." outcome="completed"># APPEAL — ADVOCATE-REBUTTAL, PS 26155 (NTRO Compliance Auditor)
+
+**Absorb the SEV1 — it's the strategy, not the wound.** I don't dispute "AI is decoration"; I reframe it. NTRO is an audit agency: for them, *determinism is the feature*. The engineering finding that kills a naive pitch ("what did the model learn?") is precisely what kills our competition. Prosecution verified 7 public `sih26155*` repos — all LLM-wrapper shaped. When a judge asks any of them "run it twice, same report?", they die live. We weaponize that: **the demo's money shot is a SHA-256 hash of the audit report — upload, re-audit, byte-identical.** "AI decoration" becomes "audit-grade determinism with an LLM copilot," which is the only architecturally honest reading of the PS's own spec (its "training loop" is a human-approved mapping GUI, not gradient descent).
+
+**LLM role — pinned, three jobs, never verdict:**
+1. **Extraction assist**: unseen CLI line → *suggested* IR mapping, queued for one-click human approval (this IS the PS's training-loop GUI — we demo the exact feature NTRO wrote).
+2. **Evidence citation**: every finding links rule ID → exact offending config line → remediation prose. Traceable, quotable, hallucination-fenced because the verdict existed before the LLM saw it.
+3. **Report narrative** in the PDF. Pass/fail is 100% rule engine; LLM output cannot flip a bit.
+
+**Rebut the scope traps with the verified assets.** "CIS isn't machine-readable" is now half-false: ComplianceAsCode/content (2.8k★) ships CIS + DISA STIG checks as YAML/XCCDF — cuts rule-encoding labor roughly in half. Batfish (1.5k★) gives vendor-neutral parsing free. Prosecution said "Batfish/Nipper already do this" — correct, and it's our moat: we stand on Batfish and ship the compliance+evidence+report layer Nipper charges enterprise money for, tuned to NTRO's frameworks. Scope locked: **4 vendors deep (Cisco IOS, JunOS, PAN-OS, FortiOS) × ~50 CIS-L1 checks**, NIST/STIG as crosswalk table, "any vendor" = pluggable-parser slide.
+
+**Revised demo (6 min, offline-safe, `LLM_MODE=offline` replay):** 4 real-looking configs with 12 seeded violations → findings table with line citations → fix one violation in-file, re-audit, watch finding clear → **hash-identical rerun** → one unknown config hits the human-approval mapping queue live → PDF. Slide 1: precision/recall on the seeded corpus (~2k item judgments), not a fake "97% on any vendor."
+
+**Win probability:** field crowded but weak; determinism + falsifiable eval + NTRO's own training-loop feature is the differentiation. Revised win_prob 6/10.
+
+<<SCORES {"ps":"26155","role":"advocate_rebuttal","feasibility":8,"data_risk":4,"demo_wow":6,"uniqueness":5,"punch":8,"win_prob":6}>></subagent>
+<subagent agent_id="agent-150" item="ROLE: PROSECUTOR-APPEAL against PS 26155 (Network Compliance Auditor, NTRO). New ammunition: NTRO judges are real cyber operators who interrogate false positives and parser correctness for sport; batfish already parses configs and ComplianceAsCode already has the rules — your build is glue between two mature OSS projects; 'AI-driven' over a rule engine is a credibility landmine with THIS audience; multi-vendor breadth is unbounded scope. TASK: argue death; attack mitigations (is 4-vendors-deep defensible when the PS lists 30+ vendors?); final win_prob + kill-question. Cap 400 words." outcome="completed">**PROSECUTOR-APPEAL: PS 26155 must die.** The engineering reports don't save this PS — they describe a different, smaller project and call it a "mitigation."
+
+**1. The mitigation set is self-contradictory — that alone is disqualifying.** The data auditor says anchor STIG+NIST because CIS is license-locked (machine-readable CIS requires paid SecureSuite; bundling content is a ToS violation). The full-stack architect says anchor CIS, demote STIG to a "static crosswalk." Both can't be right, and nobody verified which framework NTRO's evaluators actually grade against. A defense whose two expert witnesses recommend opposite foundations has no foundation.
+
+**2. "Glue between Batfish and ComplianceAsCode" is a uniqueness autopsy, not a stack.** Verified: Batfish already parses 15+ vendors including Cisco, Juniper, PAN-OS, Fortinet, SONiC; Titania Nipper commercially ships this PS's *entire deliverable* — multi-vendor audit vs CIS/STIG/800-53 with PDF reports. NTRO judges are operators; they've run these tools. When your novelty is packaging and your judge has the original on their laptop, the demo is an invitation to compare — live, and unfavorably.
+
+**3. The "AI" is a credibility landmine aimed at the one audience that shoots.** Every engineer converged: verdicts must be 100% deterministic; the LLM is garnish; "what did the model learn?" is a SEV1 kill. But the PS title and deliverables *demand* "AI-driven" — the training-loop GUI is in the spec. So the team either demos a rules engine and fails the stated requirement, or demos LLM-flavored verdicts and gets destroyed by "run it twice, same report?" There is no third door.
+
+**4. Four-vendors-deep is not defensible; it's a confession.** The PS text says "ideally designed to support *any* network device configuration, regardless of vendor" and names 30+. The architect's own math: full scope = 13–17.5 person-weeks against 12–16 available — zero slack, and that's *before* the IR schema is wrong once. Verified: no free baselines exist for half the named vendors (Check Point, Sophos, MikroTik, Ubiquiti, Huawei, SONiC). A judge uploading a MikroTik config — a listed vendor — hits either a crash or a theater-prop "training GUI."
+
+**5. Unfalsifiable demo.** No labeled corpus exists anywhere (verified: zero HF datasets). Evaluation is circular — your rules pass your own injected violations. Against false-positive-interrogating judges, that's a live fire exercise with our team as the target.
+
+**Kill-question:** "Here's a JunOS config your tool passes. Batfish's reference parser extracts a different ACL semantics. Which of you is wrong — and what ground truth would tell you?"
+
+<<SCORES {"ps":"26155","role":"prosecutor_appeal","feasibility":5,"data_risk":7,"demo_wow":3,"uniqueness":2,"punch":8,"win_prob":2}>></subagent>
+<subagent agent_id="agent-151" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26155 (Network Compliance Auditor, NTRO). Debate: advocate strong (9 feasibility, verified OSS assets); prosecutor: hostile expert audience + glue-between-OSS. Engineering: honest-hybrid positioning mandatory, 4 vendors deep, deterministic scoring, line-number evidence. TASK: final verdict — MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed">## ARCHITECT-ADJUDICATOR — Final Verdict, PS 26155 (NTRO Compliance Auditor)
+
+**Adjudication.** Prosecutor's crowding kill-shot is *confirmed live*: `gh search repos sih26155` returns **10 competing repos** (Aug 25–Sep 7) — worse than claimed. Batfish re-verified (1,465★, pushed 2026-09-06). But the prosecutor's three biggest attacks collapse under engineering evidence: K1 (fake data) — DISA STIG XCCDF is machine-readable ground truth *with fix text* for exactly 4 vendors (IOS-XE 97 rules, Juniper 96, PAN 50, FortiGate 29+60); K2/K3 (training loop, any-vendor) — the Interactive Training Interface is **PS-mandated deliverable #2**, so build it as a human-in-the-loop rules editor and the unseen-vendor judge trap becomes the demo centerpiece. Advocate's feasibility-9 was overfit to full scope (engineering: 13–17.5pw vs 12–16 available); rescoped, it holds.
+
+**MVP scope (locked).**
+- **4 vendors deep**: Cisco IOS(-XE), Juniper SRX/JunOS, Palo Alto PAN-OS, FortiGate — chosen because they have verified current STIGs. Everything else = pluggable-parser-interface slide.
+- **Frameworks**: STIG executable checks (XCCDF) as backbone; NIST 800-53 free via CCI crosswalk; CIS L1 ~30–40 hand-encoded checks covering PS-named items (Telnet/HTTP, crypto, ACLs, logging); ISO 27001 title-level crosswalk only.
+- Parsing via Batfish/ntc-templates — do not hand-roll grammars.
+- LLM strictly post-verdict: remediation prose + unknown-line mapping suggestions. Deterministic weighted-severity scoring; every finding carries line-number evidence.
+- Training GUI with persisted mappings; seeded-violation corpus (Batfish fixtures + injected faults) with precision/recall on slide 1; `LLM_MODE=offline` cached demo.
+
+**Mandatory conditions (all, or NO-GO).**
+1. Honest-hybrid positioning; red team's three banned sentences enforced (no "AI audits NIST/ISO," no "any vendor," no "learns automatically").
+2. Verdicts 100% rule-engine — LLM never issues pass/fail.
+3. No CIS/ISO text redistributed in repo or PDF (license).
+4. IR schema frozen day 3; golden fixtures + regression tests.
+5. Seeded corpus built day 1 — the sole surviving answer to the killer question ("show your ground truth and one miss").
+
+**go_no_go: 7 — conditional GO.** Clone teams ship chatbot wrappers; this team wins on eval rigor, the mandated training GUI, and remediation UX. Ceiling is capped by crowding + Nipper/Batfish incumbency and a non-flashy surface.
+
+<<SCORES {"ps":"26155","role":"architect-adjudicator","feasibility":8,"data_risk":4,"demo_wow":6,"uniqueness":3,"punch":7,"win_prob":5}>></subagent>
+<subagent agent_id="agent-152" item="ROLE: ADVOCATE-REBUTTAL for PS 26083 (Heatwave Thermal Stress Index, IMD/MoES). Engineering found: SEV1 fabricated-label mortality model — NO open Indian daily heat-mortality dataset exists, so the PS's mortality-prediction framing must be amputated week 1 and replaced with 'risk index from published coefficients, honestly labeled'; 'localized impact-based' overclaim (Open-Meteo grid is 9-11km); live-API demo dependence (offline SQLite + ERA5 replay non-negotiable); cut the custom-ML vanity module. Assets verified earlier: Open-Meteo keyless (ECMWF/GFS + ERA5 to 1940), pythermalcomfort for UTCI/WBGT. TASK: rebut/absorb each; answer 'where is the AI?' precisely; final revised demo + win_prob. Cap 400 words." outcome="completed">**ADVOCATE-REBUTTAL — PS 26083 (Heatwave Thermal Stress Index, MoES/NCMRWF)**
+
+Engineering's findings are correct on facts; wrong on the conclusion that they sink us. Point-by-point:
+
+**1. SEV1 fabricated mortality labels — ABSORB + WEAPONIZE.** Correct: no open Indian daily heat-mortality series exists. So we amputate supervised mortality prediction week 1 — and turn the amputation into the pitch. Replacement: an *attributable-risk estimator* driven by published city-level exposure-response coefficients from peer-reviewed Indian heat-mortality studies (Ahmedabad HAP evaluations, multi-city DLNM literature), applied to forecast UTCI/WBGT. Output is honestly labeled "estimated excess-risk band (literature-derived)," not a fake learned model. Judges at MoES/NCMRWF are scientists — the team that says "we refused to fabricate labels" beats the team demoing a mortality model trained on synthetic data, which any domain judge dismantles in one question.
+
+**2. "Hyper-local" overclaim — REBUT.** The 9–11 km Open-Meteo grid limits the *hazard* layer, not the *risk* layer. Risk = hazard × vulnerability × exposure. Ward-level differentiation comes from Census vulnerability overlays (elderly density, slum share, outdoor-worker share) — two adjacent wards under identical weather get genuinely different risk scores and different advisories. We label the map honestly ("hazard: ~10 km grid; vulnerability: ward-level"). The PS's own words — "Zone/Ward level alerts paired with advisories" — are satisfied.
+
+**3. Live-API demo dependence — ABSORB.** Offline-first architecture: pre-fetched ERA5 archive + a frozen 72-h forecast snapshot in SQLite; demo replays the June 2024 Delhi heatwave deterministically. Live Open-Meteo fetch is a toggle, never a dependency. Zero demo risk.
+
+**4. Cut custom-ML vanity module — ABSORB with precision.** Agreed, no bespoke deep model. The ML that survives has **real, free labels**: IMD heatwave-day criteria applied to ERA5 1940–present gives 85 years of ground truth for a calibrated gradient-boosted probabilistic persistence forecaster (P(heat stress persists day 3–5)) — no fabrication, trains on CPU/minutes, fits the GPU budget trivially.
+
+**Where is the AI? Precisely:**
+- (a) Probabilistic heat-persistence classifier, ERA5-derived labels, calibrated probabilities.
+- (b) LLM advisory engine (our team's strength): RAG over NDMA/IMD Heat Action Plan guidelines → ward-specific, multilingual, 160-char SMS/WhatsApp advisories + trigger recommendations (cooling centers, work-hour shifts). This is the visible "intelligence" the PS demands.
+
+**Revised demo (6 min):** Map replays June 2024 → dry-bulb forecast shows 45°C while UTCI risk diverges ward-by-ward → probabilistic 3–5 day alert fires → one click generates Hindi/English ward advisories via LLM → mock SMS dispatch webhook. One-line kill-shot: "temperature says heatwave; our index says *who dies where, and what to send them*."
+
+Competition note: 0/500 ideas submitted — thin field, real ministry owner, no vision AI needed.
+
+<<SCORES {"ps":"26083","role":"advocate-rebuttal","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":5,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-153" item="ROLE: PROSECUTOR-APPEAL against PS 26083 (Heatwave Index, IMD). New ammunition: mortality-prediction core objective has no data anywhere — you must visibly descope the PS's own ask; 'where is the AI' — pythermalcomfort + thresholds is physics, not intelligence; December demo of a summer problem; IMD judges are operational forecasters who know Open-Meteo isn't IMD data; same MoES pool as flashier WeatherGPT entries. TASK: argue death; attack mitigations (is 'risk index from published coefficients' just a formula wearing a badge?); final win_prob + kill-question. Cap 400 words." outcome="completed"># PROSECUTOR-APPEAL — PS 26083: Death Warrant, Second Reading
+
+The defense's only surviving line is the engineering mitigation: "reframe as published-coefficient risk transfer." I attack that line directly, then close.
+
+**1. The mitigation is a formula wearing a badge.** The ML engineer's fix — Azhar 2014's RR 1.76–2.12 driven by forecast UTCI — is one city, one 7-day event, May 2010, all-cause mortality, data obtained under a non-distribution clause. Transferring a single Ahmedabad excess-death curve to Nagpur wards in 2026 isn't epidemiology; it's extrapolating n=1 across climates, demographics, and adaptation levels. Gasparrini DLNM, the cited fallback, requires multi-year city-day mortality series to fit — which the data auditor verified India does not publish. And the proposed "validation" (reproduce Ahmedabad 2010 within CI) is circular: you calibrate on the only event you test on. A MoES operational forecaster will see this in one slide.
+
+**2. The descope is visible and self-defeating.** The PS's own text demands a "Mortality Risk Index" predicting "mortality and hospitalization spikes 3–5 days in advance." Both engineers independently say: cut it, ship threshold exceedance instead. But threshold exceedance on WBGT/UTCI is *exactly what IMD/NDMA already issue operationally* — impact-based color-coded heat-health forecasts exist today, and IMD launched its own experimental Heat Index in 2024. Descoped, you are an incumbent clone with a Leaflet skin. Kept, you're training on fabricated labels. There is no third door.
+
+**3. "Where's the AI?" has no answer.** pythermalcomfort/thermofeel is arithmetic; the index is a download (ERA5-HEAT ships pre-computed UTCI). The one honest ML module — GBM bias-correction of forecasts — is invisible plumbing, and it corrects *Open-Meteo*, not IMD data, because the auditor confirmed IMD's free grids lack humidity, wind, and radiation: the very variables the PS says are ignored. Demoing ECMWF-based data to NCMRWF judges — the people who run India's NWP — while implicitly indicting their data infrastructure is politically fatal.
+
+**4. Context kills the residue.** December finale: a summer hazard demoed on replayed May data — the same canned demo all 12+ existing `SIH26083` GitHub repos can ship. Same MoES pool as conversational-weather (WeatherGPT-class) entries that put an LLM center-stage; our LLM is an advisory-text garnish on a thermostat. GPU budget: 0 hours needed — a mismatch signal that this PS wastes the team's ML strength entirely.
+
+**Kill-question for the defense:** "Name one legally downloaded city-day mortality row in your training data — or admit the Mortality Risk Index, the PS's headline deliverable, is a 2010 Ahmedabad coefficient wearing a badge."
+
+Feasible to build. Impossible to defend. Buried in a crowd. Execute.
+
+<<SCORES {"ps":"26083","role":"prosecutor-appeal","feasibility":7,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":7,"win_prob":2}>></subagent>
+<subagent agent_id="agent-154" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26083 (Heatwave Index, IMD). Debate: demo-wow high, AI-depth questioned. Engineering: amputate mortality claim, offline ERA5 replay demo, no custom ML, honest index framing. TASK: final verdict — MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed"># ARCHITECT-ADJUDICATOR — Final Verdict: PS 26083 (Heatwave Index, IMD/NCMRWF)
+
+**Verdict: CONDITIONAL GO.** The engineering findings don't kill this project — they *define* it. I adjudicate their four recommendations as accepted, not rebutted: ERA5-HEAT/UTCI on CDS is verified live, the index is deterministic plumbing, and the mortality claim was always the weakest link. Amputating it doesn't reduce wow; it removes the one question a judge could sink us with.
+
+## MVP Scope (frozen, 4 weeks, 2–4 devs)
+
+1. **Data layer (wk 1):** CDS API pull — ERA5-HEAT UTCI + ERA5-Land (2m temp, RH, wind, SSRD), India, Mar–Jun, 10–15 yr. Compute WBGT-shade + Heat Index offline into PostGIS/tiles. Zero live-CDS dependency after this.
+2. **One city, done deeply — Ahmedabad.** Public Heat Action Plan, published ward-level heat mortality studies, NDMA framework. Vulnerability overlay from Census (elderly %, outdoor-worker density) → composite **Heat Stress Risk Score**, honestly named.
+3. **Forecast:** Open-Meteo API (free, no key) hourly T/RH/wind/radiation → 3–5 day forward WBGT computed server-side. No NWP, no training.
+4. **Dashboard:** MapLibre GIS, ward-level color ramp, time-slider. **Alert API:** Twilio/WhatsApp sandbox with live-fire demo button.
+5. **Demo:** offline ERA5 replay of the May 2010 or 2022 Ahmedabad heatwave, hour-by-hour, risk map evolving, advisories firing. Works with the venue Wi-Fi dead.
+
+## Mandatory Conditions (violation = no-go)
+
+- **C1 — Mortality amputated.** No predicted death counts anywhere. Impact claims cite Ahmedabad HAP literature only. Judge pushback answered with validation framing.
+- **C2 — No custom ML.** AI-depth question is answered, not dodged: deterministic index + LLM advisory generator (localizes ward alerts from risk context) = "impact-based decision support," positioned as a feature (deterministic = trustworthy for disaster ops), not a gap. Optional LightGBM admission-proxy calibration only if a real dataset surfaces in week 1; else cut.
+- **C3 — Replay demo verified offline before submission.**
+
+## Adjudication of the debate
+
+The advocate's demo-wow claim survives *only* through the replay theater, not the dashboard itself (GIS dashboards are a commodity at SIH). The prosecutor's AI-depth attack is neutralized by C2's reframing, but uniqueness stays mid — expect 3–5 sibling teams with weather maps.
+
+<<SCORES {"ps":"26083","role":"architect-adjudicator","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":5,"punch":6,"win_prob":6}>></subagent>
+<subagent agent_id="agent-155" item="ROLE: ADVOCATE-REBUTTAL for PS 26101 (AI LMS with iGOT integration, MoSPI). Engineering found: SEV1 learner-side data entirely synthetic (no public profiles/outcomes); BUT verified strong assets: iGOT public unauthenticated course-search API (9,057 courses, 100/100 carry competencies_v6 tags), KCM framework public (750 competency terms), NSSTA training-calendar PDFs (MoSPI-flavored, zero scraping risk); only 66/9057 courses are statistics-relevant (curated-catalog honesty needed); differentiation = grounded MCQ generation + human-gold eval (n=60 MCQs), never overclaim live integration. TASK: rebut/absorb; final revised demo + win_prob. Cap 400 words." outcome="completed">**APPEAL — ADVOCATE-REBUTTAL, PS 26101 (MoSPI AI LMS + iGOT)**
+
+**Rebuttal to SEV1 (synthetic learner data).** Absorbed and defused: the PS never demands real learner records. The demo runs on *disclosed personas* seeded exclusively from real public artifacts — NSSTA training-calendar PDFs (actual MoSPI course demand), KCM's 750 competency terms (actual framework), MoSPI role descriptions. The honesty rule is one sentence on the slide: "learners are personas; every course, competency, and calendar entry is real." Every SIH recommender demo uses personas; ours are the only ones grounded in published role→competency mappings. The judge kill-question ("where is your learner data?") has a surviving answer: "persona harness for demo; production ingestion is CSV/API import — here is the schema." Data fabrication would be fatal; *labeled simulation over real catalogs* is standard practice.
+
+**Weaponizing the verified assets.** The 66/9,057 statistics-relevant finding is not a liability — it is the pitch. MoSPI's own problem statement says officials can't find relevant training in iGOT's vast catalog. We demonstrate that funnel live: 9,057 courses → competency-filtered → 66 statistics-relevant → ranked personalized pathway against the official's gap profile. That is quantified discovery, not vibes, and it proves the platform's raison d'être on the ministry's own data. Curated-catalog honesty ("Official Statistics track: 66 verified courses") pre-empts the "your catalog is thin" attack by making thinness the ministry's documented pain.
+
+**Live-check note.** I re-probed the iGOT search endpoint just now: main site 200, bare API call 401 (WAF/auth-header churn). Engineering's 9,057-course pull stands, but this reinforces the only safe demo architecture: **freeze the catalog as a versioned offline snapshot** at build time. Zero live calls on stage; "integration-ready via public API schema" is the claim, never "live integration."
+
+**Revised demo (final).** Upload an NSSTA training-calendar PDF → grounded MCQ generation with citations → report human-gold eval (n=60, % passing expert review — the measurable quality claim no rival will have) → persona skill-gap radar vs KCM terms → 9,057→66 funnel → ranked pathway. GPU budget trivial (embedding + LLM inference only; no training).
+
+**Scores (10 = best; data_risk: 10 = lowest risk).**
+
+<<SCORES {"ps":"26101","role":"advocate-rebuttal","feasibility":9,"data_risk":7,"demo_wow":7,"uniqueness":7,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-156" item="ROLE: PROSECUTOR-APPEAL against PS 26101 (AI LMS/iGOT, MoSPI). New ammunition: learner-side data is 100% fabricated; 'integration with iGOT ecosystem' is read-only at best — judges may expect SSO/enrollment write-back; LMS is the most template-ware genre in hackathons; only 66 relevant courses makes 'personalized pathways' thin; competitor repos already exist with scraped catalogs. TASK: argue death; attack mitigations; final win_prob + kill-question. Cap 400 words." outcome="completed"># PROSECUTOR-APPEAL vs PS 26101 — Death Argument
+
+The engineering phase didn't exonerate this PS; it autopsied it. Four specialists, and even the friendliest (data-auditor, GO 7) only found a *catalog* — not a product.
+
+**1. The mitigation "snapshot the 9,057-course catalog" is self-defeating.** The auditor's own numbers: zero MoSPI/NSSTA-owned courses, **66/9,057** statistics-relevant. So the "personalized pathways for India's Official Statistical System" recommend generic DoPT soft-skills modules. The core pitch is hollow *by verified measurement*, not speculation. Worse: the catalog endpoint is the same one rival SIH teams already scraped (`23f2005014/SIH_2026`, `Statskill`, `sih_prototype`). Our "curated mirror" moat is a public asset inside the competition itself. The advocate's KCM-grounding edge is one curl away for all 20+ competing repos.
+
+**2. "Synthetic personas + honest Precision@5" doesn't survive a MoSPI judge.** The red-teamer confirmed: every metric is computed against self-invented data, labeled by the same team that built the recommender — circular evaluation. And the judges are ministry officials who know the real training landscape; fabricated JSO/SSO personas and a hand-picked 30-pair gold set will read as exactly what they are. "We report confidence intervals honestly" is a defense at a thesis defense, not a hackathon stage.
+
+**3. The integration confession.** The architect verified 401s across iGOT APIs; integration requires Karmayogi Bharat partnership credentials — unobtainable. The PS text explicitly demands monitoring *enrolment and completion status*, *updating competency scores*, and **SSO**. The proposed mitigation — stand on stage and say "integration = deep links" — is a public admission of non-compliance with the expected solution's checklist. A compliant-looking rival (even a dishonest one) out-checklists us.
+
+**4. The cut-line cuts the spec.** 15–19 person-weeks vs ~10 available *after* amputation; the amputated parts (SSO, TPAC recommendations, adaptive learning) are bullet points in "Expected Solution." SIH judging is checklist-matching; we either ship thin or ship non-compliant.
+
+**5. Uniqueness is dead.** LMS + "upload PDF → MCQ" is the single most template-ware genre in hackathons; 20+ repos on this exact PS ID before Round 1 ended, several already polished. The only verifiable feature (MCQ gen) is the one every rival has, and its hallucinated answer keys require the human review that contradicts the "automated" claim.
+
+**Kill-question for the panel:** *"Show me one real official's enrollment status read back from iGOT — and if you can't, which three bullets of the Expected Solution did you silently drop?"* No answer survives: demo data is fabricated, write-back is impossible, and the checklist is cut.
+
+<<SCORES {"ps":"26101","role":"prosecutor-appeal","feasibility":5,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-157" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26101 (AI LMS/iGOT, MoSPI). Debate: mid-pack. Engineering: synthetic learner data SEV1 but verified public iGOT catalog API + KCM taxonomy + NSSTA PDFs; MCQ-grounding as differentiator; curated-catalog honesty. TASK: final verdict — MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed"># ARCHITECT-ADJUDICATOR — Final Verdict: PS 26101 (MoSPI AI LMS / iGOT)
+
+## Adjudication of the engineering conflict
+
+The four specialists contradict each other on the load-bearing fact, so I re-verified live. **The data auditor is right; the architect and red-teamer are wrong on the API.** Both probed wrong endpoints (`/api/course/v1/search` → 401). Just now: `POST igotkarmayogi.gov.in/api/content/v1/search` returns **200, unauthenticated, count=94,565 content items**, and the KCM framework endpoint returns 200/428KB. Catalog integration is therefore a **live public read API, not a scrape** — this downgrades SEV1-b ("integration impossible") to SEV3 and creates a genuine moat: the 20+ rival repos the prosecutor found almost certainly haven't discovered this endpoint (the architect missed it too).
+
+**What survives engineering scrutiny:** the *learner-side* SEV1. Enrollment/profile/progress APIs remain auth-gated; all learner data must be synthetic. Also real: 50% scope overshoot (architect's table), 20+ rival repos (prosecutor), no ground truth (red-teamer), zero MoSPI-owned courses in catalog.
+
+## MVP scope (non-negotiable cut-line)
+
+One closed loop: persona login → 20-item self-assessment → KCM-grounded gap radar → recommended pathway from the **live-synced catalog snapshot** (deep links to igotkarmayogi.gov.in) → upload text-PDF → MCQ generation **with source-span citation per question** → take quiz → updated gap chart → admin aggregate heatmap. Stack: FastAPI + SQLite/Postgres + React, MiniLM embeddings on CPU, LLM API for MCQ/chat. **CUT:** virtual labs, adaptive real-time engine, SSO/RBAC beyond stubs, enrollment write-back, multilingual beyond one toggle, predictive forecasting, video ingestion (no vision — text PDF/DOCX only, reject scanned files loudly).
+
+## Mandatory conditions (all five, or NO-GO)
+
+1. **Week-1 catalog snapshot** of the live API into Postgres; demo runs offline from snapshot, live sync as garnish.
+2. **10–15 KCM-mapped synthetic personas** (JSO/SSA/DD designations) + 30–50 hand-labeled persona→course gold pairs; report Precision@5 with CI.
+3. **Expert-panel artifact** (red-teamer's killer question): 2–3 reviewers rating top-3 recommendations on ~20 personas; report agreement %.
+4. **MCQ grounding:** every question cites its source paragraph; human-review queue; 60-MCQ human-validated accuracy number.
+5. **Stage language discipline:** say "catalog sync + deep links, integration-ready," never "integrated with iGOT"; never claim gap "accuracy" — frame as framework-aligned self-assessment.
+
+## Verdict
+
+**CONDITIONAL GO.** The engineering findings, correctly adjudicated, net out positive: real catalog + taxonomy (verified), no GPU need, buildable in ~10 pw after cuts. The binding constraint is crowding — the demo must lead with what rivals lack: live iGOT sync, KCM ontology, cited MCQs, honest eval numbers.
+
+<<SCORES {"ps":"26101","role":"architect-adjudicator","feasibility":7,"data_risk":5,"demo_wow":6,"uniqueness":5,"punch":7,"win_prob":5}>></subagent>
+<subagent agent_id="agent-158" item="ROLE: ADVOCATE-REBUTTAL for PS 26165 (OIL SIF-precursor NLP). Engineering (fresh pass, raw concept) found SEV1s: no ground truth exists anywhere for near-miss SIF; outcome-language leakage (OSHA narratives are post-injury; outcome words never appear in near-misses); circular LLM-labeling; domain shift (2.6% oil&amp;gas rows). You defend a REVISED blueprint from a prior deep-dive: (1) labels derived deterministically from OSHA's human-coded OIICS event codes (high-energy mechanism = SIF-potential) — zero LLM opinion in the label; (2) outcome-masking before training; (3) NASA ASRS 47.7k real near-miss narratives supply the near-miss register; (4) 1,000-report blind human gold set (CI-valid); (5) reframe as hazard-exposure TRIAGE (ranking, not prediction; claims = extraction precision + triage time saved); (6) declare 2 unlearnable IOGP rules openly. TASK: defend the revised blueprint against each SEV1; final revised demo + win_prob. Cap 400 words." outcome="completed">All facts verified live. Writing the appeal.
+
+## ADVOCATE-REBUTTAL — PS 26165 (SIF-precursor NLP), revised blueprint
+
+**SEV1 "no ground truth" — DISPROVEN for the revised claim.** Live profile: **105,996/105,996 rows carry human-coded OIICS Event codes (0 missing)** — regulator-grade labels from OSHA/BLS-trained coders. "High-energy exposure = SIF-potential" is not our invention; it is the DEKRA/EEI definition the PS itself cites. Deterministic mapping yields caught-in 26,639, falls 28,415, struck-by 14,799, transportation 9,402, electrical 4,632, fire/explosion 1,864 (80.9% high-energy) plus **20,245 real low-energy rows as a native negative class**. The SEV1 attacked near-miss→fatality *prediction*; blueprint item 5 concedes that is unlearnable and never claims it. Triage needs agreement metrics, not oracle truth.
+
+**SEV1 "outcome leakage" — diagnosis conceded, verdict rejected.** Confirmed live: 83.9% of narratives leak outcome tokens ("fracture", "amputat", "hospital"). But: (a) the label comes from the code column, not text; (b) outcome-masking before training is now load-bearing, not optional; (c) mechanism signal survives — 63.9% of narratives contain explicit mechanism language; (d) evaluation runs on masked text against the blind gold set, and the masking ablation delta is a number we *report*. Leakage becomes a disclosed metric, not a hidden flaw.
+
+**SEV1 "circular LLM-labeling" — eliminated by construction.** The label is a fixed, pre-published OIICS→energy-class lookup; no LLM anywhere in the label path. Gold set is 1,000 blind human labels (Wilson 95% CI ≈ ±2.5% at p≈0.85). LLM proposes IOGP tags only; every tag human-verified on the gold set.
+
+**SEV1 "domain shift (2.6% O&G)" — downgraded to SEV2.** Energy-mechanism language is cross-industry by design — that is why IOGP rules are sector-agnostic. The 3,285-row O&G slice (83.7% high-energy) is the adaptation/demo corpus. ASRS re-verified live today: public, ungated, Apache-2.0, 47.7k expert near-miss narratives — it supplies exactly the pre-incident register engineering correctly said OSHA lacks. Declared openly: 2 unlearnable IOGP rules — Work Authorization (7 textual hits) and Bypassing Safety Controls (78) — the other 7 have 225–13,699 hits.
+
+**Revised demo:** ingest → mask → high-energy triage queue → 7-rule tags → site/activity heat dashboard → gold-set slide (κ, precision@20, triage-time-saved). Claims = extraction precision + ranking + time saved. Never "predicts fatalities."
+
+<<SCORES {"ps":"26165","role":"advocate_rebuttal","feasibility":8,"data_risk":4,"demo_wow":6,"uniqueness":7,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-159" item="ROLE: PROSECUTOR-APPEAL against PS 26165 (OIL SIF NLP). New ammunition: fresh engineering found no ground truth, outcome leakage (P(severity|outcome-word)=98.6%), circular labeling, 2.6% domain match. The team's revised blueprint: OIICS-derived deterministic labels, outcome-masking, ASRS near-miss corpus, blind gold, triage-not-prediction reframe, declare-2-dead-rules. TASK: attack the REVISED blueprint specifically — is OIICS-derived labeling just 'the model re-discovers activity codes'? is triage-reframe a retreat that scores zero on the PS's actual 'classify SIF-potential' ask? is ASRS aviation text relevant to oilfields? Final win_prob + kill-question. Cap 400 words." outcome="completed">## PROSECUTOR-APPEAL — PS 26165 (OIL SIF NLP): The Revised Blueprint Is a Relabeled Corpse
+
+The engineering findings stand unrefuted — I verified them in `runs/run1/phase2_all.txt`: 105,996 OSHA rows, **zero negatives**, every narrative a realized severe injury (median 31 words), ~3,370 in-domain oil rows, and no labeled near-miss corpus anywhere on HF/GitHub. The defense's revision patches cosmetics, not the structural defect.
+
+**1. OIICS-derived labels = circularity relocated, not removed.** OIICS event codes are assigned *from the outcome narrative*. Deriving "SIF" deterministically from `EventTitle`/`NatureTitle` means the classifier's job reduces to re-discovering a lookup table already encoded in the text — that's how you got P(severity|outcome-word)=98.6% in the first place. Worse, OIICS codes describe **injury events**, and SIF-potential on a near-miss is defined by *hazard energy present with no injury*. The label ontology itself is off-target.
+
+**2. Outcome-masking is theater.** Strip "amputated/hospitalized" and the energy-mechanism cues ("caught in running equipment," "fell from derrick") that co-occur with severity remain — the shortcut survives. And masking shrinks already-31-word texts toward unusability.
+
+**3. "Blind gold" is blind in the wrong eye.** Who labels fatal potential — four students with no process-safety adjudication? If the gold set is LLM/heuristic-assisted, validation measures *agreement with your own labeling functions*, i.e., self-consistency dressed as accuracy. n=300 student labels ≠ ground truth.
+
+**4. Triage-reframe scores zero against the PS text.** The statement demands "(a) classify SIF-potential vs non-SIF." Renaming the deliverable "triage" doesn't satisfy the rubric line; judges grade the PS as written. It's a confession that (a) is unbuildable — correct, but fatal to the pitch. "Declare-2-dead-rules" further shrinks (b) from 9 rules to 7.
+
+**5. ASRS is aviation.** ATC phraseology and altitude-deviation narratives share no vocabulary with hot work, confined space, or line-of-fire. 47K rows of the wrong domain plus 3.3K rows of the leaked right domain is still the leaked domain.
+
+**Verdict:** every mitigation orbits the same unfixable void — no adjudicated SIF-potential labels exist, and OIL will not hand students HSSE records. Feasibility 7, data_risk 8, demo_wow 5, uniqueness 5, punch 7, **win_prob 3**.
+
+**Kill-question:** *"Name one real near-miss report — not an OSHA outcome narrative, not synthetic — that your 'SIF-potential' score was ever validated against."*
+
+<<SCORES {"ps":"26165","role":"prosecutor-appeal","feasibility":7,"data_risk":8,"demo_wow":5,"uniqueness":5,"punch":7,"win_prob":3}>></subagent>
+<subagent agent_id="agent-160" item="ROLE: ARCHITECT-ADJUDICATOR for PS 26165 (OIL SIF NLP). You receive: fresh engineering SEV1s (no ground truth, outcome leakage, circularity, domain shift) AND the revised blueprint (OIICS-derived labels, outcome-masking, ASRS corpus, blind 1000-gold, triage reframe, declare dead rules, verified OSHA 106k CSV on disk). Debate R1: mid-pack scores but zero crowding. TASK: final verdict — is the revised blueprint a sound build or elaborate cope? MVP scope, mandatory conditions, go_no_go + win_prob. Cap 400 words." outcome="completed">## ARCHITECT-ADJUDICATOR — PS 26165 (OIL SIF NLP): Final Verdict
+
+**Live re-verification (appeal round, independent):**
+- OSHA CSV: 105,996 rows via pandas ✓; 649 unique OIICS EventTitles, top codes are high-energy mechanisms (caught-in 11.9k, falls-to-lower-level ~9k, compressed/pinched 5k) — the OIICS-derived label basis is **real, not rhetorical**.
+- Outcome leakage: 65% of sampled narratives contain explicit outcome tokens (amputat*/hospital/fractur*/kept-overnight). The SEV1 leakage was real — and outcome-masking is a *necessary* fix, not decoration.
+- ASRS: re-fetched HF API live — public, ungated, Apache-2.0, 10–100k near-miss narratives ✓. Negative class exists.
+- Oil-adjacent NAICS: only ~3,459 rows (3.3%) — domain-shift SEV stands; demo slice only.
+
+### Adjudication: SOUND BUILD, conditionally
+
+Each SEV1 has a mechanism-specific fix verified against the data, which is what separates blueprint from cope:
+
+1. **Circularity → broken, not patched over.** OIICS energy-mechanism labels anchor "SIF-potential" to external safety science (DEKRA/EEI), and the blind 1000-gold (n=1000 → Wilson CI ±2.2% at p=0.85; ~2-3 person-days) is human adjudication, not the model grading itself.
+2. **Leakage → addressable and testable.** Masking + mandatory ablation (report F1 delta masked vs unmasked; audit residual signal) converts the fake-F1 trap into a demonstrated rigor point — a Q&A asset.
+3. **Domain shift → bounded.** ASRS supplies near-miss *structure*; the 3.4k oil rows + LLM-synthesized OIL-style (Hinglish-tinged) reports in the gold set bound the claim. Honest slide: 0.55–0.75 F1 on OIL-style text.
+4. **No ground truth → reframed, not denied.** Triage queue (precision@k, κ vs gold, review-time saved) is the red-teamer's only surviving answer — adopted as design, which is correct.
+
+### Mandatory conditions (any breach = NO-GO)
+- Triage framing only; never "predicts fatalities" or unqualified accuracy.
+- Gold set built blind, week 1; includes synthesized OIL-style reports; schema locked week 1.
+- Outcome-mask ablation reported; same-distribution-only eval declared dead.
+- Week-2 gate: F1 ≥ 0.75 on gold before dashboard scales.
+- Batch/offline inference only (frozen SQLite snapshot); IOGP rules stay zero-shot ensemble with per-rule precision; no fine-tune dependency, no real-time, no auth.
+
+### MVP
+Ingest → mask → LLM few-shot classify (SIF-flag + 9-rule tags, JSON) → SQLite snapshot → Streamlit dashboard (queue, rule tags, site/activity heat) → canned offline demo. ~11–13 pw vs 8–16 available: tight but inside.
+
+**Verdict: GO (7/10).** Zero crowding ("0/500" ideas) plus a survival plan for the killer question makes this a defensible mid-pack pick with upset potential — execution discipline is the whole game.
+
+<<SCORES {"ps":"26165","role":"architect-adjudicator","feasibility":7,"data_risk":5,"demo_wow":6,"uniqueness":7,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-161" item="ROLE: CROSS-EXAMINER X1 for the PLATFORM FOUR (26043, 26092, 26089, 26046). After the appeal round, adjudicate each: (a) 26043 Jharkhand crowdsourcing — does it escape 'CPGRAMS clone'? (b) 26092 scheme matching — does it escape 'myScheme exists'? is 'rules+LLM-explains' honest enough? (c) 26089 gig platform — is the governance-moat answer credible to Ministry of Cooperation judges? (d) 26046 CTMS — is synthetic trial data + standards-knowledge a feature or a fatal credibility gap? Verify 1-2 load-bearing facts live (e.g., does myScheme actually cover NSKFDC loan products? does CPGRAMS do challenge-to-solution matching?). Final win_prob per PS. Cap 500 words." outcome="completed">All facts verified. Here's my adjudication.
+
+# CROSS-EXAMINER X1 — Appeal Adjudication, Platform Four
+
+**Live verifications performed (2026-09-07):**
+1. **CPGRAMS** (pgportal.gov.in, fetched live): it is strictly a *service-delivery grievance* portal — lodge, track, appeal, feedback. No challenge intake for innovation, no university/industry routing, no solution lifecycle. The "CPGRAMS clone" charge fails on the facts.
+2. **myScheme NSFDC coverage** (Kaggle corpus scraped from myScheme.gov.in, 3,400 rows, re-profiled now): **31 NSFDC/NSKFDC product rows already exist**, including Aajeevika Micro-Finance Yojana, Term Loan, and Education Loan Scheme (NSFDC) — the exact products PS 26092 names. The "myScheme exists" attack is *stronger* than Round 1 knew.
+
+## (a) 26043 — Escapes CPGRAMS, not the real incumbents
+"CPGRAMS clone" is dead — verified above. But the engineering finding stands: Unnat Bharat Abhiyan (verified live), MyGov, and Manthan already do citizen-problem → institution → solution, and SIH itself *is* this workflow. The only survivable reframe — "state-scoped lifecycle layer between submission and deployed solution, with an incumbent-comparison slide" — is honest but leaves a puppet-theater demo of seeded CRUD whose network effect cannot be shown. **Adjudication: escapes the clone charge, doesn't escape the "why does this exist" charge. Weak finalist.**
+
+## (b) 26092 — myScheme attack deepens; the escape narrows
+My live check makes it worse: myScheme doesn't just do generic matching, it already catalogs NSFDC's own loan products; JanSamarth covers credit-linked loans. The residual moat is real but thin: channel-partner **geolocation routing** (100+ SCAs/PSBs/RRBs/NBFC-MFIs, PDF-sourced and verified parseable) + EMI arithmetic + multilingual access. On honesty: "rules decide, LLM explains with citations" is not merely honest enough — it's the *correct* architecture for a ministry audience; it converts the AI-overclaim into an auditability feature. The fund-utilization router remains fabricated data and must be a labeled roadmap mock, never a live flag. **Adjudication: viable only as "myScheme-for-NSFDC's last mile," and four rival public repos already exist. Mid-tier.**
+
+## (c) 26089 — Governance moat is credible *to these judges*
+The moat answer works for a specific reason engineering underrated: cooperative-platform ownership is the Ministry of Cooperation's *own policy thesis* (high-confidence: the ministry itself launched the Sahkar/Bharat Taxi cooperative cab platform in 2025-26 — the judges are pre-sold on the premise). UC's verified labor-relations record (protests, ID-blocking, Fairwork criticism) is citable ammunition. The real killer is scope: 12 mandated features at ~1 feature/day. The 5-feature spine + governance dashboard is the right cut. **Adjudication: strongest premise of the four; execution risk, not premise risk.**
+
+## (d) 26046 — Synthetic data is a feature; overclaim is the gap
+The PS *mandates* synthetic data — so it's a compliance feature, and the failure mode is purely self-inflicted: claiming GCP compliance, real safety signals, or live CTRI sync (no API, verified). Standards-knowledge is the differentiator: HAPI-validated FHIR R4 on stage, NDCT SAE-deadline clock, and an on-stage audit-trail edit test are machine-checkable proofs almost no student team will bring. Scope discipline via the PS's own "staged MVP" sentence is mandatory. **Adjudication: synthetic = feature; credibility gap only exists if the team talks past its claim boundary.**
+
+**Ranking: 26089 > 26046 > 26092 > 26043.**
+
+<<SCORES {"ps":"26089","role":"cross_examiner_x1","feasibility":7,"data_risk":4,"demo_wow":6,"uniqueness":7,"punch":7,"win_prob":6}>>
+<<SCORES {"ps":"26046","role":"cross_examiner_x1","feasibility":7,"data_risk":5,"demo_wow":6,"uniqueness":7,"punch":6,"win_prob":6}>>
+<<SCORES {"ps":"26092","role":"cross_examiner_x1","feasibility":8,"data_risk":4,"demo_wow":5,"uniqueness":4,"punch":5,"win_prob":4}>>
+<<SCORES {"ps":"26043","role":"cross_examiner_x1","feasibility":8,"data_risk":3,"demo_wow":4,"uniqueness":3,"punch":4,"win_prob":3}>></subagent>
+<subagent agent_id="agent-162" item="ROLE: CROSS-EXAMINER X2 for the AI-CORE FOUR (26155, 26083, 26101, 26165). After the appeal round, adjudicate each: (a) 26155 network auditor — is 'honest rule-engine+LLM hybrid' a strength or a confession with NTRO judges? (b) 26083 heatwave — does the amputated-mortality version still satisfy the PS? (c) 26101 iGOT LMS — does the verified public iGOT catalog API + KCM taxonomy rescue the synthetic-learner-data problem? (d) 26165 SIF — does the revised blueprint (OIICS-derived labels + ASRS + triage reframe) constitute a sound build or a retreat from the PS's classification ask? Verify 1-2 load-bearing facts live. Final win_prob per PS. Cap 500 words." outcome="completed">All facts gathered. Both live checks complete: the iGOT catalog API dispute is resolved (public API confirmed live, contradicting two engineering agents), and the OIICS label claim is verified against the local CSV. Writing adjudication.
+
+---
+
+## CROSS-EXAMINER X2 — Appeal-Round Adjudication, AI-CORE FOUR
+
+### Live verification results (load-bearing)
+
+1. **iGOT catalog API — VERIFIED PUBLIC, disproving two engineering agents.** `POST https://igotkarmayogi.gov.in/api/content/v1/search` returns `responseCode: OK, count: 9057` live courses; `GET /api/framework/v1/read/kcmfinal_fw` returns the KCM taxonomy. The full-stack architect's "401/auth-wall" and red-teamer's "no public catalog API" claims are **false** — they probed wrong endpoints (`/api/course/v1/search`). Data auditor stands vindicated.
+2. **OIICS labels — VERIFIED in local CSV.** `January2015toNovember2025.csv` carries numeric OIICS codes + titles for Event/Nature/Part-of-Body/Source/Secondary-Source (e.g., Event `1214`, `317`). "OIICS-derived labels" is a real artifact, not hand-waving. Also confirmed: Hospitalized/Amputation are counts; every row is a severe injury — **zero negative class**, as engineering claimed.
+
+### (a) 26155 Network auditor — hybrid: strength or confession?
+
+**Strength, conditionally.** NTRO judges are auditors; a non-reproducible "AI verdict" is disqualifying to *them* — so a deterministic core isn't a confession, it's audit-grade posture. But framing decides everything: "the AI just writes prose" is a confession; "reproducible verdicts + LLM for the unmapped long tail, with the PS-mandated training-loop GUI as the learning story" is a strength. Real constraints stand: Batfish parses 15+ vendors free, Nipper ships this commercially, CIS/ISO are license-blocked (STIG/NIST-only executable checks), ~7 rival repos, thin demo wow. Verdict: buildable, mid-pack.
+
+### (b) 26083 Heatwave — does amputated-mortality still satisfy the PS?
+
+**Yes.** The PS's literal deliverables are the composite index + localized early warning + health-impact framing; "projected mortality" is background motivation. UTCI/WBGT + threshold-exceedance + published exposure-response bands (Azhar 2014, Mazdiyasni 2017) cited as *epidemiology*, plus the one honest ML module (NWP→ERA5 bias correction), satisfies the letter and survives the killer question. Residual risk: MoES judges know IMD already ships an experimental humidity Heat Index and ERA5-HEAT exists — differentiation must be vulnerability-weighted localization and actionable advisories, not the index itself.
+
+### (c) 26101 iGOT LMS — does the API rescue it?
+
+**Substantially, yes.** Both SEV1 objections collapse: "integration" is honestly deliverable as live read-side sync against iGOT's own public Sunbird API (9,057 courses, 100% competency-tagged), and KCM's 750-term taxonomy is ground-truth structure for gap mapping. Synthetic learner data stops being fatal because learner data is inherently customer-side; disclosed personas + hand-labeled gold set + Precision@5 is defensible. New binding constraint: **crowding** (20+ repos; "LMS + PDF→quiz" is the #1 LLM-wrapper project) and the 66/9,057 statistics-relevant-course thinness. Data rescued; differentiation now decides.
+
+### (d) 26165 SIF — sound build or retreat?
+
+**Sound build, not retreat — narrowly.** The PS asks to *classify* SIF-potential; the blueprint still ships a classifier, IOGP tagging, and dashboard — it changes only label *semantics*: mechanism-based (OIICS event codes, independent of outcome columns, dodging the leakage trap) + ASRS near-miss negatives + expert-agreement validation. This matches the PS's own cited literature (precursors ≠ outcomes) and OIL's real pain (triage volume). It fails only if pitched as fatality *prediction*. Residual: no OIL text, Hinglish gap, 10+ rival repos, VelocityEHS named in the PS.
+
+**Panel ranking:** 26101 ≈ 26083 > 26155 > 26165.
+
+<<SCORES {"ps":"26155","role":"cross_examiner_x2","feasibility":7,"data_risk":4,"demo_wow":5,"uniqueness":4,"punch":6,"win_prob":5}>>
+<<SCORES {"ps":"26083","role":"cross_examiner_x2","feasibility":8,"data_risk":5,"demo_wow":7,"uniqueness":4,"punch":6,"win_prob":6}>>
+<<SCORES {"ps":"26101","role":"cross_examiner_x2","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":4,"punch":7,"win_prob":6}>>
+<<SCORES {"ps":"26165","role":"cross_examiner_x2","feasibility":7,"data_risk":6,"demo_wow":6,"uniqueness":4,"punch":7,"win_prob":4}>></subagent>
+<subagent agent_id="agent-163" item="ROLE: NON-TECHNICAL JUDGE persona (senior bureaucrat). Rank these 8 planned demos 1-8 on pure in-room experience (emotional grip, clarity, 'I'd fund this'): (1) 26043: citizens post local problems on a map of Jharkhand, AI categorizes and routes them to a university team that accepts the challenge live on screen; (2) 26092: Hindi voice in — 'mujhe 2 lakh ka kirana store kholo hai' — scheme card + EMI slider + map to nearest loan partner with rule-trace shown; (3) 26046: live dashboard of clinical trials, safety-signal alert fires red when adverse events cluster, one-click CTRI compliance report; (4) 26089: book an electrician from a workers' cooperative, worker welfare dashboard shows fair-wage distribution vs private platforms; (5) 26155: drag-drop a firewall config, compliance score animates, click a violation → offending line + exact fix commands + PDF audit report; (6) 26083: June-2024 Delhi heatwave replay, wards turn red hour by hour, WhatsApp heat advisory fires in Hindi; (7) 26101: upload a statistics training PDF, get a personalized course path + auto-generated quiz, answer wrong and the assistant explains; (8) 26165: paste a near-miss report, damning sentence highlights red tagged 'Line of Fire', site-ranking chart shows where fatal risk concentrates. Be brutal about what bores you. One-line reason each + your top-2 paragraph. Cap 450 words." outcome="completed">Verified all 8 IDs against `data/sih2026_ps.csv` — titles match the planned demos. Ranking below, in-room experience only, as a senior bureaucrat who has sat through a hundred hackathon finals.
+
+**RANKING (1 = I'd fund it today, 8 = I'm checking my phone)**
+
+1. **26083 — Heatwave replay.** A mother in a red ward getting a Hindi WhatsApp warning is the only demo where I feel a life is at stake.
+2. **26165 — SIF near-miss highlight.** One damning sentence turning red, tagged "Line of Fire" — I understand it in five seconds and it scares me, which is correct.
+3. **26092 — Hindi voice loan scheme.** A kirana-owner's spoken dream becoming a scheme card is emotionally direct; loses points only because a live voice demo can embarrass you on stage.
+4. **26043 — Jharkhand crowdsourcing map.** Heartwarming governance theatre, but I've funded ten "portals connecting citizens to universities" that are now ghost websites.
+5. **26089 — Cooperative electrician booking.** The fair-wage vs private-platform chart flatters my ministry instincts, but booking an electrician on screen is still just… booking an electrician.
+6. **26046 — Clinical trials dashboard.** The red safety alert is dramatic, but the demo drowns in CTMS/CDISC/FHIR jargon; if I can't retell it to my secretary at lunch, it didn't land.
+7. **26155 — Firewall compliance animator.** Competent, useful, and utterly bloodless — watching a config file score itself is a demo for auditors, not for me.
+8. **26101 — PDF-to-quiz learning platform.** "Upload a PDF, get a quiz" is every edtech pitch since 2019; I'd excuse myself before the MCQs render.
+
+**TOP-2 PARAGRAPH**
+
+26083 wins the room because it needs no translation: everyone in that hall has lived a Delhi June. Wards igniting red hour-by-hour is a ticking clock, and the Hindi advisory firing on WhatsApp is the payoff moment — the technology visibly reaching the last citizen. It converts abstraction into dread and then into relief, which is the only emotional arc on this list. 26165 is second because it does the same trick with one sentence: a worker's near-miss report, a red highlight, a label that says someone almost died. A fatality prevented is a story a minister will repeat. Both demos share what the bottom half lacks — a human consequence visible in the first 30 seconds, no domain degree required. The engineering risks flagged (26083's alert latency, 26165's small NLP dataset) are real but survivable; a boring demo is not.
+
+<<SCORES {"ps":"26083","role":"non-technical judge","feasibility":7,"data_risk":4,"demo_wow":9,"uniqueness":7,"punch":9,"win_prob":8}>>
+<<SCORES {"ps":"26165","role":"non-technical judge","feasibility":7,"data_risk":5,"demo_wow":8,"uniqueness":8,"punch":8,"win_prob":7}>>
+<<SCORES {"ps":"26092","role":"non-technical judge","feasibility":6,"data_risk":5,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":6}>>
+<<SCORES {"ps":"26043","role":"non-technical judge","feasibility":8,"data_risk":3,"demo_wow":6,"uniqueness":5,"punch":6,"win_prob":5}>>
+<<SCORES {"ps":"26089","role":"non-technical judge","feasibility":7,"data_risk":4,"demo_wow":5,"uniqueness":7,"punch":6,"win_prob":5}>>
+<<SCORES {"ps":"26046","role":"non-technical judge","feasibility":5,"data_risk":7,"demo_wow":5,"uniqueness":7,"punch":5,"win_prob":4}>>
+<<SCORES {"ps":"26155","role":"non-technical judge","feasibility":7,"data_risk":4,"demo_wow":5,"uniqueness":6,"punch":4,"win_prob":4}>>
+<<SCORES {"ps":"26101","role":"non-technical judge","feasibility":8,"data_risk":3,"demo_wow":3,"uniqueness":3,"punch":3,"win_prob":3}>></subagent>
+<subagent agent_id="agent-164" item="ROLE: SIH VETERAN MENTOR persona. Rank 8 finalists on win probability for a strong full-stack+LLM team (1 month, no vision, 30 Kaggle GPU-hrs): 26043 (crowdsource platform; zero real data, CPGRAMS-clone risk), 26092 (scheme matching; myScheme exists, rules+voice), 26046 (CTMS; synthetic data, niche), 26089 (gig platform; Urban Company shadow, scope cut), 26155 (network auditor; OSS-glue but real artifacts, expert judges), 26083 (heatwave; amputated mortality claim, offline replay), 26101 (iGOT LMS; verified public catalog API + KCM, synthetic learners), 26165 (SIF NLP; revised blueprint OIICS-labels+ASRS+triage, zero crowding, real 106k dataset verified on disk). Consider crowding, spec-completeness, Q&amp;A survivability per your rule: 'pick the PS whose kill-question you answer with evidence on screen, not apologies.' Per PS: one-line verdict + win_prob /10. Then your top-3 with the execution edge that wins each. Cap 500 words." outcome="completed">## SIH VETERAN MENTOR — Appeal Round Verdict
+
+Before ranking, I ran my own live check, because a mentor doesn't trust summaries: `data/January2015toNovember2025.csv` is on disk, 57 MB, **106,487 rows** of OSHA Severe Injury Reports with final narratives and OIICS-coded columns (Nature / Part of Body / Event / Source). So 26165's "real 106k dataset" claim is not a claim — it's a file I just opened. That changes everything below.
+
+My rule stands: **pick the PS whose kill-question you answer with evidence on screen, not apologies.**
+
+### The 8, ranked
+
+**1. 26165 (SIF NLP, Oil India) — 9/10.** Kill question: "OIL's near-miss reports aren't public — what did you train on?" Answer on screen: 106k real OSHA injury narratives, OIICS labels, fine-tuned classifier flagging SIF precursors, live triage board. Zero crowding — this is an NLP PS disguised as a safety PS; CRUD teams flee it. Engineering's "synthetic proxy" finding is rebutted: the proxy is a *public, verifiable* proxy, which is demo gold, not weakness.
+
+**2. 26101 (iGOT LMS) — 7/10.** Kill question: "Learners are synthetic?" Answer: "Competency-gap engine runs against the live iGOT catalog API + KCM framework; synthetic learners only simulate scale." Real ministry data backbone + recommenders = LLM team's home turf. Crowding is the only drag.
+
+**3. 26155 (network auditor) — 7/10.** Kill question: "You glued Nmap/OpenSCAP?" Answer: live multi-vendor config drift + AI correlation of findings into one compliance verdict. Real artifacts survive expert judges, but only if the AI layer is visibly more than a parser. One slip and experts smell the glue.
+
+**4. 26092 (scheme matching) — 6/10.** myScheme exists; survivable only if the demo is voice-first, multilingual, eligibility-*reasoning* (LLM) vs myScheme's form filters. Very crowded theme; differentiation is a sliver you must hit perfectly.
+
+**5. 26046 (CTMS) — 5/10.** Niche (AIIA/Ayurveda trials) = low crowding, but synthetic data + GCP-compliance jargon invites "validated against a real trial workflow?" — that's apology territory.
+
+**6. 26083 (heatwave) — 5/10.** Engineering amputated the mortality claim; what's left is IMD replay on a dashboard. Offline replay kills demo wow; judges have seen 50 heat dashboards.
+
+**7. 26089 (gig platform) — 4/10.** "How is this not Urban Company?" The cooperative-ownership angle is a slide, not a feature. Commoditized CRUD, heavy crowding, no data moat.
+
+**8. 26043 (crowdsource platform) — 3/10.** Zero real data + CPGRAMS shadow. "Show me one real challenge with real users" — silence. This is the PS every average team picks.
+
+### Top-3 execution edges
+
+- **26165:** Ship the narrative→SIF-risk pipeline *end to end* by week 2 (data already on disk, OIICS labels free). Edge: open the demo by pasting a raw injury narrative and watching triage happen live — evidence, not slideware.
+- **26101:** Edge: hit the real iGOT catalog API live in the demo. One real API call separates you from every synthetic-data team in the room.
+- **26155:** Edge: the AI correlation verdict, not the scan. Demo three vendor configs, show drift + one natural-language compliance ruling an OSS tool alone can't produce.
+
+<<SCORES {"ps":"26165","role":"sih_veteran_mentor","feasibility":9,"data_risk":2,"demo_wow":8,"uniqueness":9,"punch":8,"win_prob":9}>>
+<<SCORES {"ps":"26101","role":"sih_veteran_mentor","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":6,"punch":7,"win_prob":7}>>
+<<SCORES {"ps":"26155","role":"sih_veteran_mentor","feasibility":7,"data_risk":3,"demo_wow":7,"uniqueness":7,"punch":6,"win_prob":7}>>
+<<SCORES {"ps":"26092","role":"sih_veteran_mentor","feasibility":8,"data_risk":3,"demo_wow":6,"uniqueness":4,"punch":6,"win_prob":6}>>
+<<SCORES {"ps":"26046","role":"sih_veteran_mentor","feasibility":7,"data_risk":6,"demo_wow":6,"uniqueness":7,"punch":5,"win_prob":5}>>
+<<SCORES {"ps":"26083","role":"sih_veteran_mentor","feasibility":7,"data_risk":5,"demo_wow":4,"uniqueness":6,"punch":6,"win_prob":5}>>
+<<SCORES {"ps":"26089","role":"sih_veteran_mentor","feasibility":8,"data_risk":3,"demo_wow":4,"uniqueness":3,"punch":4,"win_prob":4}>>
+<<SCORES {"ps":"26043","role":"sih_veteran_mentor","feasibility":8,"data_risk":8,"demo_wow":3,"uniqueness":2,"punch":3,"win_prob":3}>></subagent>
+<subagent agent_id="agent-165" item="ROLE: TECHNICAL GOVERNMENT EVALUATOR persona. Rank 8 finalists on credibility under hostile technical Q&amp;A: 26043 (all seed data LLM-fabricated, grounded only in district stats), 26092 (rules honest but myScheme pre-exists; mock partner data), 26046 (100% synthetic trial data, compliance-expert judges), 26089 (no real bookings; 'AI forecasting' cut as unfakeable), 26155 (rule-engine+LLM hybrid honestly labeled, deterministic scores, OSS-credited), 26083 (mortality claim amputated; physics index + published coefficients), 26101 (synthetic learners; real iGOT catalog; human-gold MCQ eval), 26165 (OIICS-derived labels, blind 1000-gold, triage-not-prediction, 2 rules declared unlearnable). Per PS: the hardest question you'd ask, whether the honest answer survives, credibility /10. Then rank on 'would I defend this team to my DG?'. Cap 500 words." outcome="completed">## TECHNICAL GOVERNMENT EVALUATOR — Appeal Round Verdict
+
+I grade one thing: does this team walk out of my Q&A with its credibility intact? Engineering findings stand unless noted.
+
+**26165 — OIL SIF triage. Credibility 8.5/10.**
+Hardest Q: *"Show me labeled ground truth — against what did you validate fatal potential?"* The honest answer survives, and it's the best defense in this panel: OIICS-derived labels from 105,996 **real** OSHA SIR rows (verified locally), blind 1000-report gold set, "we triage hazard context, we don't predict fatalities," and 2 IOGP rules declared unlearnable — that concession, unprompted, is exactly what a safety-domain judge rewards. Residual risk: proxy labels are not OIL-adjudicated truth, and OSHA general-industry text ≠ refinery reports.
+
+**26155 — NTRO compliance auditor. Credibility 8/10.**
+Hardest Q: *"Is this finding real or hallucinated? Run it twice — same report?"* Survives cleanly: verdicts 100% deterministic rule-engine, LLM only explains post-verdict, Batfish/OSS credited, seeded corpus with precision/recall on slide 1. Bonus: a hostile judge injecting `snmp-server community public` live becomes the team's *best* demo moment. Risk: no gold dataset exists anywhere; hand-built seeds must be honest.
+
+**26083 — Heatwave index. Credibility 7.5/10.**
+Hardest Q: *"What ground truth trained your mortality predictions?"* The amputation was correct — NCRB's ~800 annual deaths can't train anything. Surviving answer: validated physics indices (UTCI/wet-bulb, published coefficients), thresholds calibrated on peer-reviewed Indian heat studies. MoES judges respect honest physics; but "where's the AI?" and the ERA5-HEAT re-skin resemblance deflate it.
+
+**26046 — AIIA CTMS. Credibility 7/10.**
+Hardest Q: *"Show me one real SAE record."* Honest answer survives *by scope*: no student team could ever receive real trial data — synthetic is PS-sanctioned. Compliance judges test GCP/NDCT/CDISC **artifacts** (validators, CTRI-format IDs), which are checkable and honest. Risk: toy-smelling synthetic data and any overclaimed "real-time" language.
+
+**26101 — iGOT learning. Credibility 6.5/10.**
+Hardest Q: *"Your learners are synthetic — what did the recommender actually learn?"* Partially survives: real 9k-course catalog + KCM taxonomy anchor it; human-gold MCQ eval is real measurement. But competency-gap inference on fabricated learners is unfalsifiable — the red team scored this data_risk 8 and I concur.
+
+**26092 — Scheme matching. Credibility 6/10.**
+Hardest Q: *"How is this different from myScheme, which my ministry already runs?"* Rules-owning-all-numbers survives the hallucination probe; the myScheme elephant and simulated fund-utilization flags do not fully. Visible scar.
+
+**26089 — Gig platform. Credibility 6/10.**
+Hardest Q: *"Where are the bookings? Where's the AI?"* Nothing fake — forecasting was cut rather than faked, which I note approvingly. What remains is honest CRUD; the room yawns.
+
+**26043 — Jharkhand crowdsourcing. Credibility 5/10.**
+Hardest Q: *"Your premise says no mechanism exists — heard of MyGov/UBA/Manthan? And where did these challenges come from?"* Fabricated seed challenges + a factually false premise = highest reputational exposure in the panel.
+
+**Would I defend this team to my DG? (ranked):** 26165 > 26155 > 26083 > 26046 > 26101 > 26092 > 26089 > 26043.
+
+<<SCORES {"ps":"26165","role":"technical_government_evaluator","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":8,"punch":8,"win_prob":8}>>
+<<SCORES {"ps":"26155","role":"technical_government_evaluator","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":7,"punch":7,"win_prob":8}>>
+<<SCORES {"ps":"26083","role":"technical_government_evaluator","feasibility":8,"data_risk":4,"demo_wow":7,"uniqueness":6,"punch":7,"win_prob":7}>>
+<<SCORES {"ps":"26046","role":"technical_government_evaluator","feasibility":7,"data_risk":5,"demo_wow":6,"uniqueness":6,"punch":6,"win_prob":7}>>
+<<SCORES {"ps":"26101","role":"technical_government_evaluator","feasibility":7,"data_risk":6,"demo_wow":6,"uniqueness":6,"punch":6,"win_prob":6}>>
+<<SCORES {"ps":"26092","role":"technical_government_evaluator","feasibility":7,"data_risk":5,"demo_wow":5,"uniqueness":4,"punch":6,"win_prob":5}>>
+<<SCORES {"ps":"26089","role":"technical_government_evaluator","feasibility":8,"data_risk":5,"demo_wow":4,"uniqueness":5,"punch":5,"win_prob":5}>>
+<<SCORES {"ps":"26043","role":"technical_government_evaluator","feasibility":7,"data_risk":6,"demo_wow":5,"uniqueness":4,"punch":5,"win_prob":4}>></subagent>
+</agent_swarm_result>

@@ -1,0 +1,1050 @@
+<agent_swarm_result>
+<summary>completed: 16</summary>
+<subagent agent_id="agent-49" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26045: &quot;IP-SAKTI Sahayak a multilingual, RAG-based (source-cited) AI assistant for Intellectual Property and regulatory guidance in Ayurveda, across national and international regimes.&quot;
+Org: Ministry of Ayush | Theme: Toys &amp; Games
+Dataset field: corpus from open public sources: TKDL (tkdl.res.in), India Code statutes, IP India databases, GI Registry, WIPO treaty texts.
+Description: Ayurveda rests on a vast corpus of codified traditional knowledge. Protecting and commercialising an Ayurvedic product means navigating overlapping regimes: patents, GI, trademarks, copyright, designs, trade secrets, plant-variety rights; Access-and-Benefit-Sharing duties; and the drug-regulatory framework that classifies a formulation (classical medicine, proprietary medicine, new drug, phytopharmaceutical, food or cosmetic). The assistant answers IPR questions specific to Ayurveda with accuracy, source citation and jurisdictional clarity, keeping national and international layers distinct through an explicit jurisdiction switch. It first helps classify the formulation, asking minimum clarifying questions." outcome="completed">**ADVOCATE — PS 26045 (SIH26045, Ministry of Ayush)**
+
+This is the strongest fit for this exact team in the entire Ayush cluster. Zero vision, zero mandatory training (pure RAG = 0 of your 30 Kaggle hours spent), and the ministry literally hands you a staged roadmap: citation-grounded MVP → graph/agentic layer → multilingual/voice. You ship stage 1 in week 2, which derisks everything after.
+
+**Verified data (all live today):** `tkdl.res.in` → HTTP 200, `indiacode.nic.in` → 200, `wipo.int/wipolex` → 200, `bhashini.gov.in` → 200. Honest caveat: TKDL's full database is authorization-gated — but the PS only demands a "TKDL/prior-art pointer," not a mirror. Your citation corpus is fully public: India Code statutes (Patents Act, Biological Diversity Act 2002/2023 amendment, Drugs & Cosmetics Act), 2024 Patent Amendment Rules, WIPO Treaty on Genetic Resources & Associated TK (adopted May 2024 — the PS's own hook), GI Registry journals, Ayurvedic Formulary of India PDFs from the Ayush ministry site. Small corpus (~500–2,000 docs) = hand-curable, version-tracked, *verifiable* — a selling point, not a gap.
+
+**Architecture:** Next.js + Postgres/pgvector. Ingest PDFs/HTML → section-aware chunking with statutory metadata (act, section, jurisdiction, date) → hybrid retrieval (BM25 + embeddings) → LLM (GPT-4o/Gemini) with strict citation-required prompting and an abstention fallback. A tiny rules-based formulation classifier (classical/proprietary/new drug/phytopharmaceutical/food/cosmetic) drives the clarifying-questions flow — deterministic logic, no training. Bhashini API for Hindi/regional I/O. Jurisdiction toggle = a metadata filter on retrieval, so India/international answers are structurally separate, not vibes.
+
+**90-second demo:** "Meet Priya, an AYUSH startup founder in Kochi. She's made a turmeric-ashwagandha energy bar. Is it food or medicine? Can she patent it? Watch." → Type her question → assistant asks 2 clarifying questions → classifies: *food (FSSAI), not ASU drug* → answers with **clickable citations**; judge clicks one, the actual statute page opens. → Flip jurisdiction switch: "Selling in the US? Different regime — here's FDA + the 2024 WIPO Treaty." → Toggle Hindi: same answer, same citations, spoken aloud via Bhashini. → Ask something out-of-scope: it *refuses politely* and offers escalation to an IP facilitator. Judges see: citations, refusal, two languages, two jurisdictions — trust theater.
+
+**Beating rival teams:** they demo generic chat-with-PDF. You win on (1) hand-verified 50-question eval set scored live on screen (citation accuracy %), (2) the classification wizard — a visible *workflow*, not a chatbot, (3) abstention/guardrails as a demo beat, (4) DPDP audit log page. Rigor beats flash here because the buyer is a ministry.
+
+<<SCORES {"ps":"26045","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":7,"uniqueness":8,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-50" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26045: &quot;IP-SAKTI Sahayak a multilingual, RAG-based (source-cited) AI assistant for Intellectual Property and regulatory guidance in Ayurveda, across national and international regimes.&quot;
+Org: Ministry of Ayush | Theme: Toys &amp; Games
+Dataset field: corpus from open public sources: TKDL (tkdl.res.in), India Code statutes, IP India databases, GI Registry, WIPO treaty texts.
+Description: Ayurveda rests on a vast corpus of codified traditional knowledge. Protecting and commercialising an Ayurvedic product means navigating overlapping regimes: patents, GI, trademarks, copyright, designs, trade secrets, plant-variety rights; Access-and-Benefit-Sharing duties; and the drug-regulatory framework that classifies a formulation (classical medicine, proprietary medicine, new drug, phytopharmaceutical, food or cosmetic). The assistant answers IPR questions specific to Ayurveda with accuracy, source citation and jurisdictional clarity, keeping national and international layers distinct through an explicit jurisdiction switch. It first helps classify the formulation, asking minimum clarifying questions." outcome="completed"># PROSECUTION BRIEF: PS 26045 (IP-SAKTI Sahayak)
+
+## Kill-shot #1: The headline dataset is closed. VERIFIED. (Severity 10/10)
+The PS's dataset field leads with TKDL. [tkdl.res.in](https://tkdl.res.in) states verbatim: **"Access to the full database is available to Patent Offices only under TKDL Access Agreement."** TKDL is famously NOT open — it was built precisely to be kept away from the public (access granted only to foreign patent offices under agreement to fight biopiracy). Only a handful of representative sample formulations are viewable. The corpus that justifies the entire "Ayurveda-specific" angle — codified TK formulations mapped to IPC — is unobtainable by a student team. Without TKDL, this collapses into "generic Indian IP-law chatbot," which ChatGPT already does. This is a spec that advertises data it cannot deliver.
+
+## Kill-shot #2: Catastrophic crowding. VERIFIED. (Severity 9/10)
+`gh search repos SIH26045` returned **~19 public repos created Aug 29 – Sep 7, 2026** — before hackathon even starts: `celestialgeeks/SIH26045`, `dgexplores/ip-sakti-sahayak-SIH26045`, `xarjunpatil/SIH26045-IP-SAKTI...`, `Jaydeng75/ip-sakti` (already promising a full "intelligence platform"), plus 10+ bare `IP-SAKTI` repos. Judges will see dozens of near-identical RAG chatbots on this exact PS. Zero differentiation possible at the architecture level.
+
+## Attack #3: Legal-liability Q&A ambush (Severity 8/10)
+The tool *classifies formulations* — classical medicine vs new drug vs phytopharmaceutical — a decision that determines whether a product needs a drug license. First judge question: "Your bot misclassifies my product and I launch without a license. Who's liable?" "It's just guidance" guts the entire value proposition. Hallucinated citations in a *legal* RAG demo is a live-demo landmine — one fabricated case citation and you're done.
+
+## Attack #4: Demo-wow ≈ 0 (Severity 8/10)
+Non-technical judges see: a chat box, a "jurisdiction switch" dropdown, Sanskrit-flavored legalese with footnotes. It is visually and experientially indistinguishable from the 500 other RAG bots at SIH. Nothing to touch, nothing to watch happen.
+
+## Attack #5: Spec rot signals (Severity 6/10)
+Theme listed as **"Toys & Games"** for an IP-regulatory tool (one repo says MedTech/BioTech) — sloppy PS authoring. "Multilingual" legal translation quality is unverifiable by the team and unjudgeable by evaluators. IP India/GI Registry have no public APIs; the remaining sources (India Code, WIPO texts) are generic web-scrape fare.
+
+## Concession
+Build feasibility is fine — it's plain RAG, no training, no vision. But the moat was TKDL, and the moat is locked.
+
+**Verdict: reject.** The PS sells access to a database it can't give, in the most crowded lane of the hackathon, with a demo that can't wow.
+
+<<SCORES {"ps":"26045","role":"prosecutor","feasibility":5,"data_risk":9,"demo_wow":2,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-51" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26046: &quot;AIIA Clinical Trials Dashboard - a real-time, cloud-based, GCP-compliant Clinical Trial Management System (CTMS) for Ayurveda research, with CDISC/FHIR-interoperable data, role-based KPIs, and integrated ethics, regulatory (CTRI / NDCT Rules 2019) and pharmacovigilance tracking.&quot;
+Org: Ministry of Ayush | Theme: Space Technology
+Dataset field: Clinical-trial data is sensitive; use synthetic/de-identified datasets; standards: CTRI, GCP-ASU, ICMR guidelines, NDCT Rules 2019.
+Description: AIIA conducts a growing portfolio of Ayurveda clinical research and hosts the National Pharmacovigilance Coordination Centre. Compliance demands: mandatory CTRI prospective registration, GCP-ASU, ICMR ethics guidelines, NDCT Rules 2019, ethics committee oversight, timely AE/SAE reporting. Yet study status, recruitment, milestones, data quality and safety signals are tracked across spreadsheets with no single real-time auditable view. Build a CTMS: real-time dashboards, role-based KPIs, ethics/regulatory tracking, pharmacovigilance module, CDISC/FHIR interoperability." outcome="completed">**ADVOCATE — PS 26046 (AIIA Clinical Trials Dashboard)**
+
+**Why this wins for THIS team:** The dataset field — "clinical data is sensitive, use synthetic" — is a filter, not a bug. It kills every team whose pitch needs real patient ML. This is a **pure full-stack web + LLM play**: dashboards, RBAC, audit trails, forms, deadline engines. Zero training, zero GPU, zero vision. The PS itself (full text in `data/sih2026_ps.csv:719`) explicitly endorses a staged build: "core study-tracking and KPI MVP first, then EDC/FHIR integration and pharmacovigilance, then CDISC export." The ministry is literally telling you a 1-month MVP is the correct scope. Also note the sheet's theme field says "Space Technology" — obvious data-entry glitch for an Ayurveda CTMS; ignore it.
+
+**Architecture:** Next.js + Postgres (Supabase) + row-level RBAC; append-only audit table = ALCOA+ trail for free. FHIR R4 resources as the data layer, validated live against the public HAPI FHIR server. LLM API (text-only) does three things: CTRI registration-form autofill from protocol text, AE narrative drafting with WHO-UMC causality suggestion, and natural-language KPI queries ("which trials are behind on recruitment?"). A rules engine encodes NDCT 2019 timelines (SAE reporting within 24 hours) as live countdowns.
+
+**Data (verified):** Synthea — github.com/synthetichealth/synthea, **3,323 stars**, FHIR-output synthetic patient generator; confirmed live. Real trial metadata from the clinicaltrials.gov API v2 (public, no auth) and CTRI structure from ctri.nic.in. Seed 20 fake Ayurveda trials + 500 Synthea patients → demo feels alive, zero privacy risk.
+
+**90-second demo for non-technical judges:** "It's 2 AM Sunday. A patient in an Ashwagandha trial has a serious adverse reaction." Log the SAE → a **24-hour legal countdown appears on screen** → the SAE report auto-drafts via LLM → ethics committee and leadership dashboards light up in real time → immutable audit log shows who did what, when. "Today, all of that lives in a spreadsheet. That spreadsheet fails audits and endangers patients." Then one click: green FHIR-conformance checkmark. Judges love a countdown clock and a green checkmark.
+
+**Beating rival teams:** Everyone else builds CRUD dashboards with a pie chart. You win on: (1) compliance countdowns as first-class UI objects, (2) live external FHIR validation (proof, not promises), (3) LLM copilot scoped to regulatory paperwork — the exact boring work Ayush researchers hate, (4) ALCOA+ audit trail demoed by trying to edit a record and getting blocked.
+
+**Honest risk:** dashboards cap demo-wow; the countdown + live interop check must carry the theater.
+
+<<SCORES {"ps":"26046","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":7,"uniqueness":7,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-52" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26046: &quot;AIIA Clinical Trials Dashboard - a real-time, cloud-based, GCP-compliant Clinical Trial Management System (CTMS) for Ayurveda research, with CDISC/FHIR-interoperable data, role-based KPIs, and integrated ethics, regulatory (CTRI / NDCT Rules 2019) and pharmacovigilance tracking.&quot;
+Org: Ministry of Ayush | Theme: Space Technology
+Dataset field: Clinical-trial data is sensitive; use synthetic/de-identified datasets; standards: CTRI, GCP-ASU, ICMR guidelines, NDCT Rules 2019.
+Description: AIIA conducts a growing portfolio of Ayurveda clinical research and hosts the National Pharmacovigilance Coordination Centre. Compliance demands: mandatory CTRI prospective registration, GCP-ASU, ICMR ethics guidelines, NDCT Rules 2019, ethics committee oversight, timely AE/SAE reporting. Yet study status, recruitment, milestones, data quality and safety signals are tracked across spreadsheets with no single real-time auditable view. Build a CTMS: real-time dashboards, role-based KPIs, ethics/regulatory tracking, pharmacovigilance module, CDISC/FHIR interoperability." outcome="completed">## PROSECUTION BRIEF — PS 26046 (AIIA Clinical Trials Dashboard)
+
+**KILL SHOT #1: The description you were shown is a decoy. Severity 9/10**
+The full text in `data/sih2026_ps.csv` demands: ALCOA+-compliant immutable audit trails, MedDRA/WHO Drug coding, SDTM/ADaM + Define-XML submission-ready exports, e-signatures, DPDP privacy controls, FHIR R4/ABDM integration with hospital systems, ISO 27001/CERT-In hosting. That is Veeva Vault / Medidata Rave scope — enterprise products built by hundreds of engineers over a decade. One month of vibe-coding delivers a skin over 5% of the spec, and the stated evaluation criteria ("interoperability conformance", "SDTM export correctness") will be graded against the full thing. FHIR conformance and Define-XML correctness are not LLM-stack problems; they're CDISC-expert problems.
+
+**KILL SHOT #2: Incumbent Q&A death. Severity 8/10**
+OpenClinica (open source, GCP-compliant, CDISC-native) and REDCap (used across Indian academia, free) already do this. First judge question: "Why not deploy OpenClinica?" There is no honest answer a student team can give.
+
+**KILL SHOT #3: MedDRA legal trap. Severity 7/10**
+The spec says MedDRA coding. MedDRA is a paid MSSO-licensed terminology — you cannot ship "MedDRA coding" without a subscription. Faking it in a demo for the National Pharmacovigilance Coordination Centre's own ministry is asking to be caught.
+
+**KILL SHOT #4: Demo anti-wow. Severity 8/10**
+Dashboards, audit logs, and compliance checklists are the least impressive genre for non-technical judges. There is no moment of magic — no prediction, no interaction, just tables and role-based logins. Your LLM strength has no organic hook here; bolted-on chat over fake trials reads as lipstick on CRUD.
+
+**KILL SHOT #5: Crowding confirmed. Severity 7/10**
+GitHub shows 4 public repos in week one (xarjunpatil, MdAkil146, ompatil0/Swami... Swaroop1301), all Aug 31–Sep 6. This is the most generic vibe-codeable PS shape in the list; differentiation ≈ zero.
+
+**Mitigations (begrudging):** Synthetic data is explicitly permitted and CTRI (ctri.nic.in) is publicly searchable, so data_risk is moderate, not fatal. The staged-MVP language gives cover to ship less. Domain landmine: NDCT Rules 2019 govern new drugs, not ASU trials — a ministry judge will probe this mismatch.
+
+**Verdict: REJECT.** No vision trap, but the spec is a compliance iceberg, incumbents own the answer, and the demo cannot wow.
+
+<<SCORES {"ps":"26046","role":"prosecutor","feasibility":3,"data_risk":4,"demo_wow":3,"uniqueness":2,"punch":9,"win_prob":3}>></subagent>
+<subagent agent_id="agent-53" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26099: &quot;AI-Driven Standardization and Harmonization of Material Codes Across CPSEs&quot;
+Org: Ministry of Petroleum &amp; Natural Gas | Theme: Smart Automation
+Dataset field: CPSE Material Master Data / Sample Material Master Dataset to be provided by participating CPSEs.
+Description: CPSEs (Oil &amp; Gas, Power, Steel, Mining, Heavy Engineering) procure similar materials but assign different codes, descriptions, specs, UoM across organizations — causing duplicate material masters, fragmented procurement, higher inventory. Build an AI-powered National Unified Material Master Framework: analyze codes/descriptions/specs/procurement data from multiple CPSEs; use AI/ML/NLP to identify identical, duplicate, near-duplicate and functionally equivalent materials across ERP/SAP systems; recommend standardized descriptions, classifications and a Common National Material Code with mapping to each CPSE's codes; human review/validate/approve workflow; support legacy migration and SAP/ERP integration." outcome="completed">**ROLE: ADVOCATE — PS 26099 (Material Code Harmonization, MoPNG/CPCL)**
+
+**Why this wins for this team.** It's pure text NLP over messy enterprise strings — zero vision, zero exotic training. The whole problem decomposes into: normalization, blocking, embeddings, LLM-as-judge reranking, and a review UI. That is *exactly* a full-stack + LLM-API team's home turf. Any fine-tuning (a bi-encoder like `sentence-transformers/all-MiniLM-L6-v2` on synthetic duplicate pairs) needs <5 GPU-hours — laughably inside the 30h Kaggle budget, and honestly optional.
+
+**Data is the sleeper advantage.** The PS itself supplies a Sample Material Master Dataset from CPSEs. I verified the fallback: the full UNSPSC taxonomy (~21k codes) is openly available on GitHub — [sihaysistema/unspsc](https://github.com/sihaysistema/unspsc), and [colaberry/WorldOfTaxonomy](https://github.com/colaberry/WorldOfTaxonomy) (MIT, UNSPSC + 320K crosswalk edges). Combine UNSPSC + GeM's public category taxonomy, then *generate* five fake CPSE ERP exports with controlled noise (abbreviations, UoM drift, spec reordering). The generator doubles as a demo asset and a labeled benchmark with known ground truth — you can show precision/recall, which no vibe-coded rival will have.
+
+**Architecture (1 para).** Next.js + FastAPI + Postgres/pgvector. Ingest CSV/SAP export → normalize (units, Hindi/English abbreviations, IS/ASTM spec extraction) → block via BM25/trigram → embed candidates → LLM pairwise verifier classifies identical/duplicate/near-dup/functionally-equivalent *with rationale* → propose Common National Material Code anchored to UNSPSC segment → human approve/reject queue with audit trail → one-click SAP-ready migration file. Clean GPU/local split: bulk embedding on Kaggle, LLM rerank via API at runtime.
+
+**90-second demo.** "Here are ONGC, SAIL and BHEL each buying the same bearing under three different codes and UoMs." Upload CSV → clusters animate into a unified master → verdict drawer shows the LLM's reasoning ("same 6205-2RS spec, different description") → reviewer clicks Approve → savings counter ticks up: "consolidating 12,400 duplicates = ₹3.2 Cr working capital freed." Judges understand *money saved*, not models.
+
+**Beating rivals.** Everyone else ships an LLM chatbot that "finds duplicates." You ship: explainable match scores, confidence bands, human-in-the-loop governance (explicitly demanded in the PS), migration tooling, and a savings estimator. Demo wow is the weakest axis — procurement dashboards aren't fireworks — but MoPNG judges are domain people; a defensible pipeline beats glitter.
+
+<<SCORES {"ps":"26099","role":"advocate","feasibility":9,"data_risk":5,"demo_wow":7,"uniqueness":7,"punch":7,"win_prob":7}>></subagent>
+<subagent agent_id="agent-54" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26099: &quot;AI-Driven Standardization and Harmonization of Material Codes Across CPSEs&quot;
+Org: Ministry of Petroleum &amp; Natural Gas | Theme: Smart Automation
+Dataset field: CPSE Material Master Data / Sample Material Master Dataset to be provided by participating CPSEs.
+Description: CPSEs (Oil &amp; Gas, Power, Steel, Mining, Heavy Engineering) procure similar materials but assign different codes, descriptions, specs, UoM across organizations — causing duplicate material masters, fragmented procurement, higher inventory. Build an AI-powered National Unified Material Master Framework: analyze codes/descriptions/specs/procurement data from multiple CPSEs; use AI/ML/NLP to identify identical, duplicate, near-duplicate and functionally equivalent materials across ERP/SAP systems; recommend standardized descriptions, classifications and a Common National Material Code with mapping to each CPSE's codes; human review/validate/approve workflow; support legacy migration and SAP/ERP integration." outcome="completed"># PROSECUTION: PS 26099 — "National Unified Material Master Framework"
+
+**KILL-SHOT 1 — Data does not exist. Severity 9/10 (verified).**
+The official dataset field reads verbatim: *"Sample Material Master Dataset — To be provided by participating CPSEs"* (data/sih2026_ps.csv). Not a link. Not now. You cannot inspect schema, quality, volume, or labeling before committing. Material masters are commercially sensitive procurement data; CPSEs (CPCL is the nodal dept) historically hand out tiny, sanitized, Excel-grade samples. Your entire AI pipeline is hostage to a file that may arrive as 500 rows of junk — or not at all.
+
+**KILL-SHOT 2 — No labels, no training story. Severity 8/10.**
+Cross-CPSE duplicate/equivalence detection is entity resolution. Production-grade matchers (Ditto, DeepMatcher) need labeled match/non-match pairs across organizations — which by definition don't exist (that's the whole problem). You'll end up with embedding cosine-similarity + threshold, i.e., a dressed-up LLM demo, and any petroleum-ministry judge who asks "what's your precision on functionally-equivalent-but-differently-specified items?" ends you. "Equivalent" requires engineering judgment, not NLP — a flange with different pressure ratings is NOT equivalent, and string similarity can't know that.
+
+**KILL-SHOT 3 — SAP integration trap. Severity 8/10.**
+Spec demands "seamless integration with existing SAP/ERP systems" and "legacy migration support." No student team has SAP access. Judges from MoPNG/CPCL will ask exactly this. Your honest answer — "we exported a CSV" — concedes the enterprise requirement is faked.
+
+**KILL-SHOT 4 — Crowded field. Severity 7/10 (verified via gh).**
+9+ public GitHub repos on this exact PS ID created in the last 14 days (nyte-8/SIH26099, yuva-9/tensor_sih26099 — already advertising "semantic NLP, 3D vector clustering," sugannth, xarjunpatil, Chirantan112, Solanki-Jatin, Harshal350, sarveshmuthuvel, Adeptaadi...). Dozens more unindexed. Zero differentiation runway.
+
+**KILL-SHOT 5 — Demo is a sleeping pill. Severity 9/10.**
+Non-technical judges watch... one spreadsheet row matched to another spreadsheet row, then an approval-workflow screen. It is an enterprise back-office MDM tool — a category (SAP MDG, Informatica, Prospecta MDO) where billion-dollar incumbents exist. No visual moment, no live "wow," no human story. And a procurement-savvy judge asks the fatal question: "Why not just adopt UNSPSC/eCl@ss?" Your "Common National Material Code" reinvents existing classification standards.
+
+**Verdict:** Invisible data, unlearnable labels, unfakeable SAP requirement, saturated repo field, soporific demo. Hard pass.
+
+<<SCORES {"ps":"26099","role":"prosecutor","feasibility":4,"data_risk":9,"demo_wow":2,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-55" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26100: &quot;AI-Powered Integrated Bid Compliance Verification Platform for GeM Procurement&quot;
+Org: Ministry of Petroleum &amp; Natural Gas (CPCL) | Theme: Smart Automation
+Dataset field: To be provided / Dummy bidder and tender datasets may be used for development and testing.
+Description: GeM procurement requires verifying bidder statutory/regulatory/eligibility requirements: Udyam/MSME, GST registration and returns, PAN/IT compliance, Make in India local content, EPFO/ESIC, Startup India, NSIC, OEM authorization, DigiLocker, blacklisting/debarment. Manual document-intensive cross-checking across portals. Build an AI platform that automatically verifies bidder eligibility/compliance: integrate with government portals/databases to retrieve/verify info; an AI Verification Engine analyzes submitted bidder documents + portal info, identifies missing/inconsistent info, validates requirements, generates compliance assessment; Compliance Dashboard with score, risk level, document status, pending requirements, AI recommendations. Final decision remains with procurement officer." outcome="completed">## ADVOCATE — PS 26100 (GeM Bid Compliance Verification)
+
+**Why this wins under our constraints:** This is the rare SIH problem that is *pure* document+rules+LLM work — zero vision, zero model training, zero GPU budget. The entire product is a web app with an LLM reasoning core, which is exactly our team's strength. And "final decision remains with the Procurement Officer" is a gift: the human-in-the-loop framing makes errors forgivable and lets us demo boldly.
+
+**Architecture (1 para):** Next.js frontend + FastAPI/Node backend + Postgres. Ingest: bidder uploads PDFs/DigiLocker exports; we extract text with `pypdf`/`pdfplumber` (text-layer extraction is *not* OCR/vision). Verification engine = three layers: (1) **Portal adapters** hitting real public checks where possible — GeM's public bid portal (bidplus.gem.gov.in, confirmed live), GSTIN status via GSTN taxpayer search / sandbox providers like sandbox.co.in (GST-verification APIs are a commodity; multiple exist on GitHub), MCA21 master data — plus mock adapters over a seeded synthetic registry for Udyam/EPFO/ESIC/NSIC where no public API exists (honestly labeled, exactly what the PS permits: "dummy datasets may be used"). (2) **LLM cross-checker** (Claude/GPT): structured-extract each document's fields into JSON, then compare against portal data and tender eligibility clauses — flag mismatches (PAN name vs GST legal name, lapsed MSME category, missing GSTR-3B filing months). (3) **Deterministic rules engine** (JSON-logic per requirement) computing the compliance score — LLM proposes, rules dispose. This layering is our moat: it's auditable, which procurement officers legally need.
+
+**90-second demo for non-technical judges:** "This is Rajesh, a procurement officer. A bid evaluation used to take him 3 days per tender." → Upload 4 dummy bidder folders (drag-drop, 10s). → Live dashboard fills: bidder 1 green/92, bidder 2 red/41. → Click the red flag: "GST return filed under *Sharma Traders*, PAN says *Sharma Enterprises* — possible shell entity. Blacklist check: HIT on GeM debarment list." → Click "Generate report" → one-page compliance PDF with citations to source portals. Close: "Rajesh now spends 20 minutes, and every flag shows its evidence." Judges *feel* the corruption-catching angle.
+
+**Data risk:** Genuinely low *for a hackathon* — PS explicitly sanctions dummy data; real GSTIN/PAN/MCA samples are abundant (every Indian invoice carries a GSTIN; we can verify real companies live). Cite: GeM publishes bids publicly; GST verification APIs are commercially available off-the-shelf.
+
+**Beating rival teams:** They'll ship a chatbot over tender PDFs. We ship (a) live portal verification with real GSTINs of famous companies, (b) evidence-cited flags (auditable, matches the PS's "officer decides" clause), (c) a polished cross-portal mismatch visualization. One live-verified real GSTIN on stage beats a hundred mocked screenshots.
+
+<<SCORES {"ps":"26100","role":"advocate","feasibility":9,"data_risk":4,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-56" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26100: &quot;AI-Powered Integrated Bid Compliance Verification Platform for GeM Procurement&quot;
+Org: Ministry of Petroleum &amp; Natural Gas (CPCL) | Theme: Smart Automation
+Dataset field: To be provided / Dummy bidder and tender datasets may be used for development and testing.
+Description: GeM procurement requires verifying bidder statutory/regulatory/eligibility requirements: Udyam/MSME, GST registration and returns, PAN/IT compliance, Make in India local content, EPFO/ESIC, Startup India, NSIC, OEM authorization, DigiLocker, blacklisting/debarment. Manual document-intensive cross-checking across portals. Build an AI platform that automatically verifies bidder eligibility/compliance: integrate with government portals/databases to retrieve/verify info; an AI Verification Engine analyzes submitted bidder documents + portal info, identifies missing/inconsistent info, validates requirements, generates compliance assessment; Compliance Dashboard with score, risk level, document status, pending requirements, AI recommendations. Final decision remains with procurement officer." outcome="completed"># PROSECUTION: PS 26100 — GeM Bid Compliance Platform
+
+**Charge 1 — Data kill shot (severity 10).** The spec *requires* live integration with ~12 government portals: GSTN, Income Tax, PAN, MCA21, EPFO, ESIC, Udyam, DigiLocker, Startup India, NSIC, BIS/DPIIT. Not one offers student-accessible sandbox keys. GST return-filing APIs are gated behind taxpayer logins or licensed GSPs; MCA21 master data is pay-per-document; EPFO/ESIC have *no public verification API at all*; DigiLocker requester access requires organizational approval. The dataset field confesses it: *"To be provided / Dummy bidder and tender datasets may be used."* You will demo fake data checked against fake portals. Judges who've seen any SIH round ask one question — "is this actually connected to GSTN?" — and the demo dies.
+
+**Charge 2 — Smuggled vision module (severity 8).** "AI Verification Engine shall analyse the submitted bidder documents." Real Udyam/GST/NSIC certificates are scanned PDFs. Genuine document analysis = OCR = banned under team constraints. You can dodge with text-PDF dummies, but then the AI engine is verifying documents *you fabricated to be verifiable* — circular demo.
+
+**Charge 3 — Crowding (severity 8, verified).** GitHub search run today: **12+ public repos in the last two weeks** — `BidLens-AI`, `GeMGuard`, `ProcureShield-AI-SIH`, `gem-bid-compliance` (×4 forks of the same name), `GeM-AI-Bid-Compliance`, `Gem-Bid-Compliance-AI`. Every one is the same: upload docs → compliance score → red/green checklist dashboard. Your demo is indistinguishable from a dozen others before you write a line.
+
+**Charge 4 — No trainable moat (severity 7).** The "AI" is regex + LLM field-matching over forms. No public corpus of bid-compliance *decisions* exists; there is nothing to fine-tune on, and nothing Kaggle hours can fix. Judge asks "what did you train?" — shrug.
+
+**Charge 5 — Judge-proofing failures (severity 9).** "Make in India local content" is a *self-declared percentage* — no database anywhere can verify it. There is no unified national debarment list; blacklists are scattered per-ministry. Any "blacklist check" you show is fiction, and a procurement-savvy judge (CPCL's own panel) knows it.
+
+**Charge 6 — Demo wow (severity 6).** For non-technical judges this is a CRUD form with a progress bar and green ticks. The spec even caps your drama: "final decision remains with the Procurement Officer."
+
+**Verdict:** Core spec is undeliverable as written; everything impressive about it is faked, and it's already the most-crowded PS on GitHub this cycle. Pass.
+
+<<SCORES {"ps":"26100","role":"prosecutor","feasibility":3,"data_risk":9,"demo_wow":4,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-57" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26101: &quot;Develop an AI enabled learning platform that identifies competency gaps, recommends personalized training through integration with the iGOT Karmayogi ecosystem, and capable of generating Quizzes and Multiple choice questions (MCQs) from uploaded learning materials to strengthen capacity building in India's Official Statistical System.&quot;
+Org: MoSPI | Theme: Smart Education
+Dataset field: nssta.gov.in, mospi.gov.in
+Description: Officials in India's statistical system need continuous upskilling in AI/ML/Big Data/GIS. iGOT Karmayogi offers vast learning resources but officials can't identify relevant courses for their roles. Build an AI LMS: assess learner competencies from profiles, identify skill gaps, recommend personalized training via iGOT integration based on roles/experience; adaptive learning modules, AI virtual assistants, automated assessments (generate Quizzes/MCQs from uploaded learning materials), real-time feedback." outcome="completed">## ADVOCATE — PS 26101 (MoSPI AI Learning Platform)
+
+**Why this wins under our constraints.** This is the most "us" PS on the list: 100% LLM API + standard web stack, zero vision, zero GPU training (embeddings are inference, not training — the 30 Kaggle-hour constraint never even activates). The core asks — competency-gap mapping, course recommendation, MCQ generation from uploads — are exactly what LLM APIs do best today. Verified: [igotkarmayogi.gov.in](https://www.igotkarmayogi.gov.in) is live; the Karmayogi Competency Framework (KCF, DoPT-published competency dictionary) is real and public, giving us a ground-truth ontology no rival will bother to wire in. Content corpus: public MoSPI/NSSTA training manuals, NSS survey schedules, Census training PDFs from mospi.gov.in — downloadable, citable, legally clean.
+
+**The iGOT "integration" trap is our moat.** iGOT has no public API. Every competing team will hand-wave this. We pre-build a curated mirror catalog of publicly listed iGOT courses + a connector abstraction ("sandbox mode today, plug real API when MoSPI grants access") with deep links. Judges see integration working; architects see honesty.
+
+**Architecture (1 para).** Next.js + Postgres + pgvector. Ingestion: PDF → text chunking (no OCR — text-based PDFs only, stated plainly) → embeddings. Gap engine: learner role/experience → KCF competency vector → cosine gap vs role target → LLM-ranked iGOT course pathway. Assessment: RAG-grounded MCQ generator with citation-to-source-paragraph for every question (kills the hallucination objection), plus Elo-style item difficulty calibration for adaptive quizzes. Bilingual EN/HI UI.
+
+**90-second demo script.** 1) Log in as "Ramesh, Senior Statistical Officer, 12 yrs experience" → dashboard instantly shows a skill-gap radar: strong in sampling, weak in Big Data/GIS. 2) One click → personalized iGOT pathway with real course links. 3) Upload a 40-page MoSPI training PDF → in ~10 seconds, a 10-question quiz appears, each MCQ linked to its source paragraph. 4) Ramesh answers; quiz adapts difficulty live; weak answers push a micro-lesson. 5) Switch UI to Hindi. 6) Zoom out: ministry admin heatmap — "62% of officials lack GIS skills" — the shot that wins government judges.
+
+**Beating rivals.** They ship generic chatbot + quiz gen. We ship: KCF-grounded ontology, per-question source citations, adaptive difficulty, admin skill-gap analytics, Hindi. That's a product, theirs is a wrapper.
+
+**Punch line for panel:** "MoSPI asked for an LMS. We built the competency brain for India's entire statistical system — and every quiz question cites its source."
+
+<<SCORES {"ps":"26101","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-58" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26101: &quot;Develop an AI enabled learning platform that identifies competency gaps, recommends personalized training through integration with the iGOT Karmayogi ecosystem, and capable of generating Quizzes and Multiple choice questions (MCQs) from uploaded learning materials to strengthen capacity building in India's Official Statistical System.&quot;
+Org: MoSPI | Theme: Smart Education
+Dataset field: nssta.gov.in, mospi.gov.in
+Description: Officials in India's statistical system need continuous upskilling in AI/ML/Big Data/GIS. iGOT Karmayogi offers vast learning resources but officials can't identify relevant courses for their roles. Build an AI LMS: assess learner competencies from profiles, identify skill gaps, recommend personalized training via iGOT integration based on roles/experience; adaptive learning modules, AI virtual assistants, automated assessments (generate Quizzes/MCQs from uploaded learning materials), real-time feedback." outcome="completed"># PROSECUTION vs PS 26101 (MoSPI — AI LMS + iGOT integration)
+
+**Kill-shot 1 — The iGOT "API" doesn't exist. Severity 9/10.**
+The spec's load-bearing line: *"integrate seamlessly with iGOT Karmayogi APIs to retrieve course catalogues, recommend relevant courses, monitor enrolment and completion status, and update competency scores automatically."* I fetched igotkarmayogi.gov.in: a login-gated JS shell, no developer portal, no public API, no catalog endpoint. Karmayogi Bharat SPV exposes nothing to third parties. You cannot build "seamless integration" in a month; you will demo a hand-typed JSON of ~50 courses and pray no mentor asks *"where's the live iGOT data?"* — a judge Q&A execution. This is a spec trap, not a solvable feature.
+
+**Kill-shot 2 — Catastrophic crowding. Severity 9/10.**
+`gh search repos SIH26101` returns **20+ public repos created Aug 23–Sep 7, 2026** — and counting daily (`anshikaaggarwall/SIH26101-NEXORA` created *today*). Several already polished ("StatSaksham… personalised iGOT learning pathways"). This is the most generic prompt in the set: "LMS + upload PDF → generate quiz" is the #1 LLM-wrapper project on Earth. Zero moat = zero differentiation at judging.
+
+**Kill-shot 3 — Data is a fiction. Severity 7/10.**
+"Dataset: nssta.gov.in, mospi.gov.in" = two ministry homepages, not data. No published machine-readable competency framework for Official Statistics, no learner profiles, no iGOT course dump. The "AI" (competency assessment, gap analysis, recommendations) runs on data you invent. Non-technical judges won't notice; MoSPI mentors will, in one question.
+
+**Kill-shot 4 — Feature bloat guarantees a shallow demo. Severity 8/10.**
+Expected solution demands 10+ subsystems: competency engine, gap analysis, iGOT *and* NSSTA-TPAC recommendations, MCQ gen from "documents, presentations, **videos**" (smuggled transcription pipeline), adaptive modules, virtual assistant, **virtual labs on AI/Cloud/Cybersecurity**, multilingual support, SSO/RBAC, predictive analytics, gov cybersecurity compliance. One month → 10 half-features vs. rivals' one polished demo.
+
+**Concession for balance:** zero training needed (GPU constraint moot) and MCQ-via-LLM is trivially buildable — which is precisely why it's crowded. Feasibility of the *core* isn't the problem; winning is.
+
+<<SCORES {"ps":"26101","role":"prosecutor","feasibility":5,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":9,"win_prob":3}>></subagent>
+<subagent agent_id="agent-59" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26102: &quot;Development of an AI-powered system to detect anomalies, fraud, and inefficiencies in MPLAD Scheme implementation regd.&quot;
+Org: MoSPI | Theme: Miscellaneous
+Dataset field: https://mplads.mospi.gov.in/digigov/dashboard.html
+Description: MPLADS lets MPs recommend developmental works; large fund utilization across thousands of works. Need AI to leverage ML/analytics to detect trends and anomalies in expenditure patterns, fund utilization, cost estimates, work execution — early identification of potential fraud, inefficiencies, non-compliance. Analyze sanctions, expenditures, cost estimates, work progress, payments, asset creation to detect unusual patterns, cost overruns, duplicate works, delayed projects, deviations from norms. Generate risk-based alerts, predictive insights, decision-support dashboards for MPs, State Nodal Authorities, District Authorities, Ministry. Automated compliance monitoring, trend analysis, early warning." outcome="completed">## ADVOCATE — SIH26102 (MPLADS Fraud/Anomaly Detection)
+
+**Why this wins for this team.** This is the rare SIH PS that is *pure structured-data analytics + LLM storytelling* — zero vision, zero heavy training, and a domain judges viscerally understand ("MP funds being misused"). Non-technical judges don't get RAG pipelines; they get "this app found a toilet block sanctioned 3 times at 4× the going rate."
+
+**Architecture (1 para).** ETL pipeline scrapes the official MPLADS portal into Postgres (works: cost, agency, sanction/completion dates, district, sector). A **deterministic-first anomaly engine**: ~20 auditable rules (cost/unit vs. district-sector median, sanction→completion latency, vendor concentration, duplicate works via embedding similarity of work descriptions) plus Isolation Forest for multivariate outliers — **CPU-trivial, Kaggle budget untouched**. An LLM layer converts each flag into a plain-language "case file" and answers natural-language queries over the dashboard ("which districts have the most stalled works?"). React + map-based frontend. Honest framing: it flags *risk*, doesn't accuse — that's also the legally safe posture.
+
+**90-second demo for non-technical judges.**
+1. (0–15s) India map, districts colored by "MPLADS Health Score." "₹5 crore per MP per year — here's where it's leaking."
+2. (15–45s) Click a red district: alert feed of flagged works. Open one case file — LLM-written card: *"Work #4123: community hall, sanctioned twice, 200m apart, 3.8× the median cost, 26 months stalled."*
+3. (45–70s) Type a question in plain English; dashboard answers with charts + citations.
+4. (70–90s) "Audit Priority Queue" — tell a District Authority *which 10 works to physically inspect first*. Judges love actionable output.
+
+**Data — verified.** The official dashboard at [mplads.mospi.gov.in/digigov/dashboard.html](https://mplads.mospi.gov.in/digigov/dashboard.html) is **live today** with real aggregates (₹33,123 Cr recommended, ₹4,466 Cr sanctioned, ₹859 Cr completed). Work-level drill-downs historically existed on mplads.gov.in; my data.gov.in catalog check timed out (504) — **unverified**, so mitigate: build a scraper day 1, plus a clearly-labeled synthetic generator seeded on published MPLADS norms (₹5 Cr/MP/yr, guideline sector caps) so demo never depends on scrape success.
+
+**Beating rival teams.** Competitors will ship generic dashboards. We ship: (a) case-file narratives, (b) the audit-priority queue — a decision, not a chart, (c) precomputed benchmarks per district/sector so every flag cites a norm. Judged on insight, not ETL.
+
+**Punch:** if the panel fears data access, the synthetic-generator fallback makes this the *lowest*-data-risk PS on the board while the live dashboard keeps it real.
+
+<<SCORES {"ps":"26102","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":8,"uniqueness":7,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-60" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26102: &quot;Development of an AI-powered system to detect anomalies, fraud, and inefficiencies in MPLAD Scheme implementation regd.&quot;
+Org: MoSPI | Theme: Miscellaneous
+Dataset field: https://mplads.mospi.gov.in/digigov/dashboard.html
+Description: MPLADS lets MPs recommend developmental works; large fund utilization across thousands of works. Need AI to leverage ML/analytics to detect trends and anomalies in expenditure patterns, fund utilization, cost estimates, work execution — early identification of potential fraud, inefficiencies, non-compliance. Analyze sanctions, expenditures, cost estimates, work progress, payments, asset creation to detect unusual patterns, cost overruns, duplicate works, delayed projects, deviations from norms. Generate risk-based alerts, predictive insights, decision-support dashboards for MPs, State Nodal Authorities, District Authorities, Ministry. Automated compliance monitoring, trend analysis, early warning." outcome="completed">**PROSECUTION BRIEF — PS 26102 (MPLAD Anomaly Detection)**
+
+**Attack 1 — Crowding is fatal (9/10).** `gh search repos "26102"` returns **40 repos**, nearly all created Aug 26–Sep 7, 2026, all targeting this exact PS: `sujalkanere/SIH26102`, `SIH-2k26/sanchay-ai`, `PraveenKumar-99/mplads-anomaly-detector` ("SATARK MPLAD… contractor cartels, citizen auditing"), `DONTcompeteIFWEAk/SIH26102-MPLADS-Anomaly-Detection` (created *today*). Internal hackathons have already run on it. Any idea we'd pitch — maps, cartel detection, risk scores — exists in a public repo judges can find in one search. Uniqueness is dead on arrival.
+
+**Attack 2 — The "dataset" is a dashboard (8/10).** The dataset URL serves a pre-login D3/Chart.js dashboard showing **three aggregate KPIs** (₹33,123 Cr recommended, etc.). No CSV export; `/digigov/api/` 302-redirects to auth. Work-level rows require scraping paginated DataTables drill-downs across ~790 MPs — brittle, ToS-gray, and the portal has already migrated once (mplads.gov.in → mospi digigov). "Verifiably available training data" fails the sniff test.
+
+**Attack 3 — Zero fraud labels, unvalidatable claims (9/10).** No public record exists of *which* MPLADS works were fraudulent. Every "fraud detection" claim reduces to unsupervised heuristics or **fabricated synthetic labels**. Judge asks "precision/recall?" → we have no ground truth. This is a Q&A execution chamber. Worse, the juiciest fraud signals (vendor/contractor identity for cartel detection) are **not disclosed** in public MPLADS data.
+
+**Attack 4 — Scope creep (6/10).** Four stakeholder dashboards (MP, State, District, Ministry) + predictive engine + compliance monitoring + alerts. That's 4 products in 1 month.
+
+**Concession:** No vision/research modules smuggled in — tabular, LLM-friendly, and MPLAD corruption *does* resonate with Indian judges (punch is real). That's precisely *why* it's crowded: easy to start, impossible to win. A mediocre version is vibe-codeable, which means 40 other teams ship the same mediocre version.
+
+**Verdict:** Data-scrape tax + no labels + saturated field. Kill it.
+
+<<SCORES {"ps":"26102","role":"prosecutor","feasibility":6,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":7,"win_prob":2}>></subagent>
+<subagent agent_id="agent-61" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26103: &quot;Use case on web-based integrated project-monitoring platform&quot;
+Org: MoSPI | Theme: Smart Automation
+Dataset field: Project Monitoring Report April 2026 at https://paimana-proj.mospi.gov.in/ReportPage
+Description: IPMD/MoSPI monitors Central Sector Infrastructure Projects costing Rs 150+ crore across ministries. OCMS since 2006 built a valuable historical database of project cost, expenditure, timelines, implementation status, cost/time overruns. Modernized to PAIMANA portal as a national repository of infrastructure projects capturing project-level information. Build a use case on the web-based integrated project-monitoring platform leveraging this data ecosystem." outcome="completed">## ADVOCATE — PS 26103: Integrated Project-Monitoring Platform (MoSPI)
+
+**Verified load-bearing fact:** [paimana-proj.mospi.gov.in/ReportPage](https://paimana-proj.mospi.gov.in/ReportPage) currently returns **"Coming Soon."** Read that right: MoSPI's own public reporting layer doesn't exist. This PS isn't "rebuild our dashboard" — it's a greenfield mandate to define what India's infrastructure transparency portal should look like. No incumbent to clone, no spec to be marked wrong against.
+
+**The data is real and clean.** MoSPI has published the monthly *Project Implementation Status Report (PISR)* of Central Sector Projects (₹150+ cr) for years — text PDFs/Excel, no OCR needed. Recent editions cover ~1,800+ projects, ~45% delayed, average delays of ~3 years, aggregate cost overruns in the lakh-crore range. Those numbers alone are judge-bait. Twenty years of OCMS history gives you trend lines nobody else can show in month 1.
+
+**Architecture (zero vision, all web+LLM):** Python ETL parses monthly PISR files → Postgres (project, ministry, cost, milestone, overrun tables). Next.js + Tailwind dashboard with ECharts. An LLM layer does natural-language-to-SQL ("chat with the national repository") plus RAG over project notes to auto-write ministry-grade status summaries. Risk scoring is a small tabular model (gradient boosting on cost/time-overrun history) — trains in minutes on Kaggle, trivially inside the 30 GPU-hour budget, and is *explainable*, which judges love.
+
+**90-second demo script for non-technical judges:**
+1. Open "India Infrastructure Health Map" — 1,800 live projects, red/amber/green. (0-20s)
+2. Type: *"Which railway projects in the Northeast are over 2 years late, and what's the overrun in crore?"* → instant table + chart + generated narrative. (20-55s)
+3. Click one project: timeline scrubber shows 2016 promise vs. 2026 reality, AI-written "why it slipped" brief, predicted completion. (55-80s)
+4. Punchline on screen: **"₹4+ lakh crore of taxpayer money is currently overrun. We made it queryable in plain English."** (80-90s)
+
+**How to beat the field:** every rival builds a CRUD dashboard with filters. You win on three differentiators: (1) conversational querying over the *full historical* dataset, (2) explainable delay-risk scoring with what-if sliders, (3) a demo built around one devastating money number. Production polish on Next.js is this team's home turf.
+
+**Risks, honestly:** the official dataset is dated "April 2026" behind a "Coming Soon" page — you must hedge by pre-scraping archived monthly PISRs now. Judges may also ask "why isn't this just Power BI?" — answer with the LLM layer.
+
+<<SCORES {"ps":"26103","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":8,"uniqueness":7,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-62" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26103: &quot;Use case on web-based integrated project-monitoring platform&quot;
+Org: MoSPI | Theme: Smart Automation
+Dataset field: Project Monitoring Report April 2026 at https://paimana-proj.mospi.gov.in/ReportPage
+Description: IPMD/MoSPI monitors Central Sector Infrastructure Projects costing Rs 150+ crore across ministries. OCMS since 2006 built a valuable historical database of project cost, expenditure, timelines, implementation status, cost/time overruns. Modernized to PAIMANA portal as a national repository of infrastructure projects capturing project-level information. Build a use case on the web-based integrated project-monitoring platform leveraging this data ecosystem." outcome="completed"># PROSECUTION: PS 26103 (MoSPI — PAIMANA project-monitoring platform)
+
+**Verdict: this PS is a data mirage wrapped around a research homework assignment, and the crowd already found it.**
+
+**Attack 1 — The cited dataset does not exist (severity 9).** I fetched the exact URL in the dataset field, `https://paimana-proj.mospi.gov.in/ReportPage`, and its archive subpage `ReportPage/ArchiveProjectMonitoring`. The archive renders a selector UI (Monthly Flash Report / Quarterly Report, FY, month) but the content body literally reads **"Coming Soon. Discover your new favorite spaces, Download from Google Play/iOS App."** Zero downloadable files. The "Project Monitoring Report April 2026" the PS tells you to study is not retrievable at the citation. Worse, the portal's nav shows project-level data sits behind **"Add Project / Update Reports" + Login** — the PS itself admits updates flow "through role-based access and APIs," i.e., government users only. The romantic "two decades of OCMS history" is not published anywhere machine-readable; what exists publicly on the old MoSPI site is aggregate Flash Report PDFs. Teams will fabricate or hand-type data.
+
+**Attack 2 — Toy training set (severity 8).** Even with full access: **1,981 ongoing projects** across 22 sectors / 17 ministries (PS's own numbers). That's sub-2K rows for "production-grade" cost/time-overrun prediction, with schema drift from the OCMS→PAIMANA migration. Judge Q&A kill: "How many held-out projects validate your model?" MoSPI is a ministry of *statisticians* — they will smell a 2K-row XGBoost instantly.
+
+**Attack 3 — Smuggled research requirements (severity 8).** Expected outcome (b) demands an ablation study: "assess whether AI/ML provides significant gains over conventional statistical methods." Outcome (c) demands attribution analysis of "CUF fields vis-à-vis additional variables **not presently captured in the CUF**" — i.e., go collect land-acquisition/clearance/litigation data that doesn't exist. That's thesis work, not a hackathon.
+
+**Attack 4 — Crowded and converged (severity 7).** `gh search repos` shows **13+ public SIH26103 repos** created Aug 24–Sep 7 alone (`syswitzz/sih26103-paimana` carries the identical "predictive analytics + early warning" pitch). Idea deadline is Sep 20 — this is one of the most-crowded MoSPI PSs.
+
+**Attack 5 — Demo is a spreadsheet with lipstick (severity 7).** RAG tiles, risk scores, a chatbot. Non-technical judges see numbers that can never be verified live ("23% overrun risk" — prove it). Only mercy: zero vision AI, honest LLM+web surface.
+
+**Attack 6 — Scope fog (severity 6).** Nine indicative outcomes (a–i) including "documentation and deployment framework" means any missing module is a judge's stick.
+
+<<SCORES {"ps":"26103","role":"prosecutor","feasibility":4,"data_risk":9,"demo_wow":3,"uniqueness":2,"punch":8,"win_prob":2}>></subagent>
+<subagent agent_id="agent-63" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26153: &quot;AI based Network Attack Forecasting from Network Traffic Data&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: Publicly available datasets: CIC-IDS2017/2018, UNSW-NB15, CTU-13, CICIoT2023, LANL Authentication Dataset, DARPA Intrusion Detection.
+Description: Build AI that learns network behaviour, anticipates attacker progression, supports proactive cyber defence using World Models. Ingest network traffic, learn temporal behaviour, forecast future attack states, interpretable decision support. Represent network state as feature vectors or graphs; learn state-transition dynamics (LSTM, Transformer, GNN, latent state models); forecast future network states, estimate probability of attacker progression; map to MITRE ATT&amp;CK stages; explainability via attention. Applicable to enterprise and Critical Information Infrastructure." outcome="completed"># ADVOCATE: PS 26153 — AI Network Attack Forecasting (NTRO)
+
+**Verdict: Pick this. It's the rare cyber PS where the team's exact strengths (full-stack + LLM) ARE the solution, and every rival will handicap themselves by building a boring classifier.**
+
+**Why it fits the constraints perfectly.** Zero vision anywhere — it's pure tabular/time-series ML on flow records. Data is verified public: I confirmed live HuggingFace mirrors of **CICIoT2023** (`bencorn/CIC-IoT-2023`, ~3K downloads, CSV/tabular, CC license) and **CIC-IDS2017** (`bencorn/CICIDS2017` + parquet mirrors), alongside the canonical unb.ca/cic originals and UNSW-NB15. Training fits the Kaggle budget trivially: a small Transformer/LSTM over CICFlowMeter-style flow features (78 numeric cols, ~2.8M rows) trains in 2–4 GPU-hours on a T4 — batch-train on Kaggle, CPU inference locally. Clean split, zero risk.
+
+**Architecture (1 para).** Replay flow CSVs through a windowing layer that builds per-host state vectors every 30s → Transformer encoder learns state-transition dynamics → two heads: (a) attack-probability forecast at +5/+15/+30 min horizons, (b) MITRE ATT&CK stage classifier. FastAPI backend streams forecasts via WebSocket to a React dashboard; attention weights + top feature attributions feed an LLM API that writes plain-English SOC briefings ("Host .5 is probing 400 ports/min — matches Reconnaissance, stage 1 of 6"). The LLM layer is where we out-shine every pure-ML team.
+
+**90-second demo for non-technical judges.** "Defenders today react *after* the breach. We built a weather forecast for hackers." Replay a real CIC-IDS2017 attack chain at 100x speed: threat gauge climbs amber→red, forecast curve shows "84% probability of exploitation stage within 20 min" *before* the ground-truth attack label fires — the lead-time gap is the money shot. Click "Why?": LLM explains in one sentence, MITRE stage lights up on a 6-stage progress bar. Then the what-if: "block host" in the simulator, forecast drops to green. Cause and effect a judge can *feel*.
+
+**How we beat rival teams on the same PS.** They'll demo confusion matrices and 99% accuracy — a solved, memed benchmark judges have seen 50 times. We demo **lead time, calibration, and a movie**. We use newer CICIoT2023 (they'll all default to IDS2017), evaluate on forecast horizon not accuracy, and add the LLM analyst copilot nobody else will have. The "World Models" buzzword in the PS is aspirational — our sequence model + state representation checks the box credibly without research risk.
+
+**Honest risk:** CIC-IDS2017 has known label/artifact criticisms — mitigate by leading with CICIoT2023 and a cross-dataset generalization slide (train CIC, test UNSW-NB15).
+
+<<SCORES {"ps":"26153","role":"advocate","feasibility":8,"data_risk":2,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-64" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26153: &quot;AI based Network Attack Forecasting from Network Traffic Data&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: Publicly available datasets: CIC-IDS2017/2018, UNSW-NB15, CTU-13, CICIoT2023, LANL Authentication Dataset, DARPA Intrusion Detection.
+Description: Build AI that learns network behaviour, anticipates attacker progression, supports proactive cyber defence using World Models. Ingest network traffic, learn temporal behaviour, forecast future attack states, interpretable decision support. Represent network state as feature vectors or graphs; learn state-transition dynamics (LSTM, Transformer, GNN, latent state models); forecast future network states, estimate probability of attacker progression; map to MITRE ATT&amp;CK stages; explainability via attention. Applicable to enterprise and Critical Information Infrastructure." outcome="completed">## PROSECUTION: PS 26153 — "AI Network Attack Forecasting / World Models" (NTRO)
+
+**KILL-SHOT 1 — The ground truth doesn't exist (severity 9/10).** The spec demands "ground-truth state transitions derived from the attack timeline annotations in the dataset" and "generalise to unseen attack patterns." Fatal: **none of the listed datasets have attack-stage timelines.** CIC-IDS2017/2018 labels are per-flow categories executed as scripted day batches (Tuesday = brute force, Wednesday = DoS…), not causal multi-stage kill chains. There is no Recon→C2→Exfil progression to learn — the model will fit day-of-week artifacts. This is documented: CIC-IDS datasets are widely criticized (duplicate flows, no session continuity, compressed attack windows; see "A Critical Evaluation of CIC-IDS2017" literature and dataset-flaw surveys on arXiv). Forecasting a future the data never records is unfalsifiable. Judge asks "how did you validate a K-step-ahead forecast?" — no honest answer.
+
+**KILL-SHOT 2 — It's a research paper, not a hackathon build (9/10).** "World Models" P(S_t+1|S_t) with K-step rollout, GNN/Transformer dynamics, SHAP/attention explanations — that's a NeurIPS workshop agenda. Team strength (full-stack + LLM APIs) is *useless*: the spec **explicitly requires fully offline operation, no cloud API dependencies** and demands "trained model weights + reproducible training configuration." Mandatory training, mandatory benchmarks vs. logistic-regression baseline (F1/precision/recall/FPR). One month, 30 Kaggle hrs, production-grade? No.
+
+**KILL-SHOT 3 — Catastrophic crowding (8/10).** Verified via `gh search`: **13+ public repos already exist for SIH26153** (created Aug 22–Sep 7 2026), including near-finished prototypes — `HowSuyash/AttackForecast` ("world model… runs fully offline on CPU"), `hasim2006/PhantomGrid-Predictive-Defense-SIH26153`, `SabarishR08/SIH26153-AI-Network-Attack-Forecasting`. Judges will sit through a parade of identical Streamlit + SHAP-bar dashboards.
+
+**KILL-SHOT 4 — Demo has negative wow (7/10).** Upload PCAP → squiggly "infiltration probability" line + MITRE stage chip. Non-technical judges see a stock chart. It's also fragile: live parsing with Scapy/PyShark on stage, plus NTRO judges are *real cyber operators* who will interrogate false-positive rates and dataset leakage — the exact audience that eviscerates vibe-coded ML.
+
+**Verdict:** Data unavailable in the required form, mandated training, LLM skills banned, crowded field, hostile expert judges. Run away.
+
+<<SCORES {"ps":"26153","role":"prosecutor","feasibility":3,"data_risk":8,"demo_wow":3,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+</agent_swarm_result><agent_swarm_result>
+<summary>completed: 16</summary>
+<subagent agent_id="agent-65" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26155: &quot;AI-Driven Multi-Vendor Network Security Compliance Auditor&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: CIS Benchmarks, NIST SP 800-53, DISA STIGs, ISO/IEC 27001; vendor-specific CLI configuration samples.
+Description: Enterprise networks are heterogeneous: firewalls (Palo Alto, Fortinet, Cisco, Check Point, Juniper, Sophos...), routers/switches (Cisco, Aruba, Juniper, Arista, Huawei, MikroTik, Ubiquiti...), open/disaggregated (SONiC, Cumulus). Organizations must align devices with security frameworks (CIS, NIST 800-53, STIGs, ISO 27001). Build an AI-driven auditor that ingests multi-vendor device configurations and audits them against these frameworks, identifies non-compliance, assesses risk, and recommends remediation." outcome="completed">**ADVOCATE — PS 26155: Multi-Vendor Compliance Auditor.** This is a text-in/text-out problem wearing a cybersecurity costume — perfect for an LLM+full-stack team. Every input is a config file (plain text), every framework is a document (plain text). Zero pixels anywhere.
+
+**Why it wins:** Judges at NTRO are cybersecurity people, not ML researchers — they will personally recognize the pain (Nipper Studio licenses cost lakhs, audits take weeks). No training needed: this is RAG + structured extraction, so the 30 Kaggle-hour constraint is irrelevant, and the "production-grade model" objection evaporates.
+
+**Verified data sources:** `ComplianceAsCode/content` (GitHub, 2.8k stars) ships machine-readable STIG/CIS/NIST 800-53 control content — verifiably available today. `batfish/batfish` (1.5k stars) already parses Cisco/Juniper/Arista/Palo Alto/Fortinet configs — borrow its grammar approach or use `ntc-templates` (TextFSM). DISA STIGs are public DoD downloads (public.cyber.mil/stigs); CIS Benchmark PDFs free with registration. Vendor sample configs: Batfish's own test networks + countless "gns3 lab configs" repos + generate synthetic ones with an LLM.
+
+**Architecture (1 para):** Next.js/FastAPI app. Ingestion → vendor detection (LLM call or regex) → chunk configs by section (ACLs, crypto, auth, services) → for each control in the selected framework, LLM-with-JSON-schema judges compliant/violation/not-applicable with quoted line-number evidence (this grounding is your credibility armor vs hallucination claims) → risk score weighted by CVSS-style severity → remediation generator emits exact CLI diffs + one-click Ansible playbook (ComplianceAsCode content as templates). Deterministic scoring layer so the same config always yields the same grade — judges hate nondeterminism.
+
+**90-second demo:** Drag-drop a Cisco ASA config AND a FortiGate config. Dashboard animates: 847 checks, 62/100, 14 critical. Click "telnet enabled on management interface" → shows offending line, cites CIS control 4.1.2 + STIG V-220615, one click generates remediation CLI and a downloadable PDF audit report mapped to ISO 27001 Annex A clauses. Punchline: "This exact misconfiguration pattern appeared in the 2024 hospital ransomware report. Manual audit: 3 weeks. This: 40 seconds, ₹2 of API calls."
+
+**Beating clones:** Most teams will do "paste config → chatbot rambles." You win on (1) line-number evidence citations, (2) deterministic reproducible scores, (3) real remediation diffs not advice, (4) multi-framework crosswalk in one pass, (5) air-gapped/Ollama mode toggle — NTRO *loves* on-prem. Ship 4 vendor parsers solid over 10 shallow.
+
+<<SCORES {"ps":"26155","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-66" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26155: &quot;AI-Driven Multi-Vendor Network Security Compliance Auditor&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: CIS Benchmarks, NIST SP 800-53, DISA STIGs, ISO/IEC 27001; vendor-specific CLI configuration samples.
+Description: Enterprise networks are heterogeneous: firewalls (Palo Alto, Fortinet, Cisco, Check Point, Juniper, Sophos...), routers/switches (Cisco, Aruba, Juniper, Arista, Huawei, MikroTik, Ubiquiti...), open/disaggregated (SONiC, Cumulus). Organizations must align devices with security frameworks (CIS, NIST 800-53, STIGs, ISO 27001). Build an AI-driven auditor that ingests multi-vendor device configurations and audits them against these frameworks, identifies non-compliance, assesses risk, and recommends remediation." outcome="completed"># PROSECUTION vs PS 26155 — Network Compliance Auditor
+
+**Verdict: REJECT.** No vision trap (it's text-only), but the spec smuggles in worse: an unbounded-scope clause and a fake "AI training" requirement.
+
+**K1 — Dataset field is a fabrication (9/10).** "Vendor-specific CLI configuration samples" don't exist as real data. Real firewall configs contain public IPs, ACLs, SNMP strings — no enterprise publishes them. Public corpus = Cisco IOS lab toys (Batfish `networks/` fixtures, GNS3 labs) plus doc snippets; effectively zero real Fortinet/Palo Alto/Sophos/SonicWall configs. The team hand-writes synthetic configs, then audits its own inventions — circular validation. NTRO (a signals-intelligence org) will spot toy configs instantly.
+
+**K2 — Spec trap: the "Interactive Training Loop" (8/10).** The PS mandates a low-code GUI where the AI *learns to parse unseen vendors without redeployment*. That's parser induction — a research product feature, not LLM API + web stack. Vibe-coded version = a prompt box. Judge: "show me the training." You show few-shot prompting. "That's a chatbot, not training." Dead.
+
+**K3 — Unbounded scope clause (8/10).** "Ideally designed to support ANY device, regardless of vendor." Any vendor a judge names that you don't cover (Hillstone? Ruijie? Stormshield?) = live failure.
+
+**K4 — Solved commercially (7/10).** Titania **Nipper Studio** audits multi-vendor configs against CIS/STIG/NIST 800-53/ISO 27001 — exactly this PS. Also Tenable Nessus `.audit` files, SolarWinds NCM, Forward Networks, and open-source **Batfish** (batfish/batfish, multi-vendor config analysis). "What's your moat vs Nipper?" — silence on stage.
+
+**K5 — No trainable model (7/10).** Honest build is LLM-as-parser + rules engine. Fine-tuning needs labeled (config → verdict) pairs that don't exist at scale; 30 Kaggle GPU-hours can't conjure labels.
+
+**K6 — Crowded (6/10).** 7 public GitHub repos already named `sih26155*` created Aug 30–Sep 7 (manas010506, xarjunpatil, 0xAryannn, karthikmoka, shahdhairyah, logith-a, saifpathan9969). Known pick; differentiation fight starts behind.
+
+**K7 — Demo poison (8/10).** Non-technical judges watch CLI gibberish → red/green table. They cannot distinguish a correct audit from a hallucinated one — and in a *security* tool, one false "compliant" verdict is disqualifying. Every judge answer invites "prove that isn't hallucinated."
+
+Wow ≈ 0, data fake, scope infinite, incumbent named Nipper. Pass.
+
+<<SCORES {"ps":"26155","role":"prosecutor","feasibility":4,"data_risk":8,"demo_wow":3,"uniqueness":3,"punch":9,"win_prob":3}>></subagent>
+<subagent agent_id="agent-67" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26159: &quot;SecureMailScope: AI-Assisted Cryptographic Security Posture Assessment for Secure Email Communications&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: Synthetic — participants may generate IMAPS, POP3S, SMTPS data using any email server/client and capture pcap dumps.
+Description: Many SMTP/IMAP/POP3 deployments suffer cryptographic misconfigurations: obsolete TLS versions, weak cipher suites, insecure STARTTLS, expired/improper certificates — exposing email to downgrade attacks, MITM, passive interception. Existing tools decode packets but don't evaluate overall cryptographic security posture or provide intelligent risk assessment and prioritization. Build an AI-assisted passive network forensic framework analyzing captured email traffic to assess cryptographic posture, score risk, and prioritize findings for security analysts." outcome="completed">## ADVOCATE: PS 26159 — SecureMailScope (NTRO, Blockchain & Cybersecurity)
+
+**Why this wins for this team.** The dataset is *synthetic-by-design* — and that's a feature, not a bug. Every other team will generate toy pcaps from a Docker Postfix/Dovecot lab; we do the same thing but better, because generating misconfigured-TLS pcaps is a solved engineering task, not a data hunt. Spin up 3 mail servers (Postfix + Dovecot in Docker), script `openssl s_client` handshakes across the full misconfiguration matrix (TLS 1.0/1.1, RC4/3DES/NULL ciphers, expired/self-signed certs, STARTTLS-stripped plaintext sessions), capture with `tcpdump`. Hundreds of labeled, perfectly ground-truthed pcaps in a weekend. Zero data risk, zero GPU hours — the "AI" is LLM reasoning over extracted handshake features, squarely the team's strength.
+
+**Architecture (1 para).** `tshark`/pyshark passive parser → per-session crypto posture extractor (TLS version, cipher suite, cert chain validity/expiry, STARTTLS presence, plaintext fallback detection) → deterministic scoring engine (NIST SP 800-52r2 / RFC 8314 rules as auditable rules, not vibes) → LLM layer (structured output) that converts scored findings into analyst-ranked risk narratives with remediation steps → React dashboard + one-click PDF "posture report." No model training anywhere; Kaggle budget untouched.
+
+**90-second demo for non-technical judges.** Screen 1: upload a pcap of "Company X's mail server." Screen 2: dashboard lights up — overall grade **D**, red flags: "TLS 1.0 — attackable since 2014 (POODLE)," "Certificate expired 47 days ago," "Login passwords transmitted in plaintext on 3 sessions." Screen 3: AI narrates in plain English — "An attacker on your office WiFi could read every password reset email" — and ranks fixes by effort-vs-impact. Screen 4: upload the *fixed* pcap, grade flips to **A**, judge sees the delta. Everyone understands a report card; nobody understands Wireshark.
+
+**Beating clone teams.** Three moats: (1) **attack simulation, not just detection** — we replay a real STARTTLS-stripping MITM (STRIPTLS) live against our lab server and show the tool *catching it in the pcap*, a story judges remember; (2) **verified grounding** — the LLM layer is constrained to cite the extracted evidence + NIST/CVE references (verified: [testssl.sh](https://github.com/testssl/testssl.sh) proves the active-scan side is crowded and mature; passive forensic posture assessment genuinely isn't), so no hallucination traps in Q&A; (3) **production polish** — batch pcap ingestion, analyst workflow (assign/resolve findings), exportable compliance report. Rivals will demo a CLI; we demo a product.
+
+**Honest risks.** Demo wow depends on live-theater execution, not inherent flashiness; "posture scoring" is rules engineering, and a sharp technical judge may ask what's AI vs. if-statements — answer: evidence-grounded LLM triage layer, and be ready to ablate it live.
+
+<<SCORES {"ps":"26159","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":6,"uniqueness":6,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-68" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26159: &quot;SecureMailScope: AI-Assisted Cryptographic Security Posture Assessment for Secure Email Communications&quot;
+Org: NTRO | Theme: Blockchain &amp; Cybersecurity
+Dataset field: Synthetic — participants may generate IMAPS, POP3S, SMTPS data using any email server/client and capture pcap dumps.
+Description: Many SMTP/IMAP/POP3 deployments suffer cryptographic misconfigurations: obsolete TLS versions, weak cipher suites, insecure STARTTLS, expired/improper certificates — exposing email to downgrade attacks, MITM, passive interception. Existing tools decode packets but don't evaluate overall cryptographic security posture or provide intelligent risk assessment and prioritization. Build an AI-assisted passive network forensic framework analyzing captured email traffic to assess cryptographic posture, score risk, and prioritize findings for security analysts." outcome="completed"># PROSECUTOR — PS 26159 SecureMailScope
+
+**Verdict: reject.** This is a rule engine wearing an AI costume, and the crowd already built it.
+
+**Kill-shot 1 — Crowding is already fatal (9/10).** `gh search repos "securemailscope"` returns 10+ public repos named exactly that, most created Aug 28–Sep 7 2026: `Atharva006`, `Arulesh-08`, `souravpal11`, `pitu2k`, `MalharBhoi` ("grades servers A–F… hands you an ordered list of what to fix"), `BatthulaRajeswari` ("SIH project prototype"). The obvious implementation — pcap in, A–F grade + remediation list out — is already public. Judges who Google the name see the finished product.
+
+**Kill-shot 2 — "AI" is wallpaper (9/10).** Everything the spec demands — TLS version, cipher suite, cert expiry, STARTTLS downgrade — is deterministic string-matching on handshake fields. testssl.sh (~23k stars) and SSLyze already do "cryptographic posture assessment" with published grading logic (SSLLabs' own A–F methodology). There is *no learning problem here*. The team's only move is bolting an LLM onto rule output — and for an **NTRO** problem, hallucinating risk scores in a security-scoring context is disqualifying, not impressive.
+
+**Kill-shot 3 — No training data, circular labels (8/10).** "Synthetic — generate your own pcaps" means there is no labeled pcap→risk-score dataset anywhere, because risk scores *are* the rules you'd use to generate the labels. Any "trained model" is distilled from the team's own rulebook — pure circularity, zero GPU-hours needed, and it collapses under one judge question: "what does the model learn that the rules don't?"
+
+**Kill-shot 4 — TLS 1.3 guts the premise (7/10).** Most of the modern handshake is encrypted; passive capture sees only ClientHello/ServerHello/cert. The "deep forensic analysis" the title promises is physically not in the pcap. Spec overpromises; delivery is a handshake parser.
+
+**Kill-shot 5 — Demo is dead on arrival (8/10).** Non-technical judges get hex dumps, cipher-suite jargon, and a severity table. No visual hook, no emotional payoff. A live-capture demo also risks failing on stage (wrong interface, no traffic, TLS 1.3 opacity) — maximum fragility, minimum wow.
+
+**Attack summary:** crowding 9 · AI-wallpaper 9 · circular data 8 · spec overpromise 7 · demo wow 8.
+
+<<SCORES {"ps":"26159","role":"prosecutor","feasibility":7,"data_risk":8,"demo_wow":3,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-69" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26186: &quot;AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces&quot;
+Org: Ministry of Home Affairs | Theme: MedTech/BioTech/HealthTech
+Dataset field: Anonymized HR datasets, deployment records, leave history, wellness survey data, workload data, and simulated behavioral datasets.
+Description: CAPF/Armed Forces personnel face extended deployments, operational pressure, family separation, irregular hours, traumatic exposure. Stress identification depends on manual observation and self-reporting, delaying intervention. Build an AI system identifying early indicators of stress, burnout, emotional fatigue, welfare concerns from organizational + voluntarily-provided wellness data: analyze leave patterns, deployment history, duty schedules; predictive risk scoring; privacy-preserving; dashboards for welfare officers; recommend interventions." outcome="completed"># ADVOCATE — PS 26186: CAPF Stress & Welfare Monitoring
+
+**Why this wins under our constraints.** Zero vision anywhere — pure tabular + text + dashboards, exactly our stack. The PS itself authorizes "simulated behavioral datasets," which converts our biggest weakness (no real military data) into a licensed synthetic-data play using LLMs. The model is XGBoost-grade tabular — trains in seconds on CPU, laughably inside 30 Kaggle GPU-hours. And the PS listing shows **0/500 ideas submitted** — a low-competition lane with a heavyweight org (MHA/CRPF).
+
+**Punch (verified).** MHA told Lok Sabha: **1,532 CAPF personnel died by suicide since 2011; 636 in 2019–2023**; News18's analysis: suicides outnumber operational deaths ~2:1, and **80%+ of suicides occur shortly after leave denial/return from leave** ([ETVBharat](https://www.etvbharat.com/english/bharat/capf-personnel-suicide-cases-in-last-five-years/na20230808153129261261737), [TimesNow](https://www.timesnownews.com/india/over-730-suicides-55000-resignations-mha-says-100-day-leave-policy-key-for-central-armed-forces-article-115978191)). That's an opening slide no judge forgets.
+
+**Data (verified available).** Real CAPF HR records are unobtainable — but: (1) OSMI Mental Health in Tech Survey (~1,400 labeled workplace-stress responses, mirrored on GitHub, confirmed), (2) public PHQ-9/GAD-7 instruments for the voluntary wellness check-ins, (3) LLM-generated synthetic battalion (~5,000 personnel) with causal structure seeded from published patterns (leave denial → risk spike; night-duty load; deployment length).
+
+**Architecture (1 para).** Next.js + FastAPI + Postgres. Synthetic-personnel generator writes correlated leave/deployment/duty/survey records. XGBoost risk scorer (SHAP for explainability — judges love "WHY is he red?"). LLM layer: scores free-text wellness check-ins, generates plain-language risk narratives for welfare officers, and drafts intervention plans grounded in MHA's 100-day-leave policy. Privacy story: pseudonymized IDs, officer sees risk bands not raw answers, opt-in wellness module.
+
+**90-second demo.** "This is the welfare dashboard for a CRPF battalion." Zoom unit heatmap → one jawan blinks amber → timeline shows leave request denied, 14 consecutive night duties, deployment extended → LLM explains drivers in one sentence → officer clicks "Recommend intervention" → plan generated → **what-if slider: approve the leave, watch risk drop red→green live.** Close on the 1,532 statistic. Non-technical judges see a life saved, not a model.
+
+**Beating rival teams.** They'll ship static dashboards on fake data. We win with: (1) the counterfactual what-if simulator, (2) explainable risk factors (SHAP → plain language), (3) a documented synthetic-data protocol tied to published MHA patterns so it survives "but where's the data?" grilling, (4) privacy-preserving framing they won't bother with.
+
+<<SCORES {"ps":"26186","role":"advocate","feasibility":9,"data_risk":6,"demo_wow":8,"uniqueness":7,"punch":9,"win_prob":7}>></subagent>
+<subagent agent_id="agent-70" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26186: &quot;AI-Based Predictive Personnel Stress and Welfare Monitoring System for Uniformed Forces&quot;
+Org: Ministry of Home Affairs | Theme: MedTech/BioTech/HealthTech
+Dataset field: Anonymized HR datasets, deployment records, leave history, wellness survey data, workload data, and simulated behavioral datasets.
+Description: CAPF/Armed Forces personnel face extended deployments, operational pressure, family separation, irregular hours, traumatic exposure. Stress identification depends on manual observation and self-reporting, delaying intervention. Build an AI system identifying early indicators of stress, burnout, emotional fatigue, welfare concerns from organizational + voluntarily-provided wellness data: analyze leave patterns, deployment history, duty schedules; predictive risk scoring; privacy-preserving; dashboards for welfare officers; recommend interventions." outcome="completed"># PROSECUTION: PS 26186 — Stress & Welfare Monitoring for Uniformed Forces
+
+**Kill-shot 1 — The dataset does not exist. Severity 9/10.**
+The official "dataset" field (verified in `data/sih2026_ps.csv`) reads: *"Anonymized HR datasets, deployment records, leave history, wellness survey data, workload data, and simulated behavioral datasets."* No link. No file. And none is possible — CAPF/CRPF personnel HR and mental-health records are security-classified by definition; MHA will never hand them to a hackathon. The tell is "simulated behavioral datasets": the organizer itself concedes the data is fake. Your model is trained on correlations **you invent**, so your "predictive AI" is a random-number agreement machine with extra steps.
+
+**Kill-shot 2 — No ground truth = no metrics = judge-Q&A execution. Severity 8/10.**
+The spec itself lists "minimizing false positives and false negatives" as a key challenge. Against what labels? There is no public dataset mapping leave patterns → stress outcomes for anyone, let alone jawans. First question from any ML-literate judge: *"What's your validation set?"* Honest answer: *"Data we generated and labeled ourselves."* Round over.
+
+**Kill-shot 3 — The ethics trap. Severity 8/10.**
+"Preventing stigmatization," "welfare not disciplinary," "ethical and transparent AI" are in the spec. MHA judges will ask: *"Your dashboard flags Constable X as high suicide risk from leave patterns — what does the commander do with that? What if you're wrong?"* Every plausible demo screenshot (a named soldier, a red risk gauge) is a dystopia exhibit. You cannot demo this convincingly without demoing exactly why it shouldn't exist.
+
+**Scope trap. Severity 7/10.** Expected solution = dashboard + **mobile app** + predictive engine + recommendation system + RBAC/privacy framework + alerts + HRMS integration. Seven deliverables, one month, and the "privacy-preserving analytics" requirement is enterprise vaporware in a hackathon demo.
+
+**Crowding. Severity 6/10.** GitHub already has 8+ repos created in the last two weeks on this exact ID (`janievinod/sih26186-aura`, `Tanya-sri30/SIH26186`, `medisettiamani2006-cmd/SIH26186`, `xarjunpatil/SIH26186-...`, etc.). "AI + jawans' mental health" is catnip — expect heavy field crowding.
+
+**Concession:** No vision/OCR smuggled; tabular ML fits any GPU budget. But it's cheap *because* the data is fake. Demo = charts and gauges, visually identical to every analytics PS — low wow for non-technical judges.
+
+**Verdict:** A dashboard wrapped around a model with fabricated training data and an unanswerable ethics Q&A. Reject.
+
+<<SCORES {"ps":"26186","role":"prosecutor","feasibility":5,"data_risk":9,"demo_wow":4,"uniqueness":3,"punch":8,"win_prob":3}>></subagent>
+<subagent agent_id="agent-71" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26035: &quot;Development of a Software Program/Application for Generation of Test Reports for Non-Automatic Weighing Instruments (NAWI) as per OIML Recommendation R-76&quot;
+Org: Ministry of Consumer Affairs | Theme: Smart Vehicles
+Dataset field: consumeraffairs.gov.in — Legal Metrology Act 2009 and Legal Metrology (General) Rules 2011.
+Description: Non-Automatic Weighing Instruments (scales, platform scales, weighbridges) used in trade must conform to standards, get model approval, verification and stamping. Designated labs evaluate NAWIs per OIML R-76 (international technical/metrological/performance requirements), involving various tests compiled into detailed test reports. Currently reports are prepared manually with spreadsheets/templates — time-consuming, error-prone. Build software to generate compliant test reports per OIML R-76." outcome="completed">**ADVOCATE — PS 26035 (NAWI Test Report Generator, OIML R-76)**
+
+**Verified load-bearing facts.** The PS is real and current in the official list (`data/sih2026_ps.csv:562`, SIH26035, DoCA). More importantly, the *entire required knowledge base is one free public PDF*: OIML R-76 ("Non-automatic weighing instruments") — I confirmed `oiml.org/en/files/pdf_r/r076-1-e06.pdf` returns HTTP 200. The Legal Metrology (General) Rules 2011 are on indiacode/consumeraffairs.gov.in. No dataset hunting, no training, no GPU-hours burned. This is the only PS where "data risk" is a rounding error.
+
+**Why it wins under our constraints.** It's a deterministic rules engine + LLM writing assistant + PDF pipeline — exactly full-stack + LLM integration. Zero vision AI. The "model" is the R-76 clause table encoded as code: maximum permissible errors by accuracy class, scale interval `e`, repeatability/eccentricity/creep tests. Numbers come from the engine; the LLM only writes narrative sections grounded in computed results — hallucination-proof by construction, which we can *say out loud* to judges.
+
+**Architecture.** Next.js wizard (instrument specs → lab conditions → per-test observations) → Postgres → typed TypeScript rules engine evaluating each R-76 clause and emitting pass/fail + clause citations → server-side PDF render (React-PDF) matching RRSL report formats → dashboard (the PS explicitly asks for completed/in-process/history tracking). LLM: report narrative, Hindi translation, plain-language violation explanations.
+
+**90-second demo.** "This is a weighbridge certification. Today: 2 days of spreadsheet work, error-prone. Watch." Enter 12 readings on the wizard → live MPE curve chart, one point lands red → system flags "Fails R-76 §A.4.4 eccentricity, Class III" → click → stamped bilingual PDF report + audit trail in 8 seconds. Non-technical judges understand *paperwork that takes days reduced to minutes*. That's the wow.
+
+**Beating rival teams.** They'll hardcode three tests and fake the PDF. We ship the full clause map with per-verdict clause citations, raw CSV import from real balances, and a visible audit trail — the exact thing a metrology officer trusts. And with 0/500 ideas filed, this obscure PS is a low-competition lane while everyone fights over the flashy AI PSs.
+
+**Honest ceiling:** demo is forms→PDF, not fireworks; the wow must be manufactured via the before/after speed contrast and the live compliance chart. Feasibility is near-max; demo_wow is the axis to grind.
+
+<<SCORES {"ps":"26035","role":"advocate","feasibility":9,"data_risk":1,"demo_wow":6,"uniqueness":8,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-72" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26035: &quot;Development of a Software Program/Application for Generation of Test Reports for Non-Automatic Weighing Instruments (NAWI) as per OIML Recommendation R-76&quot;
+Org: Ministry of Consumer Affairs | Theme: Smart Vehicles
+Dataset field: consumeraffairs.gov.in — Legal Metrology Act 2009 and Legal Metrology (General) Rules 2011.
+Description: Non-Automatic Weighing Instruments (scales, platform scales, weighbridges) used in trade must conform to standards, get model approval, verification and stamping. Designated labs evaluate NAWIs per OIML R-76 (international technical/metrological/performance requirements), involving various tests compiled into detailed test reports. Currently reports are prepared manually with spreadsheets/templates — time-consuming, error-prone. Build software to generate compliant test reports per OIML R-76." outcome="completed">## PROSECUTION: PS 26035 (NAWI / OIML R-76 Test Report Generator)
+
+**Verdict up front: this is a government form-filler wearing a lab coat. Buildable? Yes. Winnable? No.**
+
+**Attack 1 — There is no AI anywhere in this PS. Severity 9/10.**
+Read the spec (verified in `data/software_ps.json:26035`): every requirement is CRUD + arithmetic + PDF export — "digital data entry forms," "automated calculations," "report repository," "role-based permissions," "dashboard." Your team's core strength (LLM integration) scores zero points here. Bolting on a chatbot is lipstick on a mail-merge. Judges comparing this against AI-flavored entries will ask "where's the innovation?" and the honest answer is "validation logic." This is a digitization contract, not a hackathon winner.
+
+**Attack 2 — Demo wow ≈ 0 for non-technical judges. Severity 9/10.**
+The demo is: type numbers into a form, a PDF comes out, pass/fail badge turns green. That's a tax-filing app demo. No live map, no real-time feed, no "ask it anything" moment. Nothing photographs well. This directly violates the team's hardest constraint.
+
+**Attack 3 — Domain-correctness trap. Severity 7/10.**
+Data availability attack *partially fails* — I verified OIML R 76-1:2006 (1.5 MB) and R 76-2 PDFs download free from oiml.org (HTTP 200). But that's the trap, not the rescue: you must correctly transcribe ~150 pages of metrology — MPE tables per accuracy class (I/II/III/IIII), eccentricity/repeatability/tare/warm-up tests, in-service limits — into code with zero legal-marginal errors. Finals for ministry PSs are judged by *legal metrology officers* who will catch a wrong MPE formula in Q&A. Students cannot fake this with vibes; one wrong table = a legally invalid report generator.
+
+**Attack 4 — Smuggled scope creep. Severity 5/10.**
+Buried in Key Functional Requirements: "Attachment of photographs and supporting documents" and "Digital signatures (optional)" — photo handling plus signing infra, neither demo-able, both effort sinks. "Supporting future updates whenever OIML recommendations are revised" invites Q&A about the ongoing R 76 revision you haven't read.
+
+**Attack 5 — Crowding/precedent. Severity 4/10.**
+Low but real: GitHub already has `Taraknath31454/metrix-sih26035` (METRIX platform), `xarjunpatil/SIH26035-...`, and `aniketgond098/OIML-R-76-NAWI`. CSV shows submitted ideas **0/500** — low competition is the only mitigating factor, but it also signals everyone else smelled the CRUD.
+
+**Feasibility concession:** it IS vibe-codeable in a month (Next.js + form schema + pdf-lib), no GPU needed — feasibility is its only virtue. But "easy to build" ≠ "easy to win"; every weak team also finds it easy, and your differentiator ceiling is UI polish.
+
+<<SCORES {"ps":"26035","role":"prosecutor","feasibility":8,"data_risk":3,"demo_wow":2,"uniqueness":2,"punch":8,"win_prob":3}>></subagent>
+<subagent agent_id="agent-73" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26165: &quot;AI/NLP Engine to Detect Serious Injury &amp; Fatality (SIF) Precursors in OIL's Unsafe-Act/Unsafe-Condition and Near-Miss Reports&quot;
+Org: Oil India Limited | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: OIL collects large volumes of UA/UC observations, near-miss and incident reports through its HSSE platform but triages manually monthly/quarterly. Global best practice (DEKRA Martin &amp; Black 2015; EEI SIF Precursor model; VelocityEHS 2024 PSIF classifier): low-severity incidents don't share causes with fatalities — non-fatal US accidents fell 51% over 15 years while fatalities fell only 25.5%. Leading operators flag the ~20-25% of reports carrying genuine fatal potential. Build a prototype ingesting free-text safety reports: (a) classify SIF-potential vs non-SIF, (b) tag relevant IOGP Life-Saving Rules (Energy Isolation, Hot Work, Confined Space, Line of Fire etc), (c) surface recurring precursor patterns (activity, location, barrier failure) via dashboard ranking sites/activities by SIF-precursor density." outcome="completed"># ADVOCATE — PS 26165 (SIF Precursor Engine, Oil India)
+
+**The dataset problem is already solved, locally.** `data/January2015toNovember2025.csv` is the OSHA Severe Injury Report dump: **106,488 rows**, each with free-text `Final Narrative` plus hard labels (`Hospitalized`, `Amputation`, `Loss of Eye`, NAICS, event type). That is a verifiable, labeled SIF corpus sitting in the repo — most teams will stall on "no OIL data." Public supplement: NIOSH FACE fatality narratives and IOGP Report 459 (9 Life-Saving Rules, public PDF). Verified; no fetching gambles needed.
+
+**Architecture (1 month, vibe-codeable):** FastAPI + React + Postgres. Ingest free-text reports → dual-head scoring: (1) LLM (Gemini/Claude API) zero-shot SIF-potential classifier with structured JSON output + rationale quotes, (2) fine-tuned DistilBERT baseline trained on the 106K OSHA narratives (2–3 Kaggle GPU-hours, trivially in budget; LLM labels the unlabeled tail via self-training). IOGP rule tagging = embedding match against the 9 rule descriptions + LLM confirmation. Precursor mining = embed narratives (text-embedding-3-small), HDBSCAN cluster, surface "activity × location × barrier-failure" patterns on a dashboard ranking sites by SIF-precursor density. Zero vision anywhere.
+
+**90-second demo for non-technical judges:**
+1. (0–15s) Paste a real OSHA near-miss narrative: *"Worker was securing a load when the sling slipped; pipe missed his head by inches."*
+2. (15–35s) Engine instantly flashes red: **"SIF POTENTIAL: 91%"**, highlights the fatal-mechanism phrase, tags *Line of Fire* + *Energy Isolation*, and shows a matching historical fatality ("this exact pattern killed someone in Texas, 2019").
+3. (35–70s) Switch to dashboard: heat map of sites ranked by precursor density, trending cluster — "22 confined-space near-misses at Site B this quarter, up 3×."
+4. (70–90s) Punchline: "OIL reviews thousands of reports a quarter by hand. This flags the 20% that can kill someone — before the incident, not after."
+
+**Why it wins under the constraints:** pure NLP/LLM, demo is visceral (death avoided beats accuracy charts), training fits the GPU budget with huge margin, and "HSE triage" is unsexy enough that rival teams ship generic text classifiers.
+
+**How to beat same-PS teams:** they'll fake data or hand-label 200 rows. You show a model trained on 106K *verified* injury narratives with precision/recall on held-out OSHA data, calibrated SIF scores, and a live fatality-analogy retrieval ("this happened before") — the moment a judge sees a near-miss matched to a real death, the room is yours.
+
+Weakness to concede: demo wow depends on narrative staging, not visual flash — rehearse the fatality-match beat hard.
+
+<<SCORES {"ps":"26165","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":7,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-74" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26165: &quot;AI/NLP Engine to Detect Serious Injury &amp; Fatality (SIF) Precursors in OIL's Unsafe-Act/Unsafe-Condition and Near-Miss Reports&quot;
+Org: Oil India Limited | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: OIL collects large volumes of UA/UC observations, near-miss and incident reports through its HSSE platform but triages manually monthly/quarterly. Global best practice (DEKRA Martin &amp; Black 2015; EEI SIF Precursor model; VelocityEHS 2024 PSIF classifier): low-severity incidents don't share causes with fatalities — non-fatal US accidents fell 51% over 15 years while fatalities fell only 25.5%. Leading operators flag the ~20-25% of reports carrying genuine fatal potential. Build a prototype ingesting free-text safety reports: (a) classify SIF-potential vs non-SIF, (b) tag relevant IOGP Life-Saving Rules (Energy Isolation, Hot Work, Confined Space, Line of Fire etc), (c) surface recurring precursor patterns (activity, location, barrier failure) via dashboard ranking sites/activities by SIF-precursor density." outcome="completed"># PROSECUTION BRIEF — PS 26165 (OIL SIF-Precursor NLP)
+
+**Kill-shot #1: The label does not exist anywhere on Earth (severity 9/10).** "SIF-potential" is proprietary consulting IP (DEKRA, EEI, VelocityEHS PSIF). No public dataset pairs near-miss text with validated SIF labels. The PS's own "20–25% of reports" stat defines ground truth as *what experts flag* — circular and unverifiable. Judge asks "where did your training labels come from?" and the honest answer is "we made them up." Local `data/January2015toNovember2025.csv` (OSHA SIR) doesn't save you: it's **all-positive US severe-outcome records** (Hospitalized/Amputation/Loss of Eye columns) — outcome data, zero near-misses, zero negative class, zero SIF-potential labels, wrong country, wrong industry. Training a "precursor" classifier on it is a category error one domain judge can detonate.
+
+**Kill-shot #2: Crowded and pre-solved (severity 8/10).** `gh search repos "SIH 26165"` returns 10+ public repos created Aug 24–Sep 6 2026 alone: `xarjunpatil/SIH26165-AI-NLP-...`, `AdityaMaheshwari03/SIH26165`, `bhanikaur06/sih26165-sif-detector`, and `Predictive-Safety-Intelligence/sih26165-sif-precursor-engine` — the latter already ships an OISD-sourced data package + Streamlit demo. Note its own README: 75 hand-extracted rows, rule-based keywords, "**No ML model is trained yet.**" That's the ceiling the whole field hits, because of kill-shot #1. You'd be the 11th identical Streamlit app.
+
+**Kill-shot #3: Commercial prior art named in the PS itself (severity 7/10).** The description cites VelocityEHS's 2024 PSIF classifier — a shipped product. "What's novel?" has no answer beyond "ours is free."
+
+**Attack #4: Demo is a yawn for non-technical judges (severity 7/10).** Paste text → get a red/amber label + bar chart of "SIF density by site." No visual spectacle, no live hardware, no before/after. Judges see a form that says "HIGH RISK." Competing against drone/vision demos, this dies on stage.
+
+**Attack #5: Domain Q&A ambush (severity 6/10).** OIL operates in Assam — real field reports are English/Hindi/Assamese code-mixed; judges from OIL HSSE will ask about multilingual ingestion, IOGP rule multi-label data (also nonexistent), and HSSE-platform integration you have no API for. "Manual monthly triage" also means the org's real pain is *volume workflow*, not ML.
+
+**Attack #6: Cited evidence is soft (severity 4/10).** The 51%/25.5% divergence stat traces to a 2015 DEKRA marketing whitepaper — US data, no peer review.
+
+**Verdict:** Undifferentiated text classifier with no legal labeled data, no novelty, weak demo, and a judge panel (OIL HSSE staff) maximally equipped to expose the synthetic-data scaffolding. Hard pass.
+
+<<SCORES {"ps":"26165","role":"prosecutor","feasibility":4,"data_risk":9,"demo_wow":3,"uniqueness":2,"punch":8,"win_prob":2}>></subagent>
+<subagent agent_id="agent-75" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26068: &quot;WeatherGPT: Conversational AI for Weather Forecasting, Alerts, and Climate Information&quot;
+Org: Ministry of Earth Sciences (IMD) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Weather information is distributed across portals/bulletins/forecast systems. Build WeatherGPT: an AI chatbot integrating meteorological datasets, forecasting models, disaster warning systems for accurate, contextual, multilingual weather intelligence. Features: real-time weather retrieval; NL querying; integration with NWP models (GFS/WRF); extreme weather alerts/early warning dissemination; location-based forecasts/advisories; multilingual Indian languages; climate trend/historical analysis; voice-enabled interaction for rural accessibility. Suggested stack: Python/FastAPI, MQTT/WIS2.0/WebSocket, LLMs, GIS, PostgreSQL/MongoDB, Docker/K8s." outcome="completed">**ADVOCATE — PS 26068 WeatherGPT**
+
+This is the safest high-scoring pick on the board for a web+LLM team. Zero model training required (GPU budget untouched), zero vision, and the demo is inherently theatrical: weather is visual, temporal, and every judge has an opinion about a monsoon forecast.
+
+**Architecture (1 para):** FastAPI backend + React mobile-first PWA. Data plane: [Open-Meteo](https://open-meteo.com/) (free, no key, GFS/ECMWF/ICON models + 80-yr historical archive API), IMD's [Mausam](https://mausam.imd.gov.in/) district warnings/nowcast pages, and IMD's [Data Supply Portal](https://dsp.imdpune.gov.in/) (confirmed live, v5.7) for gridded historical rainfall. Ingest alerts into Postgres+pgvector; LLM (Gemini/Claude API) does tool-calling over a small set of typed functions (`get_forecast`, `get_alerts`, `get_climate_trend`), with guardrails forcing all numbers through retrieval — never let the LLM hallucinate a forecast. Bhashini or Gemini for 8+ Indian languages + voice in/out. Map tiles with alert polygons = the GIS checkbox. Docker compose, done. This is 4 weeks of honest vibe-coding work.
+
+**90-second demo for non-technical judges:** Judge speaks Hindi into the phone: *"कल भोपाल में धान काट सकते हैं?"* — bot answers in Hindi voice with rain probability and a "wait 2 days" advisory. Switch to English: "Any cyclone warnings on the east coast?" — map lights up with IMD alert polygons and a red banner. Then the kill shot: "How much rainier has July gotten in Kerala since 1990?" — live chart from Open-Meteo's historical archive. Three audiences (farmer, disaster manager, researcher) in 90 seconds, matching the PS's own framing.
+
+**Why it wins / how to beat clone teams:** Most teams will ship a generic chatbot wrapper around one API with hallucinated numbers. Beat them on (1) **verifiable grounding** — every figure cited with source + timestamp, LLM literally cannot emit an ungrounded forecast; (2) **push, not just pull** — WebSocket alert subscription ("notify my village if IMD issues orange alert") is what makes it *disaster management*, the actual theme; (3) voice-first Hindi demo live on stage. Judges award the working voice demo, not the architecture diagram.
+
+**Honest risks:** NWP "integration" is really API consumption — fine, Open-Meteo *is* GFS/WRF-adjacent output. IMD has no clean public REST API; you'll scrape bulletins — fragile but survivable. And "chatbot" PSs attract volume (0/500 ideas logged is suspiciously empty — may be newly listed). Differentiation above is mandatory, not optional.
+
+<<SCORES {"ps":"26068","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":8,"uniqueness":4,"punch":8,"win_prob":6}>></subagent>
+<subagent agent_id="agent-76" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26068: &quot;WeatherGPT: Conversational AI for Weather Forecasting, Alerts, and Climate Information&quot;
+Org: Ministry of Earth Sciences (IMD) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Weather information is distributed across portals/bulletins/forecast systems. Build WeatherGPT: an AI chatbot integrating meteorological datasets, forecasting models, disaster warning systems for accurate, contextual, multilingual weather intelligence. Features: real-time weather retrieval; NL querying; integration with NWP models (GFS/WRF); extreme weather alerts/early warning dissemination; location-based forecasts/advisories; multilingual Indian languages; climate trend/historical analysis; voice-enabled interaction for rural accessibility. Suggested stack: Python/FastAPI, MQTT/WIS2.0/WebSocket, LLMs, GIS, PostgreSQL/MongoDB, Docker/K8s." outcome="completed">## PROSECUTION: PS 26068 "WeatherGPT"
+
+**KILL-SHOT 1 — Crowding is fatal (severity 10/10).** Verified via `gh search`: at least 6 repos literally named for this PS ID — `pulishravya8-afk/WEATHERGPT-SIH26068`, `rangathanmai2006/WeatherGPT-SIH26068`, `xarjunpatil/SIH26068-WeatherGPT-...`, `himanshuparmar22062008-collab/vaani-sih26068`, `ashwinh11/SKYNETICS-WeatherGPT`, plus `AyanSamanta01/WeatherGPT-SIH-2026-`, `devashishgorai/WeatherGpt` ("MVP FOR SIH INTERNAL"), `mbsurya19122004/SIH-WeatherGPT` — ~20 repos total, most updated this week. Worse: `MartsTech/WeatherGPT` (GPT-3 + Open-Meteo, years old) proves the core build is a solved tutorial. You are entry #21 of the same demo.
+
+**KILL-SHOT 2 — The "IMD data" premise is hollow (severity 9/10).** No dataset is provided. Verified: IMD historical data lives behind the paid [Data Supply Portal](https://dsp.imdpune.gov.in/) — "Estimate of Data Charges... (for those who are not under MoES organisation)," account-enrolled procurement, not download. So "climate trend/historical analysis" on real IMD data is legally/financially gated; every team will silently substitute Open-Meteo/OpenWeather — exactly what the judge will probe: *"Which IMD dataset did you actually integrate?"* Answer: none.
+
+**KILL-SHOT 3 — NWP integration is a spec trap (severity 9/10).** "Integration with NWP models (GFS/WRF)" — WRF is HPC-grade (WPS geogrid, hundreds of cores, days of config). No student team runs WRF in a month; the honest implementation is calling Open-Meteo, which *already* wraps GFS/IFS/ICON. That makes you a GPT wrapper around a free API — the precise thing non-technical judges dismiss: *"So it's asking Alexa the weather?"*
+
+**KILL-SHOT 4 — Hallucinating disaster warnings (severity 9/10).** IMD/MoES holds the statutory warning mandate. An LLM that paraphrases cyclone alerts adds hallucination risk to life-safety information and zero authority. IMD-domain judges will eviscerate this in Q&A.
+
+**KILL-SHOT 5 — Breadth-over-depth + fragile demo (severity 8/10).** Spec demands ~10 subsystems: WIS2.0/MQTT, GIS, Indic-language voice ASR (a whole AI4Bharat-scale research stack), multilingual NLG, K8s. None gets production quality in a month. And the demo is hostage to demo-day weather — your "extreme alert" moment is a mocked alert, which judges smell instantly.
+
+**Verdict:** the feasible 20% (chatbot over a free API) wows nobody; the impressive 80% (NWP, IMD data, Indic voice) is infeasible or gated. Crowded, wrapper-shaped, liability-prone. Reject.
+
+<<SCORES {"ps":"26068","role":"prosecutor","feasibility":4,"data_risk":8,"demo_wow":3,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-77" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26083: &quot;Extreme Heatwave Early Warning and Human Thermal Stress Index&quot;
+Org: Ministry of Earth Sciences (IMD) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Heatwaves in India are escalating but warnings rely on dry-bulb temperature thresholds, ignoring compounding effects of humidity, wind, solar radiation. 40C at 20% humidity differs vastly from 40C at 70% — the latter can be fatal. Public health infrastructure lacks localized impact-based forecasting translating weather into physiological risk, thermal stress, projected mortality. Build a predictive platform computing a comprehensive Human Thermal Stress Index (temperature + humidity + wind + radiation) linked to health outcomes; localized early warning shifting from 'what the weather will be' to 'what the weather will do' to human health." outcome="completed"># ADVOCATE — PS 26083 (Heatwave Thermal Stress Index)
+
+**Why this wins for this team.** Zero vision AI. The "AI" is thermodynamics + one gradient-boosted model — CPU-trainable, so the 30 Kaggle GPU-hours constraint is a non-issue. The deliverable is a live map dashboard + alert system = pure full-stack + LLM work, exactly the team's strength. The PS literally asks for "what the weather will *do*" — an LLM-narrated, ward-level advisory is a built-in LLM showcase.
+
+**Architecture.** Open-Meteo free API (verified live: hourly temp, RH, wind, shortwave/direct/diffuse radiation, 16-day forecast + historical archive, no key) → compute **WBGT/UTCI** with ECMWF's `thermofeel` library (`github.com/ecmwf-projects/thermofeel`) → XGBoost layer that converts WBGT anomaly into excess-mortality/hospitalization risk per district, trained on IMD Pune 0.25° gridded data (verified: 1901–2024, free download) + NCRB Accidental Deaths heat-stroke deaths + Ahmedabad Heat Action Plan published studies → PostGIS map → Twilio WhatsApp push + LLM-generated plain-language advisories in Hindi/Marathi.
+
+**90-second demo.** Open a live color-coded map of India, zoom into Nagpur ward-level. "IMD says 41°C. Every existing app shows 41°C." Click — the app shows WBGT 33.4°C, flashing red: "This ward crosses the survivability threshold for outdoor workers by 1 PM Thursday." Show the predicted +18% excess-death band for the next 3 days. Then hit one button: a WhatsApp message arrives on a judge's phone, in Hindi, telling ward officers to open the cooling center at Shivaji Nagar and shift construction hours. Judges' phones buzzing = demo won.
+
+**Beating rival teams.** They'll show a static heat-index chart or a regurgitated IMD feed. We win with (1) real physics (WBGT, not "feels like"), (2) ward-level GIS drill-down, (3) the *outbound action* — WhatsApp advisory generation — which converts prediction into policy, and (4) citing the Ahmedabad HAP's documented mortality reduction, framing ours as its scalable software form. Nobody else will demo an actual phone receiving the alert.
+
+**Honest risk.** District-level Indian hospitalization time-series is not openly published; the mortality layer rests on NCRB annual counts + published city studies, so the XGBoost "risk model" is calibrated on sparse labels. I'd frame it as a calibrated risk-scoring layer, not a validated mortality predictor — judges won't audit, but the score block must.
+
+<<SCORES {"ps":"26083","role":"advocate","feasibility":9,"data_risk":4,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-78" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26083: &quot;Extreme Heatwave Early Warning and Human Thermal Stress Index&quot;
+Org: Ministry of Earth Sciences (IMD) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Heatwaves in India are escalating but warnings rely on dry-bulb temperature thresholds, ignoring compounding effects of humidity, wind, solar radiation. 40C at 20% humidity differs vastly from 40C at 70% — the latter can be fatal. Public health infrastructure lacks localized impact-based forecasting translating weather into physiological risk, thermal stress, projected mortality. Build a predictive platform computing a comprehensive Human Thermal Stress Index (temperature + humidity + wind + radiation) linked to health outcomes; localized early warning shifting from 'what the weather will be' to 'what the weather will do' to human health." outcome="completed">**PROSECUTION: PS 26083 — Extreme Heatwave Early Warning & Thermal Stress Index**
+
+**KILL-SHOT 1 — The mortality labels do not exist. (9/10)**
+The spec's core ask is "links directly to an automated Mortality Risk Index… predict heat-induced mortality and hospitalization spikes." India has **no public ward/city-level daily heat-mortality or hospitalization dataset**. NCRB publishes heat-stroke deaths annually, *state-level only*, and is a documented massive undercount (NCRB records ~300–700 "sun stroke" deaths/year vs. multi-thousand estimates in the literature). MCCD cause-of-death microdata isn't public; hospital admissions aren't public. There is no ground truth to train or validate against. Every team will either (a) fit literature thresholds (Ahmedabad HAP studies) and relabel it "ML," or (b) train on synthetic labels — i.e., the model predicts its own assumptions. A single judge question — "what data did you train the mortality model on?" — collapses the demo.
+
+**KILL-SHOT 2 — Crowding. (8/10)**
+`gh search repos SIH26083` returns **12 public repos in ~2 weeks** (thermowatch-sih26083, Headshield-AI, SIH26083-HeatShield, Debug-Divas, etc.), several already with GIS dashboards, alerts, multilingual support. This is one of 2026's most saturated software PS IDs. Judges will see 30 near-identical heat dashboards.
+
+**Attack 3 — The "AI" evaporates under inspection. (7/10)**
+WBGT/UTCI/HI are closed-form formulas. ERA5 (0.25°, hourly, free via Copernicus CDS) + Open-Meteo give all inputs — no GPU, no training, no Kaggle hours. So the honest build is arithmetic + a Leaflet dashboard + Twilio. Any "ML" bolted on is trained on fabricated labels (Kill-shot 1). Judge: "So where's the AI?" — there is no good answer.
+
+**Attack 4 — Ward-level resolution trap. (7/10)**
+Spec demands hyper-local Zone/Ward forecasts, but ERA5 is ~25 km, IMD gridded data is 1°×1°, and ward weather geometries don't exist. "Ward-level" becomes nearest-grid-point cosplay.
+
+**Attack 5 — Incumbents. (5/10)**
+IMD + NDMA already issue color-coded impact-based heat-health forecasts; Heat Action Plans exist in 23+ states. Differentiation story is thin.
+
+**Concessions:** No vision trap anywhere; tabular build fits the team's web+LLM stack; heat maps demo viscerally well to non-technical judges; weather data (ERA5/Open-Meteo) is genuinely free and reliable. The build is easy — which is exactly why everyone is building it. Verdict: feasible but untruthful at its core and buried in a crowd. **Reject.**
+
+<<SCORES {"ps":"26083","role":"prosecutor","feasibility":7,"data_risk":7,"demo_wow":6,"uniqueness":3,"punch":8,"win_prob":3}>></subagent>
+<subagent agent_id="agent-79" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26047: &quot;Patient Case-Taking Software&quot;
+Org: Ministry of Ayush (AIIA) | Theme: Smart Automation
+Dataset field: (none provided)
+Description: History taking — structured elicitation of presenting complaints, HPI, past medical/surgical history, drug/allergy history, family/personal history, review of systems — yields diagnosis in 70-80% of cases, yet Indian OPDs register 4,000-10,000 patients/day with 2-5 minute consultations. AYUSH adds Ayurvedic assessment (Prakriti, Vikriti, Agni, Koshtha, Ahara-Vihara, Nidana, Samprapti — Trividha/Ashtavidha/Dashavidha Pariksha). Build software for AI-assisted patient case-taking: pre-consultation patient self-interview, structured case sheets, multilingual. NOTE: the full PS also mentions document digitization modules — check description for vision/OCR requirements." outcome="completed"># ADVOCATE — SIH26047 Patient Case-Taking Software (Ministry of Ayush / AIIA)
+
+**The objection first, then the kill shot.** Yes, the full PS (verified in `data/sih2026_ps.csv`, 12KB description) contains "Module B: high-accuracy OCR, printed and handwritten, multilingual." Our team constraint forbids vision AI. Here's the steelman: **OCR is one of four modules, and the PS's own scoring heart is the conversational history engine.** Modules A (adaptive patient interview), C (structured summary generator), and D (ABDM/ABHA consent + FHIR push) are 100% text/voice LLM work. Module B can be honestly satisfied *without* vision: pull prior records as structured FHIR documents from ABDM (the [ABDM sandbox](https://sandbox.abdm.gov.in/) is live and public), accept pasted/typed lab values, and mark OCR as "deployment-phase via certified vendor." Judges from AYUSH care about the *Ayurvedic* depth, not the scanner.
+
+**Why this wins for us.** Zero model training — pure LLM orchestration, which is exactly the team's strength. Data risk ≈ zero: history-taking frameworks (OPD format, Ashtavidha/Dashavidha Pariksha, Prakriti/Vikriti/Agni/Koshtha) are published clinical canon, not proprietary datasets. No other mainstream SIH PS offers a problem this well-specified with this little data dependency.
+
+**Architecture (1 para).** Next.js/React patient tablet UI + doctor dashboard; FastAPI backend; LangGraph state machine driving a bilingual (Hindi/English, extendable via AI4Bharat TTS/STT APIs) adaptive interview with dynamic question branching per complaint + full Dashavidha Pariksha branch for AYUSH mode; GPT-4o/Claude synthesizes the transcript into the PS-specified format (Chief complaint → HPI → PMH → Drug/Allergy → Family → Personal → ROS → Prakriti assessment); mock ABDM FHIR push with consent screen; doctor edits/confirms. Red-flag rules engine for triage. All demoable offline with canned LLM responses if venue Wi-Fi dies.
+
+**90-second demo for non-technical judges.** 1) "A government hospital sees 8,000 patients a day. Each doctor gets 2 minutes. Here's where the other 13 minutes come from." 2) Volunteer plays a patient on a tablet — speaks Hindi: *"pet mein dard"* — AI asks smart follow-ups aloud, on-screen. 3) Cut to doctor's screen: a complete, color-coded case sheet in English appears *before* the patient walks in, red-flag "chest pain → priority" banner flashes. 4) One-click confirm, ABHA-linked. "The doctor now spends 5 minutes healing, not typing."
+
+**Beating rival teams.** Most will build a chatbot form. We win by (a) implementing the *actual* Ayurvedic exam frameworks rivals skip, (b) the triage red-flag moment (theatrical, judges remember it), (c) a working bilingual voice loop, (d) ABDM/FHIR compliance slide straight from the PS text — quoting the PS's own Module D back at the ministry.
+
+<<SCORES {"ps":"26047","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-80" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26047: &quot;Patient Case-Taking Software&quot;
+Org: Ministry of Ayush (AIIA) | Theme: Smart Automation
+Dataset field: (none provided)
+Description: History taking — structured elicitation of presenting complaints, HPI, past medical/surgical history, drug/allergy history, family/personal history, review of systems — yields diagnosis in 70-80% of cases, yet Indian OPDs register 4,000-10,000 patients/day with 2-5 minute consultations. AYUSH adds Ayurvedic assessment (Prakriti, Vikriti, Agni, Koshtha, Ahara-Vihara, Nidana, Samprapti — Trividha/Ashtavidha/Dashavidha Pariksha). Build software for AI-assisted patient case-taking: pre-consultation patient self-interview, structured case sheets, multilingual. NOTE: the full PS also mentions document digitization modules — check description for vision/OCR requirements." outcome="completed"># PROSECUTION: PS 26047 — "Patient Case-Taking Software" (Ministry of Ayush / AIIA)
+
+**Verdict: reject. This PS is a trap dressed as a chatbot.**
+
+## Kill-shot #1 — Banned vision module is in the Expected Solution, not optional (severity 9/10)
+The full description's §3.1 mandates **"Module B — Medical Document Digitization & Intelligence… high-accuracy OCR (printed and handwritten, multilingual)"** extracting meds/dosages/lab values from handwritten prescriptions. Handwritten medical OCR is unambiguously vision AI — our hard constraint kills it. Skipping Module B means demoing half the spec to ministry judges who wrote it; one competing repo already demos "simulated OCR" (`Neelesh573/MediKiosk-SIH26047-Prototype`), i.e., rivals are faking it and we can't even fake it well.
+
+## Kill-shot #2 — Crowding is already terminal (severity 9/10)
+GitHub today: **16 repos under "SIH 26047"** (`Clu3lesss/SIH26047` literally "agentic implementation with langchain"), plus **30 repos named "medikiosk"** — the PS *names the expected product* ("tentatively designated MediKiosk"), so every team's UI, name, and architecture converge. Zero differentiation surface: it's an LLM intake form + case-sheet renderer. Judges will see 40 identical sliding-window LangChain chatbots.
+
+## Kill-shot #3 — Spec smuggles three more un-demoable dependencies (severity 8/10)
+- **Multilingual ASR "in noisy hospital environments"** via Bhashini/AI4Bharat — ULCA API onboarding, rate limits, and a live Hindi-voice demo in a noisy judge hall is a coin-flip. The text fallback collapses the demo to a boring form.
+- **ABDM/ABHA/FHIR integration** is demanded explicitly. Sandbox access and ABHA linking cannot be real in 1 month; ministry judges *will* ask "show me the ABHA push" — answer is a mock.
+- **DPDP Act 2023 health-data compliance** is listed as a challenge. Ayush ministry judges love this question; we have nothing defensible.
+
+## Kill-shot #4 — No data, no model, no moat (severity 7/10)
+Dataset field: empty. There is no training task — Prakriti/Vikriti/Dashavidha Pariksha assessment is prompt-engineering against an LLM, which (a) any team replicates in a weekend, (b) invites the lethal Q: *"Is Prakriti assessment clinically validated? A wrong Agni classification is medical misinformation from a government kiosk."* Red-flag triage (chest pain routing) is a liability minefield judges probe for sport.
+
+## Mitigating honesty
+The 70–80% diagnosis stat and OPD bottleneck story are genuinely compelling, and the portal shows **0/500 ideas submitted** — possibly low official uptake. But official crowding is irrelevant when the GitHub field is this thick and the spec is unbuildable under our constraints.
+
+**Verdict: hard pass.** Vision-mandated, crowded, demo-fragile, no moat.
+
+<<SCORES {"ps":"26047","role":"prosecutor","feasibility":4,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":9,"win_prob":2}>></subagent>
+</agent_swarm_result><agent_swarm_result>
+<summary>completed: 16</summary>
+<subagent agent_id="agent-81" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26092: &quot;AI-Driven Scheme Matching for Marginalized Entrepreneurs&quot;
+Org: Ministry of Social Justice and Empowerment (MoSJE) | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: SC beneficiaries with family income up to Rs 5 lakh get concessional financial assistance and educational loans covering up to 90% of project/education costs at 6.5-8% p.a. Funds route through a Channel Finance System of 100+ Channel Partners (SCAs, PSBs, RRBs, NBFC-MFIs). Citizens can't distinguish which scheme fits (Micro Finance up to Rs 1.4L, Term Loan up to Rs 50L, Educational Loan) nor locate the nearest authorized Channel Partner. Build an intelligent multilingual digital platform: Smart Scheme Recommender (AI/rule-based from basic inputs), Financial/EMI calculator, Channel Partner locator with eligibility/fund-utilization awareness." outcome="completed">**PS 26092 — ADVOCATE. This is the closest thing to a free square on the board.**
+
+**Why it fits this team like a glove.** Zero vision. Zero training. Zero Kaggle hours. The "AI" is an LLM doing what LLMs already do well — multilingual conversation and explanation — wrapped around a deterministic rule engine. The entire eligibility logic is **handed to you in the PS text**: income ≤₹5L, Micro ≤₹1.4L, Term ≤₹50L, 6.5–8% p.a., 3–12-month moratoriums. I verified [NSFDC](https://nsfdc.nic.in/) is live (the MoSJE PSU running exactly these schemes); full scheme tables are public there. Only gap: partner fund-utilization data isn't public — mock it as a clearly-labeled admin feed. The PS says "awareness," not live integration. Data risk: low.
+
+**Architecture (1 para).** Next.js PWA, chat-first UI mimicking WhatsApp. LLM (Gemini 2.5 Flash) does ONLY vernacular NLU + Hindi/regional explanation; a versioned JSON rule engine decides eligibility deterministically and emits an auditable "why this scheme" trace. EMI calculator = pure JS. Locator = Leaflet + OpenStreetMap (free, no key), partner DB seeded from NSFDC's published SCA/PSB/RRB lists, fund-utilization as a mock admin toggle. Total: ~3 weeks vibe-codeable.
+
+**90-second demo for non-technical judges.**
+- 0–15s: Judge taps mic, speaks Hindi: *"मुझे 2 लाख का किराना स्टोर खोलना है।"*
+- 15–35s: Assistant replies in Hindi, asks income, returns a scheme card: "Term Loan — 90% funded, 6.5%" **with the visible rule trace** ("income ≤ ₹5L ✓").
+- 35–55s: EMI slider + moratorium toggle, numbers animate live.
+- 55–75s: Map pops: nearest partner 4.2 km; a closer one is greyed — *"fund exhausted this quarter, rerouted."* Judges audibly react to this.
+- 75–90s: One-tap bilingual application checklist. Close: "No wrong forms. No middlemen."
+
+**How we beat clones.** Everyone else ships a generic English chatbot + static map. We win on three things they won't do: (1) **voice-first vernacular** (the actual beneficiary persona), (2) **explainable rule trace** vs black-box vibes — MoSJE judges are bureaucrats, auditability is their love language, (3) **fund-utilization-aware routing**, explicitly demanded, likely skipped by 90% of teams. Bonus signal: dataset shows 0/500 ideas submitted — low competition.
+
+Honest risk: "Miscellaneous" theme, welfare-tech demos can feel dry if the team fumbles the voice UX. Nail the Hindi mic moment or this becomes a form-filler.
+
+<<SCORES {"ps":"26092","role":"advocate","feasibility":9,"data_risk":3,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-82" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26092: &quot;AI-Driven Scheme Matching for Marginalized Entrepreneurs&quot;
+Org: Ministry of Social Justice and Empowerment (MoSJE) | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: SC beneficiaries with family income up to Rs 5 lakh get concessional financial assistance and educational loans covering up to 90% of project/education costs at 6.5-8% p.a. Funds route through a Channel Finance System of 100+ Channel Partners (SCAs, PSBs, RRBs, NBFC-MFIs). Citizens can't distinguish which scheme fits (Micro Finance up to Rs 1.4L, Term Loan up to Rs 50L, Educational Loan) nor locate the nearest authorized Channel Partner. Build an intelligent multilingual digital platform: Smart Scheme Recommender (AI/rule-based from basic inputs), Financial/EMI calculator, Channel Partner locator with eligibility/fund-utilization awareness." outcome="completed"># PROSECUTION: PS 26092 — "AI-Driven Scheme Matching for Marginalized Entrepreneurs"
+
+**Kill-shot #1 — The spec mandates data that does not exist (severity 9/10).** Component 3, "Geo-Spatial Partner Locator & Router," requires routing based on "the partner's **current fund utilization eligibility**... ensuring applications aren't sent to partners with high NPAs or overdues." I probed nsfdc.nic.in: it publishes a static SCA list (names/addresses, "sca" page only). There is **no public API or dataset of per-partner NPA, overdue, or fund-utilization figures** — that's NSFDC-internal. The dataset field is literally empty. The team will either fabricate this with random numbers (fatal under MoSJE judge Q&A: "Where does this come from?" → "Nowhere") or amputate the spec's most distinctive component, leaving a plain locator.
+
+**Kill-shot #2 — Extreme crowding, verified today (severity 8/10).** `gh search repos` shows **15+ public repos already building SIH26092**: `git-anikxt/sih26092`, `priyamvada7078/SIH26092`, `jangrakartik001-prog/SIH26092-SchemeSetu`, `madhunalagayathri3-jpg/SIH26092-AI-Scheme-Matcher`, `xarjunpatil/SIH26092-...`, plus NSFDC-branded clones (`nsfdc-setu` ×2, `nsfdc-ai-scheme-finder`, `nidhi-sahayak`, and `amarranjan1/NSFDC-BEAM` dating to **January 2026** — 8 months of prior art). This is a top-cloned PS; the portal's 0/500 counter is stale.
+
+**Kill-shot #3 — The "AI" is four if-statements (severity 8/10).** Inputs: project type, cost, income, education status → output: one of **3 schemes** (Micro ≤1.4L, Term ≤50L, Education). A judge asks "why is this AI and not a dropdown?" and there is no honest answer. Bolting an LLM on a decision tree is the single most template hackathon move in existence.
+
+**Attack #4 — Demo wow is structurally capped (severity 7/10).** Form → scheme card → EMI number → map pin. To non-technical judges this is indistinguishable from every bank's eligibility page. EMI calculators are homework. **Attack #5 — Dead-end impact story (severity 7/10):** the spec itself says "direct loan applications are not entertained" — the app can't close any loop; users still walk to a partner offline. "So what did your platform actually *do*?" Nothing verifiable.
+
+**Concession:** it's trivially buildable — which is precisely the disease. Zero barrier → hundreds of identical submissions → judges compare you against 14 other demos of the same app, several with 8-month head starts. High feasibility, near-zero differentiation, and a core spec component wired to unobtainable data. **Reject.**
+
+<<SCORES {"ps":"26092","role":"prosecutor","feasibility":9,"data_risk":8,"demo_wow":4,"uniqueness":2,"punch":8,"win_prob":2}>></subagent>
+<subagent agent_id="agent-83" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26089: &quot;Cooperative Gig Services Platform for Household &amp; Community Services&quot;
+Org: Ministry of Cooperation | Theme: Smart Automation
+Dataset field: (none provided)
+Description: Labour Cooperative Federations/Societies have skilled workers (electricians, plumbers, carpenters, painters, domestic helpers, caregivers, drivers, gardeners, cleaners, technicians) but no structured digital platform to connect them with households/institutions. Private platforms dominate. Build a cooperative-owned digital service marketplace: provider registration/verification, worker skill profiling/certification, customer booking/scheduling, geo-location matching, digital payments/invoicing, ratings, worker welfare/insurance integration, emergency on-demand booking, federation admin dashboard, multilingual mobile app, AI-based demand forecasting and workforce allocation." outcome="completed">## ADVOCATE — PS 26089 (Cooperative Gig Services Platform)
+
+**The kill shot: competition = ZERO.** The official SIH 2026 tracker (`data/sih2026_ps.csv`) shows submitted ideas **"0/500"** for this PS. Popular AI-flavored PSs get hundreds of submissions; here you're effectively the only serious entrant. Winning a PS nobody else picked beats fighting 300 clones on a hot one.
+
+**Why it fits the team perfectly.** This is a marketplace CRUD + matching + LLM problem — exactly full-stack + LLM strength. The "AI-based demand forecasting" checkbox is satisfiable with zero training: LLM over booking history, or Prophet/statsmodels on CPU — no GPU hours needed, no data-scarcity gamble, no vision anywhere. No dataset is provided because **none is needed** — we generate the demo data and it's our marketplace, so judges can't fact-check it against a canonical corpus. That flips data_risk from liability to freedom.
+
+**Architecture (1 para).** Next.js + Postgres/PostGIS backend; worker/coop onboarding with Aadhaar-style ID verification mocked via LLM doc-check (text only); booking engine with geo-matching (PostGIS radius query + scoring on skill, rating, distance); LLM layer for multilingual chat intake ("need plumber Sunday morning" → structured booking via function-calling), review summarization, and a demand-forecast dashboard (aggregated bookings → LLM narrative "expect 40% plumber demand spike pre-Diwali"); UPI payments via Razorpay sandbox; admin dashboard with welfare/insurance integration hooks to **e-Shram** (verified live: HTTP 200 at eshram.gov.in — the real national registry of 30cr+ unorganized workers; cite it as the integration target, judges will recognize it).
+
+**90-second demo for non-technical judges.**
+1. (0-15s) "Urban Company takes 25-30% commission. This electrician owns the platform — it's a cooperative."
+2. (15-40s) Book in Hindi via voice-style chat: *"रविवार को प्लंबर चाहिए"* → instant match card: name, photo, rating, ₹/hr, distance, coop ID.
+3. (40-60s) Worker phone view: job accepted, UPI payment lands, invoice auto-generated.
+4. (60-90s) Federation admin dashboard: live map of 500 workers, forecast graph, welfare insurance enrollment via e-Shram. Punchline: "Same convenience. Commission goes to the workers, not a unicorn."
+
+**How to beat the (rare) co-entrant.** They'll build Urban Company with a coat of paint. We win on the cooperative-specific deltas: profit-share/surplus distribution calculator, democratic governance view (board elections, member ledger), multilingual-first (they'll do English-first), and the e-Shram welfare hook. Ship PWA + SMS fallback — real cooperatives don't all have smartphones; that's a judge-magnet line no one else will say.
+
+**Risks, honestly.** Demo wow is moderate, not spectacle — the demo script above is engineered to carry it. Scope is wide; cut hard to booking→matching→payment→dashboard core.
+
+<<SCORES {"ps":"26089","role":"ADVOCATE","feasibility":9,"data_risk":2,"demo_wow":7,"uniqueness":9,"punch":8,"win_prob":8}>></subagent>
+<subagent agent_id="agent-84" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26089: &quot;Cooperative Gig Services Platform for Household &amp; Community Services&quot;
+Org: Ministry of Cooperation | Theme: Smart Automation
+Dataset field: (none provided)
+Description: Labour Cooperative Federations/Societies have skilled workers (electricians, plumbers, carpenters, painters, domestic helpers, caregivers, drivers, gardeners, cleaners, technicians) but no structured digital platform to connect them with households/institutions. Private platforms dominate. Build a cooperative-owned digital service marketplace: provider registration/verification, worker skill profiling/certification, customer booking/scheduling, geo-location matching, digital payments/invoicing, ratings, worker welfare/insurance integration, emergency on-demand booking, federation admin dashboard, multilingual mobile app, AI-based demand forecasting and workforce allocation." outcome="completed"># PROSECUTION: PS 26089 — Cooperative Gig Services Platform
+
+**Verdict up front: this is an Urban Company clone wearing a cooperative costume, and the spec is a scope bomb. Kill it.**
+
+**Attack 1 — Crowding is already fatal (severity 9).** Verified via `gh search repos`: at least 9 public SIH-2026 repos already exist for this exact PS as of this week — `UmraCodes/saathi-sih-26089`, `Gurpreetkaur-techiee/SkillBridge-SIH26089`, `Yuvika108/SIH-26089...`, `xarjunpatil/SIH26089...`, `Sheamsundar-K/SIH26089`, `Harshita140326/sih26089-coserve`, and more. And that's just teams who pushed publicly in week one. Two-sided marketplaces are the single most template-cloned hackathon category in existence. Judges will see 40 near-identical booking apps before lunch.
+
+**Attack 2 — Feature sprawl is the real spec trap (severity 9).** Count the mandated features: registration/verification, skill certification, booking/scheduling, geo-matching, payments + invoicing, ratings, **insurance integration**, emergency on-demand booking, federation admin dashboard, **multilingual mobile app**, AI demand forecasting. That's 11 subsystems. Urban Company took a decade and $300M. A 1-month team ships 4 of these well and 7 as stubs — and judges probe stubs.
+
+**Attack 3 — "Worker welfare/insurance integration" is vaporware bait (severity 7).** Integrate with *what*? e-Shram and PM-JAY have no public sandbox APIs for students. The honest answer in Q&A is "we mocked it," which torpedoes credibility on the PS's core differentiator (cooperative welfare angle).
+
+**Attack 4 — AI forecasting has no data (severity 8).** Dataset field: **empty**. Demand forecasting for a cooperative marketplace that doesn't exist means training on faker.js output. Judge: "What data did you forecast with?" There is no good answer. It's LLM-call-dressed-as-ML.
+
+**Attack 5 — Hidden constraint collision (severity 6).** "Provider verification" tempts document OCR/Aadhaar eKYC — vision modules the team is barred from. "Multilingual **mobile application**" is mandated; team's strength is web. Both are spec-says-X, team-can't-do-X mismatches.
+
+**Attack 6 — Demo fragility with non-technical judges (severity 8).** The demo is: book a plumber between two seeded accounts, watch a pin move on a map. Non-technical judges have used Urban Company; this looks like a worse version of an app on their phone. Zero wow. Cold-start problem ("where do real workers come from?") is an unanswerable softball.
+
+**Concession (fairness):** no vision smuggled in explicitly; geo/payments are easy (PostGIS, Razorpay test mode); a competent CRUD+LLM build is very doable. Feasibility of *a* product isn't the problem — feasibility of the *mandated* product is.
+
+<<SCORES {"ps":"26089","role":"prosecutor","feasibility":4,"data_risk":7,"demo_wow":3,"uniqueness":1,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-85" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26073: &quot;AI/ML-Based Intelligent Anomaly Detection for Automatic Weather Stations (AWS)&quot;
+Org: Ministry of Earth Sciences (MoES) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: 'SkyGuard AI: Intelligent Real-Time Anomaly Detection for Temperature, Pressure, Humidity sensors in Automatic Weather Stations.' AWS networks provide real-time data for forecasting/disaster management/aviation/agriculture, but observations contain anomalies from sensor malfunction, communication failures, calibration drift, power fluctuations, harsh environment, data corruption. Threshold-based QC misses complex/hidden anomalies. Build an AI/ML system automatically identifying abnormal, inconsistent, or faulty observations from AWS data streams in real time." outcome="completed"># ADVOCATE — PS 26073 "SkyGuard AI" (MoES, Disaster Management)
+
+**Why this wins under our constraints.** It's the rare SIH PS that's pure numeric time-series — zero vision, zero OCR risk, tiny models (3 channels: temp, pressure, humidity), and the evaluation is *explicitly* on anomaly-injected data, meaning we control the benchmark. Training fits trivially in 30 Kaggle hrs: an Isolation Forest trains on CPU in minutes; an LSTM/autoencoder forecaster on ~100M numeric rows is a 2-4 GPU-hour job with a clean GPU-train/local-infer split. The PS literally asks for SHAP/LIME + LLM-style plain-language alerts — our exact strength. And it's Disaster Management: "a faulty sensor almost triggered a false heatwave alert" is a story a non-technical judge *feels*.
+
+**Architecture.** Replay real historical METAR/ASOS streams for 40-50 Indian stations into a FastAPI ingest bus → three parallel detectors: (1) per-station LSTM forecaster (residual = anomaly score), (2) multivariate physics checks (T/RH/dewpoint consistency, pressure-temperature coupling), (3) spatial graph check vs. 3 nearest neighbors — fused into a confidence score; a root-cause classifier (spike / frozen / drift / comm-dropout); an imputer suggesting corrected values; an LLM layer converting SHAP evidence into duty-officer English ("Jaipur: sensor spike, not heatwave — 3 neighbors normal, pressure steady"); Next.js dashboard + map.
+
+**Data (verified).** Iowa State IEM ASOS/AWOS archive — [mesonet.agron.iastate.edu/request/download.phtml](https://mesonet.agron.iastate.edu/request/download.phtml) — confirmed live today: free CSV, temp/RH/pressure, **global incl. Indian airports, up to 1,000 station-years per request**. Backup: NOAA ISD/GSOD, Ogimet SYNOP. Labels: we inject the PS's own fault taxonomy — exactly what judges score on. (Note: the local `data/January2015toNovember2025.csv` is OSHA injury data, *not* weather — ignore it.)
+
+**90-second demo.** Map of India, 50 stations streaming at 60× speed: "This is the country's weather nervous system." Hit **Inject Fault** — Jaipur reads 55°C. Dumb threshold: silence. SkyGuard: red pulse, 97% confidence, verdict card "sensor spike, not heatwave," neighbor-comparison chart, SHAP reasons, corrected value, auto-filed maintenance ticket — all in ~2 seconds. Second fault: frozen sensor, caught in 3 ticks. Closer: "Bad sensor data means wrong cyclone warnings. We built the self-healing network MoES asked for."
+
+**Beating same-PS teams.** Most will ship single-station IsolationForest + Grafana. We win on: the spatial neighbor graph (the PS's own example hints at it), the fault-injection "chaos console" (judges *cause* the anomaly live), root-cause taxonomy, and LLM explainability. Uniqueness is this PS's weak axis — anomaly detection is a crowded, popular pick — so execution theatre must carry us.
+
+<<SCORES {"ps":"26073","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":8,"uniqueness":6,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-86" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26073: &quot;AI/ML-Based Intelligent Anomaly Detection for Automatic Weather Stations (AWS)&quot;
+Org: Ministry of Earth Sciences (MoES) | Theme: Disaster Management
+Dataset field: (none provided)
+Description: 'SkyGuard AI: Intelligent Real-Time Anomaly Detection for Temperature, Pressure, Humidity sensors in Automatic Weather Stations.' AWS networks provide real-time data for forecasting/disaster management/aviation/agriculture, but observations contain anomalies from sensor malfunction, communication failures, calibration drift, power fluctuations, harsh environment, data corruption. Threshold-based QC misses complex/hidden anomalies. Build an AI/ML system automatically identifying abnormal, inconsistent, or faulty observations from AWS data streams in real time." outcome="completed">**PROSECUTION: PS 26073 — "SkyGuard AI" (MoES, Disaster Management)**
+
+**Attack 1 — Data kill-shot (severity 10/10).** The dataset field is *empty*, and that's fatal. IMD AWS observations sit behind the paid [Data Supply Portal](https://dsp.imdpune.gov.in/) — account enrolment, per-station charges for non-MoES users, offline procurement, zero API, zero real-time feed. Worse: even purchased data has **no fault labels** — nothing says "this reading was calibration drift." Anomaly detection without ground truth is unevaluable. Proof from the field: the strongest competitor repo, `Luciefer-555/SIH26073-Weather`, ships `generate_dataset.py` — **synthetic data**. Even rivals gave up on real data.
+
+**Attack 2 — "Real-time" spec trap (severity 8/10).** Spec demands anomaly detection on live "AWS data streams." No public stream exists. Your demo is a CSV replayed with `time.sleep()`. MoES judges know their own infrastructure — "where is this streaming from?" ends you.
+
+**Attack 3 — Disaster-theme self-own (severity 9/10).** The hard core — is a 45°C spike a stuck sensor or a *real heatwave*? — is unsolved research. Resolve it wrong and your "disaster management" system suppresses actual disaster signals. You need cross-station correlation + NWP fields you don't have. Team strength (full-stack + LLM APIs) has zero leverage; LLMs here are dashboard garnish.
+
+**Attack 4 — Crowding (severity 7/10).** Six+ public GitHub repos already (Aug 25–Sep 7): `sirawagak/SIH26073`, `amarkumar00/AeroGuard-QC-SIH26073`, `pavanbabar1616-byte/AtmosAi-SIH2026`, and — kill-shot — `JohnDev7869/SkyGuard-AI-SIH26073-AWS-Anomaly-Detection`. **Even the suggested product name is taken.** IsolationForest + Streamlit map is the template everyone clones.
+
+**Attack 5 — Demo boredom (severity 7/10).** Numbers turning red on time-series charts. Non-technical judges see a Grafana clone. No emotional hook, no interaction, no visual spectacle.
+
+**Attack 6 — "Why not a threshold?" boomerang (severity 8/10).** The spec names thresholds as the baseline to beat. On unlabeled synthetic data you *cannot* prove your autoencoder beats a 3-sigma rule — and on injected synthetic faults, simple rules usually win, so your own eval undermines you.
+
+**Attack 7 — No moat (severity 6/10).** CPU tabular sklearn = a weekend build. "Production-grade trained model" differentiator: absent.
+
+Verdict: synthetic-data science project in a rented tuxedo. Reject.
+
+<<SCORES {"ps":"26073","role":"prosecutor","feasibility":6,"data_risk":9,"demo_wow":3,"uniqueness":2,"punch":2,"win_prob":2}>></subagent>
+<subagent agent_id="agent-87" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26106: &quot;AI-Powered Email Threat Detection, GeoLocation and Forensic Intelligence Platform&quot;
+Org: AICTE | Theme: Blockchain &amp; Cybersecurity
+Dataset field: (none provided)
+Description: Email is the most exploited attack vector (phishing, impersonation, BEC, fraud, credential theft, malware). Attackers use AI-generated language, domain lookalikes, display-name spoofing, hidden redirection links, relay chains. Existing tools focus on filtering but provide limited forensic tracing of fraudulent email origins — inadequate correlation of email headers, SMTP relay paths, SPF/DKIM/DMARC validation, IP reputation, geolocation. Build a platform that both detects sophisticated fraudulent emails AND traces source path, identifies probable sender infrastructure, correlates geolocation clues, and supports investigation." outcome="completed">## ADVOCATE — PS 26106: Email Threat Detection + Forensics
+
+**Why this wins under our constraints.** This is the rare SIH PS where the entire payload is *text*: email headers, SMTP Received chains, SPF/DKIM/DMARC strings, URLs, body text. Zero vision, zero OCR risk. It's LLM-native — phishing language analysis, impersonation detection, and forensic report writing are exactly what LLM APIs do best. And it's the most demo-able cybersecurity PS on the list: judges *receive phishing emails personally*. You don't explain the problem; you show their own inbox.
+
+**Architecture (1 para).** FastAPI backend + React frontend. Ingest `.eml`/paste → parse with Python's stdlib `email` + `dkimpy`/`pyspf`/`checkdmarc` for auth results → extract Received-chain IPs → enrich each hop via **ip-api.com** (free geolocation, 45 req/min) + **AbuseIPDB** free API (1k checks/day) for IP reputation → LLM API (Groq/Gemini free tier) scores body for BEC urgency, lookalike domains (Levenshtein + homoglyph map, pure string math), and hidden redirect chains → composite verdict + forensic case file. Map hop-by-hop relay path on Leaflet/OpenStreetMap (free). Optional classifier fine-tuned on Kaggle is garnish, not load-bearing — rules + LLM carry it.
+
+**90-second demo.** Judge pastes a fake "SBI KYC expired" email → screen shows instant red verdict, SPF/DKIM/DMARC failures lighting up, an animated map tracing the relay chain Lagos→Amsterdam VPS→bulletproof host, and an LLM-written plain-English forensic summary ("display name spoofs your CFO; link redirects twice before a credential-harvesting clone"). Then paste a legit email → green. 60 seconds, zero jargon.
+
+**Data (verified).** Jose Nazario's public phishing corpus at `monkey.org/~jose/phishing/` — confirmed live (HTTP 200), thousands of raw phishing `.eml` files, the canonical academic dataset. Pair with the public Enron corpus (~500k real ham emails, CMU) for benign traffic. Both raw email text, free, no license traps.
+
+**Beating clones.** Rivals will build "upload email → phishing/not-phishing" with a scikit-learn model and call it done. We win on the *forensic* half of the PS, which everyone else under-builds: hop-by-hop relay visualization, domain-registration age (RDAP, free), lookalike-domain generator showing what attackers *could* register, and exportable PDF forensic case reports. Non-technical judges remember the map animation and the report, not F1 scores. Risk: demo emails are sensitive — ship with curated sample cases baked in.
+
+**Honest caveats.** Detection-only teams saturate this PS; our edge is forensics, but it's also the hardest part to finish in a month. LLM verdicts need hard rule-based fallbacks or a live demo can misfire on stage.
+
+<<SCORES {"ps":"26106","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":9,"uniqueness":6,"punch":9,"win_prob":7}>></subagent>
+<subagent agent_id="agent-88" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26106: &quot;AI-Powered Email Threat Detection, GeoLocation and Forensic Intelligence Platform&quot;
+Org: AICTE | Theme: Blockchain &amp; Cybersecurity
+Dataset field: (none provided)
+Description: Email is the most exploited attack vector (phishing, impersonation, BEC, fraud, credential theft, malware). Attackers use AI-generated language, domain lookalikes, display-name spoofing, hidden redirection links, relay chains. Existing tools focus on filtering but provide limited forensic tracing of fraudulent email origins — inadequate correlation of email headers, SMTP relay paths, SPF/DKIM/DMARC validation, IP reputation, geolocation. Build a platform that both detects sophisticated fraudulent emails AND traces source path, identifies probable sender infrastructure, correlates geolocation clues, and supports investigation." outcome="completed"># PROSECUTION: PS 26106 — Email Threat Detection, GeoLocation & Forensics
+
+**Kill-shot #1: The headline feature is technically fraudulent (severity 9/10).**
+"GeoLocation of probable sender" collapses on contact with reality. Gmail has never exposed the sender's originating IP for webmail-sent messages — Received headers show only Google's internal relays. Outlook.com stripped `X-Originating-IP` years ago. The vast majority of real phishing originates from consumer webmail or compromised accounts, so your "geolocation" resolves to **Google's datacenter in Mountain View**. First technical judge question — "so where is the attacker?" — and the honest answer is "we can't know." The PS's central promise (trace origin, locate actor) is undeliverable; you'd be demoing a feature you know is a lie.
+
+**Kill-shot #2: No ground truth exists for the headline feature (severity 9/10).**
+Dataset field: empty. Classification data exists (Nazario corpus ~4.5k full-header phishing, SpamAssassin, Enron) but it's all 10–25 years old — zero coverage of AI-generated BEC, the exact threat the PS names. Worse: **attacker-location ground truth does not exist anywhere**, so the forensic/geolocation module can be neither trained nor evaluated. It's rules + GeoIP lookups dressed as "AI." You can't validate "evidentiary standards" with unverifiable outputs.
+
+**Kill-shot #3: Catastrophic crowding (severity 9/10).**
+`gh api search/repositories q="SIH26106"` → **85 repos already**, created within days of PS release (`SabarishR08/mailforensic-ai-sih26106`, `kiz915/SIH26106`, etc.). Phishing detection is the most hackathon'd cyber topic in existence; every team will build the same paste-.eml → risk-score → map-pin app. Zero differentiation possible.
+
+**Attack #4: Demo fragility (severity 7/10).**
+Live demo depends on AbuseIPDB/VirusTotal/ipinfo free tiers — rate-limited, key-required, network-dependent. Offline fallback = canned results = "is this hardcoded?" Non-technical judges see a text box and a red badge; SPF/DKIM forensics means nothing to them. The one visual (map pin) is Kill-shot #1's lie.
+
+**Attack #5: Q&A ambush (severity 6/10).**
+"Maintaining legal, privacy, and evidentiary standards" invites chain-of-custody, GDPR, and admissibility questions a student team cannot survive.
+
+**Concession:** the web platform itself is buildable in a month and detection-via-LLM works — but that's a spam filter with extra steps, and 84 other repos prove it.
+
+<<SCORES {"ps":"26106","role":"prosecutor","feasibility":4,"data_risk":8,"demo_wow":3,"uniqueness":2,"punch":3,"win_prob":3}>></subagent>
+<subagent agent_id="agent-89" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26043: &quot;A digital platform to crowdsource societal challenges and facilitate collaborative problem solving through universities and industry partnerships&quot;
+Org: Government of Jharkhand | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Jharkhand communities face local challenges (education, healthcare, agriculture, water, sanitation, environment, livelihoods, accessibility, urban infrastructure, public services). Citizens identify issues first but there's no structured mechanism to submit problems for evaluation and innovation-driven resolution. HEIs have expertise and students; industries have technical/financial resources. Collaboration is fragmented. NEP 2020 emphasizes experiential learning and community engagement. Build a digital platform: citizens/organizations submit challenges; categorization, expert evaluation, institutional assignment, industry collaboration; universities and industries co-develop solutions." outcome="completed"># ADVOCATE — PS 26043 (Jharkhand Challenge-Crowdsourcing Platform)
+
+**Core argument:** This is the *lowest-risk, highest-fit* PS for this exact team. It is a pure full-stack + LLM-integration build — zero model training, zero GPU hours, zero data-availability gamble. The CSV confirms it (SIH26043, 0/500 uptake — a nearly uncontested slot, which alone inflates win probability). And the category is government-validated: [MyGov.in](https://www.mygov.in/) is live with crores of users, and SIH *itself* is literally this concept. The ask isn't to invent the category — it's to build a sharper, Jharkhand-localized, AI-native version than 40 other teams' CRUD apps.
+
+**Architecture (1 para):** Next.js + Postgres with pgvector. Citizen submits a problem (text, Hindi/English) → embedding-based semantic dedup against all prior submissions → LLM auto-clusters duplicates into a canonical "Challenge Brief" (problem statement, affected district, category, severity estimate, affected population) → matching engine ranks HEIs/industries by expertise tags and past solutions → role-based dashboards (citizen, expert evaluator, university, industry, government nodal officer) with notification lifecycle. All intelligence is LLM API calls + pgvector cosine search. No training, no vision, fully vibe-codeable in a month.
+
+**90-second demo script:** "This is Sunita, a farmer near Ranchi. Her village handpump runs dry every March." → submit her problem in Hindi → **live**: "Our AI found 47 similar reports from 6 districts — they were invisible before; now they're one challenge: 'Seasonal groundwater failure in Ranchi plateau, ~12,000 affected.'" → click: auto-generated Challenge Brief → click: matched to BIT Mesra's civil dept + a Jharkhand borewell firm, with rationale shown → government dashboard: heatmap of 500 clustered grievances, pipeline status. Judges see *invisible problems becoming solvable* — that's an emotional, non-technical story.
+
+**Data:** No dataset required. Seed with 300–500 realistic challenges synthesized from public Jharkhand news (drought, migration, water) — verifiable, legal, demo-grade. Dedup/matching runs on embedding APIs, so "production-grade model" is a non-issue.
+
+**Beating rival teams:** Everyone else ships a submission form + admin table. We win on three differentiators they won't finish: (1) semantic dedup/clustering shown *live*, (2) LLM-generated challenge briefs (NEP 2020-ready, straight into a university's project pipeline), (3) explainable HEI/industry matching. Plus Hindi support — judges notice.
+
+**Honest weaknesses:** Uniqueness is mediocre (MyGov/Change.org/SIH archetype); "Disaster Management" theme fit is a stretch; dashboards wow less than drone footage. Mitigate by framing pre-disaster community vulnerability mapping as the disaster angle.
+
+<<SCORES {"ps":"26043","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":7,"uniqueness":4,"punch":6,"win_prob":6}>></subagent>
+<subagent agent_id="agent-90" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26043: &quot;A digital platform to crowdsource societal challenges and facilitate collaborative problem solving through universities and industry partnerships&quot;
+Org: Government of Jharkhand | Theme: Disaster Management
+Dataset field: (none provided)
+Description: Jharkhand communities face local challenges (education, healthcare, agriculture, water, sanitation, environment, livelihoods, accessibility, urban infrastructure, public services). Citizens identify issues first but there's no structured mechanism to submit problems for evaluation and innovation-driven resolution. HEIs have expertise and students; industries have technical/financial resources. Collaboration is fragmented. NEP 2020 emphasizes experiential learning and community engagement. Build a digital platform: citizens/organizations submit challenges; categorization, expert evaluation, institutional assignment, industry collaboration; universities and industries co-develop solutions." outcome="completed"># PROSECUTION: SIH26043 — Jharkhand Crowdsourced Innovation Portal
+
+**Verdict: guilty on four counts. Reject.**
+
+**1. Crowding — Severity 9/10 (verified).** `gh search repos` returns **26+ public repos already building SIH26043** (searches "SIH 26043" and "SIH26043", dated 29 Aug–7 Sep 2026): JharUdyam, JanseTu-AI, CollabSolve (SIH2026-git), SolveSphere, devprakash93's full-stack portal, plus mockup repos (Kavish9090/jannirikshan). This is a bloodbath PS — judges will grade 50 near-identical multi-role portals. Differentiation is mathematically near-zero.
+
+**2. Demo wow for non-technical judges — Severity 8/10.** This is the least demoable genre in the catalog: seven mandated modules (citizen intake, AI routing, university collaboration, industry partnership, lifecycle tracking, analytics, notifications) = CRUD forms and dashboards. Non-technical judges see a government ERP mockup. There is no "wow moment" available in the spec — no prediction, no live data, no visceral output. The demo requires choreographing **four live logins** (citizen/admin/university/industry); any hiccup and the whole narrative collapses.
+
+**3. Cold-start judge Q&A kill-shot — Severity 9/10.** "Where does the submitted-challenge data come from? How do you get real citizens and universities on it?" The honest answer is governance/policy, not technology — instant loss. **No dataset exists and none is obtainable**: routing needs real HEI faculty-expertise data; analytics need real challenge corpora. Every demo runs on hand-fabricated seed data, and judges smell it.
+
+**4. Hidden spec traps — Severity 6/10.** Spec demands submissions "supported by photographs, videos, location details" — "multimedia evidence." Competitor repo SIH2026-git/SIH26043 already smuggled in **MobileNet image classification**; judges primed by rivals will ask why our intake is blind to photos. Our no-vision constraint leaves us with a dumber-looking form. Spec also says "web **and mobile** interface" — double surface area. And the stated "AI-enabled classification/dedup/routing" is pure LLM-API territory, so our one strength buys zero edge — every rival does the identical GPT call.
+
+**Theme red flag:** filed under *Disaster Management* but contains zero disaster content (it's NEP-2020 civic engagement) — misfiled judging lane risk.
+
+**Scope reality:** 7 modules × web+mobile in 1 month = everything shallow; judges poke any module, find cardboard.
+
+Feasible to build, impossible to win.
+
+<<SCORES {"ps":"SIH26043","role":"prosecutor","feasibility":7,"data_risk":7,"demo_wow":2,"uniqueness":1,"punch":9,"win_prob":2}>></subagent>
+<subagent agent_id="agent-91" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26190: &quot;Secure Digital Document Management System for Legal and Investigation Documents&quot;
+Org: Ministry of Home Affairs (NCRB) | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: Law enforcement, courts, legal departments handle sensitive documents across a case lifecycle: FIRs, investigation records, witness statements, charge sheets, court filings, evidence records, forensic reports, legal notices, judgments. Paper-based or fragmented digital storage causes: difficulty locating documents, unauthorized access, tampering risks, no version control, inefficient collaboration, delays, poor auditability. Build a secure centralized intelligent DMS: digitize/centralize storage, secure access/confidentiality, prevent unauthorized modification, complete audit trail, efficient search, using Cloud, AI, Blockchain, Digital Signatures, Secure Access Control." outcome="completed">**PS 26190 — ADVOCATE: "The tamper-proof evidence locker"**
+
+**Why this wins under our constraints.** It's the only MHA PS that is pure full-stack + LLM plumbing: zero model training, zero dataset dependency, zero GPU hours. Critical caveat we own: "digitize" means **digital-native intake** (PDF/Word upload + structured e-FIR forms), NOT scanning/OCR — vision is banned, and this reading is fully defensible since the PS's real asks are integrity, audit, access control. Every named technology (Cloud, AI, Blockchain, Digital Signatures, RBAC) maps 1:1 to a standard web-stack feature we can ship production-grade in a month.
+
+**Architecture.** Next.js + Node/FastAPI, Postgres + pgvector for semantic search, S3-compatible object store with AES-256 envelope encryption. Every document version is SHA-256 hashed into an append-only chain anchored in **immudb** (verified: codenotary/immudb, active, ~9k stars, Apache-licensed) — tamper-evidence by construction, which is the honest way to tick "blockchain." X.509 digital signatures on every state transition (draft→verified→sealed) satisfy IT Act §5 legal validity; a §65B Evidence Act compliance certificate PDF per document is the killer judge artifact. LLM layer: auto-generated case briefs, cross-document entity linking, natural-language search ("show all witness statements contradicting the charge sheet"). RBAC with case-scoped permissions.
+
+**90-second demo (non-technical judges).** Open a case file: "FIR #2026-0417 — everything in one place, every version saved." Ask a plain-English question, get an AI case brief with citations in 5s. Then the gut-punch: open a terminal, hex-edit one byte of the stored charge sheet, refresh — the UI screams red: **"INTEGRITY VIOLATION — block #1247, changed after sealing, by no authorized user."** Then show the signed §65B certificate: "This is court-admissible proof of tampering." Judges don't need to know what a hash is — they just watched someone get caught.
+
+**Data.** None needed — biggest data_risk advantage on the board. Seed with LLM-synthesized fictional FIRs/charge sheets plus real public judgments (Indian Kanoon / SC e-Courts PDFs are public). Production-grade because there's no model to be wrong.
+
+**Beating same-PS teams.** Rivals will ship a login-walled Dropbox and say "blockchain" in a slide. We win on the **live tamper catch** (they can't demo theirs — bolted-on audit tables are editable), the §65B compliance PDF, and AI case briefs they won't have. One risk, honestly: the DMS shell is commodity — our uniqueness lives entirely in the integrity demo, so we rehearse it until it's flawless.
+
+<<SCORES {"ps":"26190","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":8,"uniqueness":4,"punch":7,"win_prob":6}>></subagent>
+<subagent agent_id="agent-92" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26190: &quot;Secure Digital Document Management System for Legal and Investigation Documents&quot;
+Org: Ministry of Home Affairs (NCRB) | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: Law enforcement, courts, legal departments handle sensitive documents across a case lifecycle: FIRs, investigation records, witness statements, charge sheets, court filings, evidence records, forensic reports, legal notices, judgments. Paper-based or fragmented digital storage causes: difficulty locating documents, unauthorized access, tampering risks, no version control, inefficient collaboration, delays, poor auditability. Build a secure centralized intelligent DMS: digitize/centralize storage, secure access/confidentiality, prevent unauthorized modification, complete audit trail, efficient search, using Cloud, AI, Blockchain, Digital Signatures, Secure Access Control." outcome="completed"># PROSECUTION BRIEF — PS 26190 (NCRB Secure DMS)
+
+**KILL-SHOT #1: The spec itself is broken (severity 9/10).** Read the PS verbatim (`data/software_ps.json:1523`): the "Expected Solution" field literally reads *"Develop a system to monitor and manage police assets throughout their lifecycle"* — a copy-paste error from a different PS. The deliverable section contradicts the description. Judge Q&A: "The PS asks for asset lifecycle monitoring — where is it?" Your team built to the description; another team builds to the expected solution; nobody knows what NCRB's internal evaluators scored against. Fatal ambiguity at the source document level.
+
+**KILL-SHOT #2: Extreme crowding (severity 9/10).** GitHub already shows **13+ public repos** on this exact PS ID, all created Aug 24–Sep 6, 2026: `ravicse0407/JusticeVault-SIH26190`, `jyothirmaigowda/SIH26190-Secure-Investigation-Management`, `xarjunpatil/SIH26190-Secure-Digital-Document-Management-System-for-Legal-and-Investigation`, `Arvindkumar7738600/SECURE-CASEDOC-SIH-2026`, `utsav-khare/SIH26190-Frontend`, `NKFlisk/SIH_26190`, `somya-xcode/Sih-26190`, and more. "Miscellaneous" theme + MHA branding = the default pick for every average team. You will be demo #14 of an identical RBAC-plus-blockchain upload portal.
+
+**KILL-SHOT #3: Vision smuggled in via "digitize" (severity 8/10).** The PS says agencies "still rely on paper-based systems" and demands you "digitize and centralize." Paper FIRs → scanning → OCR. That violates the team's no-vision constraint, or you ship "digitization" as a file-upload button and get killed in Q&A: "How does a constable's paper FIR get into your system?"
+
+**KILL-SHOT #4: Zero data, classified domain (severity 8/10).** Dataset field: empty. Real FIRs/charge sheets are sensitive police records — no public corpus exists. Every demo document is fabricated, and NCRB judges will instantly spot fake FIR formats (they wrote the real ones).
+
+**KILL-SHOT #5: Buzzword salad, invisible demo (severity 8/10).** Cloud + AI + Blockchain + Digital Signatures + Access Control = five orthogonal stacks in 30 days, each at checkbox depth. Worse: **none of it is visible.** Non-technical judges see a login page, an upload form, and an audit table. Blockchain anchoring is a hex string. Meanwhile judges will ask "why blockchain?" (answer: a Postgres hash chain does it better — there is no good answer) and "doesn't CCTNS/eCourts already do this?" (yes — CCTNS is NCRB's own live national system; you're pitching them their own product, worse).
+
+**Feasibility reality check:** the CRUD core is vibe-codeable, but "production-grade secure" is exactly what LLM-generated auth fails at — vibe-coded RBAC on "sensitive investigation documents" is a security-audit embarrassment waiting for one judge question about IDOR or key management.
+
+**Verdict:** Broken spec, saturated field, no data, no visual payoff, and the sponsor already owns the production system. Reject.
+
+<<SCORES {"ps":"26190","role":"prosecutor","feasibility":6,"data_risk":8,"demo_wow":2,"uniqueness":1,"punch":3,"win_prob":2}>></subagent>
+<subagent agent_id="agent-93" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26097: &quot;AI-Driven voice Assistant for livelihood Mapping and NSQF-Aligned Skilling Recommendations for SC Communities under GIA component of PM-AJAY&quot;
+Org: Ministry of Social Justice and Empowerment (MoSJE) | Theme: Smart Education
+Dataset field: (none provided)
+Description: PM-AJAY reduces poverty among SC communities via livelihood promotion, skill development, enterprise support. Challenge: identifying training pathways matching beneficiary aspirations AND local livelihood opportunities. Beneficiaries face low digital literacy, limited trade awareness, language constraints, difficulty with text-heavy systems — causing enrollment mismatch, high dropout, poor employment outcomes. Build an AI-driven multilingual voice-based virtual livelihood assistant: conversational interviews in regional languages/dialects, understand aspirations, assess skill gaps, recommend NSQF-aligned livelihood opportunities near the beneficiary." outcome="completed">## ADVOCATE — PS 26097 (PM-AJAY Voice Livelihood Assistant)
+
+**Why this wins under our constraints:** It is the only PS family where the team's exact strengths (full-stack + LLM integration) ARE the deliverable. Zero model training, zero GPU budget, zero vision risk. ASR/TTS is a solved, free government utility: Bhashini (MeitY/AI4Bharat) covers ASR, NMT, and TTS in 22 scheduled Indian languages — verified live at [bhashini.gov.in](https://bhashini.gov.in/en/services). The "AI" is orchestration, which is precisely what vibe-coding is good at.
+
+**Architecture:** Browser/PWA mic → Bhashini ASR (Hindi + 2 regional languages) → LLM (structured conversational interview, few-shot persona of a livelihood counselor) → retrieval over the National Qualification Register: [nqr.gov.in](https://www.nqr.gov.in/) is live and searchable, listing thousands of NSQF-level-tagged Qualification Packs by sector — scrape/CSV it into Postgres, embed, done → rule-filter by district + NSQF level ≤ beneficiary's education → Bhashini TTS speaks the recommendation + a printed/visual skill-card. Add a counselor dashboard (the demo-able admin layer) with enrollment-mismatch analytics. That's the whole build: 3 API integrations + RAG + CRUD. Genuinely finishable in 4 weeks to production polish.
+
+**90-second demo script:** A judge plays "Ramesh, Class 8 pass, from Guna district." Judge *speaks Hindi into a phone*: "मैं बिजली का काम सीखना चाहता हूँ।" Assistant replies in Hindi voice, asks 3 follow-ups (education, mobility, income target), then displays a skill-card: *"Assistant Electrician, NSQF Level 3, PMKVY center 14 km away, expected wage ₹12–15k/month"* — and switches to English on command. Non-technical judges don't need "NSQF alignment" explained — they hear a phone helping an illiterate user. That's emotional, instantly legible, and nobody else's dashboard demo competes with it.
+
+**Beating rival teams:** Most will build a chatbot wrapper and demo with typed text. We win on: (1) real Bhashini voice pipeline, not Web Speech API fakery; (2) real NQR data with NSQF levels, not hallucinated courses; (3) dialect/code-switch robustness tested on-device; (4) offline-tolerant PWA for low-connectivity demo fallback. MoSJE problem statements historically favor deployment realism over ML novelty.
+
+**Risks, honestly:** Bhashini latency/uptime is mediocre — cache TTS, pre-bake fallback audio. Voice demos are high-variance live; mitigate with a recorded-video fallback. Uniqueness is moderate (voice bots are trendy), but within this PS we'll likely be the only team with a working end-to-end Indic voice loop.
+
+<<SCORES {"ps":"26097","role":"advocate","feasibility":9,"data_risk":2,"demo_wow":9,"uniqueness":6,"punch":9,"win_prob":7}>></subagent>
+<subagent agent_id="agent-94" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26097: &quot;AI-Driven voice Assistant for livelihood Mapping and NSQF-Aligned Skilling Recommendations for SC Communities under GIA component of PM-AJAY&quot;
+Org: Ministry of Social Justice and Empowerment (MoSJE) | Theme: Smart Education
+Dataset field: (none provided)
+Description: PM-AJAY reduces poverty among SC communities via livelihood promotion, skill development, enterprise support. Challenge: identifying training pathways matching beneficiary aspirations AND local livelihood opportunities. Beneficiaries face low digital literacy, limited trade awareness, language constraints, difficulty with text-heavy systems — causing enrollment mismatch, high dropout, poor employment outcomes. Build an AI-driven multilingual voice-based virtual livelihood assistant: conversational interviews in regional languages/dialects, understand aspirations, assess skill gaps, recommend NSQF-aligned livelihood opportunities near the beneficiary." outcome="completed"># PROSECUTION BRIEF — PS 26097 (PM-AJAY Voice Assistant)
+
+**Kill-shot 1: The dataset field is literally EMPTY. Severity 9/10.**
+`sih2026_ps.csv` row for 26097 ships zero data. The PS's core noun is "livelihood *mapping*" — local opportunities *near the beneficiary*. That dataset does not exist publicly anywhere. PM-AJAY GIA beneficiary/enrollment records are MoSJE-internal PII (SC community data — politically radioactive, never released). NQR (nqr.gov.in) is a glossy portal; NSQF qualification packs are thousands of unstructured PDFs with no bulk API. So the "recommender" degrades to: hand-typed 40-row CSV + LLM ranking. First judge question — *"Where did the local opportunity data come from?"* — and the answer is hallucination with extra steps. data_risk = near-max.
+
+**Kill-shot 2: Voice is the smuggled hard-research module. Severity 8/10.**
+Spec demands conversational ASR in "regional languages AND local dialects" for low-literacy rural users. That is not an LLM-API call. Whisper collapses on Bhojpuri/Marwari/Chhattisgarhi dialect code-switched speech; AI4Bharat IndicConformer covers 22 *languages*, not dialects. Fine-tuning ASR across languages inside 30 Kaggle GPU-hrs/wk with data prep + eval is a research project, not a 1-month build — the exact workload this team is NOT. The only viable path is paid Sarvam/Bhashini APIs → "LLM wrapper on a gov API," which judges increasingly punish, and Bhashini onboarding/rate-limits are demo-week roulette.
+
+**Kill-shot 3: Crowded and recycled. Severity 7/10.**
+Verified on GitHub today: `dasarisiddhu/livenavigator-AI`, `sih26097/sih26097`, `xarjunpatil/SIH26097-AI-Driven-voice-Assistant-...` — three public repos already, plus PM-AJAY was an SIH-2025 PS (`anubhab1601/samadhan-bandhu`, `Vatsal565/sih-25153`), so prior-year solutions are cloneable by every competitor. Every team ships the identical stack: ASR → GPT → CSV → TTS. Uniqueness ≈ 0.
+
+**Attack 4: Demo fragility + judge Q&A landmines. Severity 8/10.**
+Live mic + hall acoustics + a judge attempting Hinglish dialect = public, spectacular failure; pre-recorded video reads as fake. Non-technical judges can't evaluate "NSQF alignment" — output is a boring text paragraph. Worse, one Q&A grenade ends the run: *"Your AI recommends livelihoods to SC beneficiaries — how do you stop it from caste-stereotyping (e.g., pushing sanitation work)?"* A student team with no fairness eval gets demolished on stage.
+
+**Concession:** text-chat fallback demo is buildable in a month. That's a consolation B-plan, not this PS.
+
+**Verdict: hard reject.** Empty dataset + dialect-ASR research trap + recycled theme + a Q&A landmine aimed at the team's weakest flank.
+
+<<SCORES {"ps":"26097","role":"prosecutor","feasibility":4,"data_risk":9,"demo_wow":3,"uniqueness":2,"punch":9,"win_prob":3}>></subagent>
+<subagent agent_id="agent-95" item="ROLE: ADVOCATE for this PS. Steelman it ruthlessly: why it wins under the team's constraints, best architecture (1 para), the 90-second demo script for NON-technical judges, what data sources you'd use (verify 1-2 exist via web/gh if load-bearing), and how to beat teams building the same PS.
+
+CANDIDATE PS 26104: &quot;AI-Powered Real-Time Detection and Prevention of Voice Cloning Impersonation Attacks&quot;
+Org: AICTE | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: Generative AI enables high-fidelity voice cloning from seconds of audio. Attackers impersonate CXOs, government officials, trusted individuals to initiate fraudulent transactions, manipulate employees, bypass verification. Caller ID, manual call-back, voice familiarity are insufficient against AI-generated voices, especially in high-pressure social engineering over VoIP/mobile/collaboration platforms. No automated real-time synthetic/cloned voice detection increases large-scale fraud risk. Build real-time detection and prevention of voice cloning impersonation." outcome="completed">**ADVOCATE — PS 26104 (Voice Cloning Impersonation Defense)**
+
+**Why this wins under our constraints:** It is the rare SIH problem where the "AI" is *audio* (zero vision/OCR contamination), the model is small enough for Kaggle, the dataset is free and canonical, and the demo is viscerally theatrical for non-technical judges: a scam call gets killed live, on stage. India-relevant too — RBI reported ₹4,245 Cr digital payment fraud in FY24, and "AI voice scam" headlines are everywhere. Judges *fear* this problem.
+
+**Data — verified load-bearing claims:** ASVspoof 2019 Logical Access (121k utterances: bona fide + TTS/voice-conversion spoofs) is freely downloadable from [Edinburgh DataShare](https://datashare.ed.ac.uk/handle/10283/3336) — confirmed live. Augment with the "In-the-Wild" deepfake audio dataset (~38h, bona fide + deepfakes of 58 politicians, publicly released by Frank & Schönherr) and self-generated clones from ElevenLabs/Coqui XTTS of team members' voices (with consent) for modern-attack coverage. Data risk is nearly zero.
+
+**Architecture (1 para):** Fine-tune **AASIST-L** — [clovaai/aasist](https://github.com/clovaai/aasist), 85,306 params, 0.99% EER baseline, Apache-style permissive license, repo confirmed live. Fine-tuning on ASVspoof LA + In-the-Wild on a Kaggle P100/T4: ~6–10 GPU-hours, far under the 30h/week budget; GPU does training, local laptop runs inference (85K params runs realtime on CPU). Production: browser mic → WebSocket → FastAPI → 4-second sliding windows → detector score → red/green verdict. Prevention layer: when flagged, the app triggers a **challenge-response liveness phrase** and auto-alerts — that's the "prevention" checkbox the PS demands. An LLM (Gemini API) generates the plain-language incident explanation + fraud-risk summary for the dashboard.
+
+**90-second demo:** "This is Priya from accounts, calling her CFO." Phone plays a *cloned* CFO voice: "Approve the ₹8 lakh transfer now." Screen shows the waveform — red verdict in 2 seconds: "SYNTHETIC VOICE — 97% confidence," call auto-blocked, alert sent. Then a volunteer speaks live: green in 1 second. Close: "Same voice. One is fake. We caught it before the money moved." Judges will gasp.
+
+**Beating copycats:** Everyone else ships a static upload-a-file classifier. We win on (1) true real-time streaming, (2) the challenge-response prevention loop, (3) self-generated *2026-era* clones in eval (ASVspoof-only teams will choke on ElevenLabs audio), (4) Hindi/Indian-accent augmentation.
+
+<<SCORES {"ps":"26104","role":"advocate","feasibility":8,"data_risk":2,"demo_wow":9,"uniqueness":5,"punch":8,"win_prob":7}>></subagent>
+<subagent agent_id="agent-96" item="ROLE: PROSECUTOR against this PS. Destroy it: hunt kill-shots on data availability (verify claims via web/gh where load-bearing), hidden spec traps (read the description for vision/hard-research modules smuggled in), training feasibility, crowding (search GitHub for existing SIH-2026 repos on this PS ID), judge Q&amp;A failures, demo fragility. Score each attack's severity /10.
+
+CANDIDATE PS 26104: &quot;AI-Powered Real-Time Detection and Prevention of Voice Cloning Impersonation Attacks&quot;
+Org: AICTE | Theme: Miscellaneous
+Dataset field: (none provided)
+Description: Generative AI enables high-fidelity voice cloning from seconds of audio. Attackers impersonate CXOs, government officials, trusted individuals to initiate fraudulent transactions, manipulate employees, bypass verification. Caller ID, manual call-back, voice familiarity are insufficient against AI-generated voices, especially in high-pressure social engineering over VoIP/mobile/collaboration platforms. No automated real-time synthetic/cloned voice detection increases large-scale fraud risk. Build real-time detection and prevention of voice cloning impersonation." outcome="completed">## PROSECUTION: PS 26104 — Voice Cloning Detection
+
+**Kill-shot 1: Dataset field is EMPTY, and the spec demands data that doesn't exist.** (Severity 9/10)
+The PS requires "support for multiple Indian languages and regional accents." There is no public Indian-accent voice-deepfake dataset. ASVspoof 2019/2021 LA (the standard) is English, gated behind license agreements, and its 2021 edition is evaluation-only. FoR and WaveFake are English/Chinese. Your "training data verifiably available" requirement fails at the spec level — you'd be training on British voices and demoing on Indian ones.
+
+**Kill-shot 2: Production-grade generalization is an unsolved research problem.** (Severity 9/10)
+Peer-reviewed results (Müller et al., "In-the-Wild" dataset, 2022) show state-of-the-art detectors collapsing toward chance on unseen synthesizers and codec-degraded audio. ASVspoof 2021 was created precisely because telephony codecs (8kHz, AMR/Opus) destroyed detector accuracy. "Production-grade in 30 Kaggle hrs/week" is a fantasy when Pindrop/Reality Defender/Resemble Detect employ research teams on this full-time. Judges who know the domain will ask: "What's your EER on audio from a synthesizer released last month?" You have no answer.
+
+**Kill-shot 3: "Real-time telephony integration" is undeliverable in the demo.** (Severity 8/10)
+The spec demands live stream interception from VoIP/PSTN, REST/gRPC SDKs for core banking and telecom networks, plus on-device edge inference for privacy. In a month you get a WebRTC browser loop — a web toy, not "telecom infrastructure." Real PSTN audio requires paid Twilio/Exotel trunks and legal call-recording consent (a privacy trap the spec itself flags). Judges will ask "show me it working on an actual phone call" and you'll show a laptop mic.
+
+**Kill-shot 4: Demo fragility.** (Severity 7/10)
+The impressive demo (clone a judge's voice live with ElevenLabs, then detect it) has two failure modes: detector false-negatives the fresh clone (out-of-domain synth — see Kill-shot 2), or false-positives the judge's real voice over a noisy connection. Either way you die on stage.
+
+**Kill-shot 5: Crowding.** (Severity 8/10)
+`gh search repos` shows 14+ public SIH26104 repos created in the last two weeks (varunadhithya-07/SIH26104, SENTINEX-SIH26104, SIH26104-VoiceShield-AI, etc.). This is one of the most-picked PS IDs — you're in a red ocean with identical pitches.
+
+**Mitigant (honest):** No vision AI smuggled in; the constraint isn't violated. Audio ML fits Kaggle budgets for fine-tuning AASIST/RawNet2. But team strength is LLM+web; this is DSP + audio deep learning — a square peg.
+
+**Verdict:** Data risk near-max, research-grade generalization demanded, demo can't touch real telephony, crowded field. Reject.
+
+<<SCORES {"ps":"26104","role":"prosecutor","feasibility":3,"data_risk":8,"demo_wow":4,"uniqueness":3,"punch":8,"win_prob":3}>></subagent>
+</agent_swarm_result>

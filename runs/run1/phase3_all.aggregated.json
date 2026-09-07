@@ -1,0 +1,670 @@
+{
+ "blocks": [
+  {
+   "ps": "26043",
+   "role": "advocate-rebuttal",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 5,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26043",
+   "role": "prosecutor-appeal",
+   "feasibility": 7,
+   "data_risk": 8,
+   "demo_wow": 2,
+   "uniqueness": 1,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26043",
+   "role": "architect_adjudicator",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 6,
+   "uniqueness": 3,
+   "punch": 5,
+   "win_prob": 4
+  },
+  {
+   "ps": "26092",
+   "role": "advocate-rebuttal",
+   "feasibility": 8,
+   "data_risk": 7,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26092",
+   "role": "prosecutor-appeal",
+   "feasibility": 7,
+   "data_risk": 6,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 4,
+   "win_prob": 3
+  },
+  {
+   "ps": "26092",
+   "role": "architect-adjudicator",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 4,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26046",
+   "role": "advocate-rebuttal",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 8,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26046",
+   "role": "prosecutor-appeal",
+   "feasibility": 2,
+   "data_risk": 2,
+   "demo_wow": 2,
+   "uniqueness": 4,
+   "punch": 3,
+   "win_prob": 2
+  },
+  {
+   "ps": "26046",
+   "role": "architect-adjudicator",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 5,
+   "uniqueness": 5,
+   "punch": 7,
+   "win_prob": 5
+  },
+  {
+   "ps": "26089",
+   "role": "advocate-rebuttal",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 7,
+   "uniqueness": 5,
+   "punch": 8,
+   "win_prob": 6
+  },
+  {
+   "ps": "26089",
+   "role": "prosecutor-appeal",
+   "feasibility": 3,
+   "data_risk": 9,
+   "demo_wow": 3,
+   "uniqueness": 1,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26089",
+   "role": "architect-adjudicator",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 4,
+   "uniqueness": 3,
+   "punch": 7,
+   "win_prob": 4
+  },
+  {
+   "ps": "26155",
+   "role": "advocate_rebuttal",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 6,
+   "uniqueness": 5,
+   "punch": 8,
+   "win_prob": 6
+  },
+  {
+   "ps": "26155",
+   "role": "prosecutor_appeal",
+   "feasibility": 5,
+   "data_risk": 7,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 8,
+   "win_prob": 2
+  },
+  {
+   "ps": "26155",
+   "role": "architect-adjudicator",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 6,
+   "uniqueness": 3,
+   "punch": 7,
+   "win_prob": 5
+  },
+  {
+   "ps": "26083",
+   "role": "advocate-rebuttal",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 5,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26083",
+   "role": "prosecutor-appeal",
+   "feasibility": 7,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 7,
+   "win_prob": 2
+  },
+  {
+   "ps": "26083",
+   "role": "architect-adjudicator",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 5,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "26101",
+   "role": "advocate-rebuttal",
+   "feasibility": 9,
+   "data_risk": 7,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26101",
+   "role": "prosecutor-appeal",
+   "feasibility": 5,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26101",
+   "role": "architect-adjudicator",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 6,
+   "uniqueness": 5,
+   "punch": 7,
+   "win_prob": 5
+  },
+  {
+   "ps": "26165",
+   "role": "advocate_rebuttal",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 6,
+   "uniqueness": 7,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26165",
+   "role": "prosecutor-appeal",
+   "feasibility": 7,
+   "data_risk": 8,
+   "demo_wow": 5,
+   "uniqueness": 5,
+   "punch": 7,
+   "win_prob": 3
+  },
+  {
+   "ps": "26165",
+   "role": "architect-adjudicator",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 6,
+   "uniqueness": 7,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26089",
+   "role": "cross_examiner_x1",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 6,
+   "uniqueness": 7,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26046",
+   "role": "cross_examiner_x1",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 6,
+   "uniqueness": 7,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "26092",
+   "role": "cross_examiner_x1",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 5,
+   "uniqueness": 4,
+   "punch": 5,
+   "win_prob": 4
+  },
+  {
+   "ps": "26043",
+   "role": "cross_examiner_x1",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 4,
+   "uniqueness": 3,
+   "punch": 4,
+   "win_prob": 3
+  },
+  {
+   "ps": "26155",
+   "role": "cross_examiner_x2",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 5,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26083",
+   "role": "cross_examiner_x2",
+   "feasibility": 8,
+   "data_risk": 5,
+   "demo_wow": 7,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "26101",
+   "role": "cross_examiner_x2",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 4,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26165",
+   "role": "cross_examiner_x2",
+   "feasibility": 7,
+   "data_risk": 6,
+   "demo_wow": 6,
+   "uniqueness": 4,
+   "punch": 7,
+   "win_prob": 4
+  },
+  {
+   "ps": "26083",
+   "role": "non-technical judge",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 9,
+   "uniqueness": 7,
+   "punch": 9,
+   "win_prob": 8
+  },
+  {
+   "ps": "26165",
+   "role": "non-technical judge",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 8,
+   "uniqueness": 8,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26092",
+   "role": "non-technical judge",
+   "feasibility": 6,
+   "data_risk": 5,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 6
+  },
+  {
+   "ps": "26043",
+   "role": "non-technical judge",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 6,
+   "uniqueness": 5,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26089",
+   "role": "non-technical judge",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 5,
+   "uniqueness": 7,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26046",
+   "role": "non-technical judge",
+   "feasibility": 5,
+   "data_risk": 7,
+   "demo_wow": 5,
+   "uniqueness": 7,
+   "punch": 5,
+   "win_prob": 4
+  },
+  {
+   "ps": "26155",
+   "role": "non-technical judge",
+   "feasibility": 7,
+   "data_risk": 4,
+   "demo_wow": 5,
+   "uniqueness": 6,
+   "punch": 4,
+   "win_prob": 4
+  },
+  {
+   "ps": "26101",
+   "role": "non-technical judge",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 3,
+   "uniqueness": 3,
+   "punch": 3,
+   "win_prob": 3
+  },
+  {
+   "ps": "26165",
+   "role": "sih_veteran_mentor",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 9,
+   "punch": 8,
+   "win_prob": 9
+  },
+  {
+   "ps": "26101",
+   "role": "sih_veteran_mentor",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 6,
+   "punch": 7,
+   "win_prob": 7
+  },
+  {
+   "ps": "26155",
+   "role": "sih_veteran_mentor",
+   "feasibility": 7,
+   "data_risk": 3,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 6,
+   "win_prob": 7
+  },
+  {
+   "ps": "26092",
+   "role": "sih_veteran_mentor",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 6,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "26046",
+   "role": "sih_veteran_mentor",
+   "feasibility": 7,
+   "data_risk": 6,
+   "demo_wow": 6,
+   "uniqueness": 7,
+   "punch": 5,
+   "win_prob": 5
+  },
+  {
+   "ps": "26083",
+   "role": "sih_veteran_mentor",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 4,
+   "uniqueness": 6,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26089",
+   "role": "sih_veteran_mentor",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 4,
+   "uniqueness": 3,
+   "punch": 4,
+   "win_prob": 4
+  },
+  {
+   "ps": "26043",
+   "role": "sih_veteran_mentor",
+   "feasibility": 8,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 3,
+   "win_prob": 3
+  },
+  {
+   "ps": "26165",
+   "role": "technical_government_evaluator",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 8,
+   "punch": 8,
+   "win_prob": 8
+  },
+  {
+   "ps": "26155",
+   "role": "technical_government_evaluator",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 7,
+   "win_prob": 8
+  },
+  {
+   "ps": "26083",
+   "role": "technical_government_evaluator",
+   "feasibility": 8,
+   "data_risk": 4,
+   "demo_wow": 7,
+   "uniqueness": 6,
+   "punch": 7,
+   "win_prob": 7
+  },
+  {
+   "ps": "26046",
+   "role": "technical_government_evaluator",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 6,
+   "uniqueness": 6,
+   "punch": 6,
+   "win_prob": 7
+  },
+  {
+   "ps": "26101",
+   "role": "technical_government_evaluator",
+   "feasibility": 7,
+   "data_risk": 6,
+   "demo_wow": 6,
+   "uniqueness": 6,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "26092",
+   "role": "technical_government_evaluator",
+   "feasibility": 7,
+   "data_risk": 5,
+   "demo_wow": 5,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 5
+  },
+  {
+   "ps": "26089",
+   "role": "technical_government_evaluator",
+   "feasibility": 8,
+   "data_risk": 5,
+   "demo_wow": 4,
+   "uniqueness": 5,
+   "punch": 5,
+   "win_prob": 5
+  },
+  {
+   "ps": "26043",
+   "role": "technical_government_evaluator",
+   "feasibility": 7,
+   "data_risk": 6,
+   "demo_wow": 5,
+   "uniqueness": 4,
+   "punch": 5,
+   "win_prob": 4
+  }
+ ],
+ "summary": [
+  {
+   "ps": "26165",
+   "composite": 29.71,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.86,
+    "demo_wow": 6.57,
+    "feasibility": 7.57,
+    "punch": 7.43,
+    "uniqueness": 6.86,
+    "win_prob": 6.14
+   }
+  },
+  {
+   "ps": "26083",
+   "composite": 26.71,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.86,
+    "demo_wow": 6.43,
+    "feasibility": 7.57,
+    "punch": 6.86,
+    "uniqueness": 5.0,
+    "win_prob": 5.71
+   }
+  },
+  {
+   "ps": "26155",
+   "composite": 25.14,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.29,
+    "demo_wow": 5.57,
+    "feasibility": 7.14,
+    "punch": 6.57,
+    "uniqueness": 4.86,
+    "win_prob": 5.29
+   }
+  },
+  {
+   "ps": "26101",
+   "composite": 24.41,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 5.29,
+    "demo_wow": 5.71,
+    "feasibility": 7.43,
+    "punch": 6.71,
+    "uniqueness": 4.71,
+    "win_prob": 5.14
+   }
+  },
+  {
+   "ps": "26092",
+   "composite": 24.3,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.86,
+    "demo_wow": 5.86,
+    "feasibility": 7.29,
+    "punch": 6.29,
+    "uniqueness": 4.43,
+    "win_prob": 5.29
+   }
+  },
+  {
+   "ps": "26046",
+   "composite": 23.44,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.71,
+    "demo_wow": 5.29,
+    "feasibility": 6.0,
+    "punch": 5.57,
+    "uniqueness": 6.29,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26089",
+   "composite": 22.57,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.57,
+    "demo_wow": 4.71,
+    "feasibility": 6.86,
+    "punch": 6.57,
+    "uniqueness": 4.43,
+    "win_prob": 4.57
+   }
+  },
+  {
+   "ps": "26043",
+   "composite": 19.56,
+   "n_agents": 7,
+   "means": {
+    "data_risk": 4.86,
+    "demo_wow": 4.43,
+    "feasibility": 7.71,
+    "punch": 5.43,
+    "uniqueness": 3.14,
+    "win_prob": 3.71
+   }
+  }
+ ]
+}

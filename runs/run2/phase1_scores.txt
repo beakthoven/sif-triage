@@ -1,0 +1,12 @@
+<<SCORES {"ps":"26165","role":"nlp-training-engineer","go_no_go":7,"severity":0,"feasibility":8,"data_risk":4}>>
+<<SCORES {"ps":"26165","role":"kaggle-infra-engineer","go_no_go":9,"severity":0,"feasibility":9,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"data-pipeline-engineer","go_no_go":6,"severity":1,"feasibility":8,"data_risk":3}>>
+<<SCORES {"ps":"26165","role":"eval-metrics-engineer","go_no_go":6,"severity":0,"feasibility":8,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"mlops-deployment-engineer","go_no_go":6,"severity":1,"feasibility":8,"data_risk":1}>>
+<<SCORES {"ps":"26165","role":"fullstack-architect","go_no_go":6,"severity":2,"feasibility":7,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"local-llm-ops-engineer","go_no_go":7,"severity":1,"feasibility":9,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"demo-red-teamer","go_no_go":6,"severity":2,"feasibility":7,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"hse-domain-reviewer","go_no_go":8,"severity":1,"feasibility":8,"data_risk":7}>>
+<<SCORES {"ps":"26165","role":"methodology-skeptic","go_no_go":7,"severity":2,"feasibility":8,"data_risk":6}>>
+<<SCORES {"ps":"26165","role":"ux-designer","go_no_go":7,"severity":1,"feasibility":9,"data_risk":2}>>
+<<SCORES {"ps":"26165","role":"architecture-prosecutor","go_no_go":6,"severity":4,"feasibility":7,"data_risk":3}>>

@@ -1,0 +1,97 @@
+{
+ "blocks": [
+  {
+   "ps": "26165",
+   "role": "phase0-validator-osha-csv",
+   "go_no_go": 9,
+   "severity": 0,
+   "feasibility": 9,
+   "data_risk": 1
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-iogp",
+   "go_no_go": 8,
+   "severity": 0,
+   "feasibility": 7,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-asrs",
+   "go_no_go": 9,
+   "severity": 0,
+   "feasibility": 8,
+   "data_risk": 1
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-hf-misc",
+   "go_no_go": 8,
+   "severity": 0,
+   "feasibility": 8,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-kaggle",
+   "go_no_go": 6,
+   "severity": 2,
+   "feasibility": 6,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-machine",
+   "go_no_go": 6,
+   "severity": 1,
+   "feasibility": 7,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-oss",
+   "go_no_go": 9,
+   "severity": 0,
+   "feasibility": 9,
+   "data_risk": 1
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-network",
+   "go_no_go": 9,
+   "severity": 0,
+   "feasibility": 10,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-toolchain",
+   "go_no_go": 7,
+   "severity": 1,
+   "feasibility": 9,
+   "data_risk": 2
+  },
+  {
+   "ps": "26165",
+   "role": "phase0-validator-prior",
+   "go_no_go": 9,
+   "severity": 0,
+   "feasibility": 9,
+   "data_risk": 2
+  }
+ ],
+ "summary": [
+  {
+   "ps": "26165",
+   "composite": 14.1,
+   "n_agents": 10,
+   "means": {
+    "data_risk": 1.7,
+    "feasibility": 8.2,
+    "go_no_go": 8.0,
+    "severity": 0.4
+   }
+  }
+ ]
+}

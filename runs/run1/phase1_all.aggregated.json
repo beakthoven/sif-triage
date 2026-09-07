@@ -1,0 +1,798 @@
+{
+ "blocks": [
+  {
+   "ps": "26045",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 7,
+   "uniqueness": 8,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26045",
+   "role": "prosecutor",
+   "feasibility": 5,
+   "data_risk": 9,
+   "demo_wow": 2,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26046",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26046",
+   "role": "prosecutor",
+   "feasibility": 3,
+   "data_risk": 4,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 3
+  },
+  {
+   "ps": "26099",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 5,
+   "demo_wow": 7,
+   "uniqueness": 7,
+   "punch": 7,
+   "win_prob": 7
+  },
+  {
+   "ps": "26099",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 9,
+   "demo_wow": 2,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26100",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 4,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26100",
+   "role": "prosecutor",
+   "feasibility": 3,
+   "data_risk": 9,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26101",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26101",
+   "role": "prosecutor",
+   "feasibility": 5,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 3
+  },
+  {
+   "ps": "26102",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 8,
+   "uniqueness": 7,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26102",
+   "role": "prosecutor",
+   "feasibility": 6,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 7,
+   "win_prob": 2
+  },
+  {
+   "ps": "26103",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 8,
+   "uniqueness": 7,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26103",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 9,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 8,
+   "win_prob": 2
+  },
+  {
+   "ps": "26153",
+   "role": "advocate",
+   "feasibility": 8,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26153",
+   "role": "prosecutor",
+   "feasibility": 3,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26155",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26155",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 3,
+   "punch": 9,
+   "win_prob": 3
+  },
+  {
+   "ps": "26159",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 6,
+   "uniqueness": 6,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26159",
+   "role": "prosecutor",
+   "feasibility": 7,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26186",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 6,
+   "demo_wow": 8,
+   "uniqueness": 7,
+   "punch": 9,
+   "win_prob": 7
+  },
+  {
+   "ps": "26186",
+   "role": "prosecutor",
+   "feasibility": 5,
+   "data_risk": 9,
+   "demo_wow": 4,
+   "uniqueness": 3,
+   "punch": 8,
+   "win_prob": 3
+  },
+  {
+   "ps": "26035",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 1,
+   "demo_wow": 6,
+   "uniqueness": 8,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26035",
+   "role": "prosecutor",
+   "feasibility": 8,
+   "data_risk": 3,
+   "demo_wow": 2,
+   "uniqueness": 2,
+   "punch": 8,
+   "win_prob": 3
+  },
+  {
+   "ps": "26165",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 7,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26165",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 9,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 8,
+   "win_prob": 2
+  },
+  {
+   "ps": "26068",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 8,
+   "uniqueness": 4,
+   "punch": 8,
+   "win_prob": 6
+  },
+  {
+   "ps": "26068",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26083",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 4,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26083",
+   "role": "prosecutor",
+   "feasibility": 7,
+   "data_risk": 7,
+   "demo_wow": 6,
+   "uniqueness": 3,
+   "punch": 8,
+   "win_prob": 3
+  },
+  {
+   "ps": "26047",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26047",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26092",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 3,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26092",
+   "role": "prosecutor",
+   "feasibility": 9,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 2,
+   "punch": 8,
+   "win_prob": 2
+  },
+  {
+   "ps": "26089",
+   "role": "ADVOCATE",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 7,
+   "uniqueness": 9,
+   "punch": 8,
+   "win_prob": 8
+  },
+  {
+   "ps": "26089",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 7,
+   "demo_wow": 3,
+   "uniqueness": 1,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26073",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 6,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26073",
+   "role": "prosecutor",
+   "feasibility": 6,
+   "data_risk": 9,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 2,
+   "win_prob": 2
+  },
+  {
+   "ps": "26106",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 9,
+   "uniqueness": 6,
+   "punch": 9,
+   "win_prob": 7
+  },
+  {
+   "ps": "26106",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 8,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 3,
+   "win_prob": 3
+  },
+  {
+   "ps": "26043",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 7,
+   "uniqueness": 4,
+   "punch": 6,
+   "win_prob": 6
+  },
+  {
+   "ps": "SIH26043",
+   "role": "prosecutor",
+   "feasibility": 7,
+   "data_risk": 7,
+   "demo_wow": 2,
+   "uniqueness": 1,
+   "punch": 9,
+   "win_prob": 2
+  },
+  {
+   "ps": "26190",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 8,
+   "uniqueness": 4,
+   "punch": 7,
+   "win_prob": 6
+  },
+  {
+   "ps": "26190",
+   "role": "prosecutor",
+   "feasibility": 6,
+   "data_risk": 8,
+   "demo_wow": 2,
+   "uniqueness": 1,
+   "punch": 3,
+   "win_prob": 2
+  },
+  {
+   "ps": "26097",
+   "role": "advocate",
+   "feasibility": 9,
+   "data_risk": 2,
+   "demo_wow": 9,
+   "uniqueness": 6,
+   "punch": 9,
+   "win_prob": 7
+  },
+  {
+   "ps": "26097",
+   "role": "prosecutor",
+   "feasibility": 4,
+   "data_risk": 9,
+   "demo_wow": 3,
+   "uniqueness": 2,
+   "punch": 9,
+   "win_prob": 3
+  },
+  {
+   "ps": "26104",
+   "role": "advocate",
+   "feasibility": 8,
+   "data_risk": 2,
+   "demo_wow": 9,
+   "uniqueness": 5,
+   "punch": 8,
+   "win_prob": 7
+  },
+  {
+   "ps": "26104",
+   "role": "prosecutor",
+   "feasibility": 3,
+   "data_risk": 8,
+   "demo_wow": 4,
+   "uniqueness": 3,
+   "punch": 8,
+   "win_prob": 3
+  }
+ ],
+ "summary": [
+  {
+   "ps": "26035",
+   "composite": 28.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 2.0,
+    "demo_wow": 4.0,
+    "feasibility": 8.5,
+    "punch": 8.0,
+    "uniqueness": 5.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26083",
+   "composite": 27.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 7.0,
+    "feasibility": 8.0,
+    "punch": 8.0,
+    "uniqueness": 4.5,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26046",
+   "composite": 26.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 3.0,
+    "demo_wow": 5.0,
+    "feasibility": 6.0,
+    "punch": 8.5,
+    "uniqueness": 4.5,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26092",
+   "composite": 26.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 6.0,
+    "feasibility": 9.0,
+    "punch": 8.0,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26089",
+   "composite": 25.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 4.5,
+    "demo_wow": 5.0,
+    "feasibility": 6.5,
+    "punch": 8.5,
+    "uniqueness": 5.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26101",
+   "composite": 25.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 6.0,
+    "feasibility": 7.0,
+    "punch": 8.5,
+    "uniqueness": 4.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26155",
+   "composite": 25.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 5.5,
+    "feasibility": 6.5,
+    "punch": 8.5,
+    "uniqueness": 4.5,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26097",
+   "composite": 25.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 6.0,
+    "feasibility": 6.5,
+    "punch": 9.0,
+    "uniqueness": 4.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26102",
+   "composite": 24.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 6.0,
+    "feasibility": 7.5,
+    "punch": 7.5,
+    "uniqueness": 4.5,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26047",
+   "composite": 24.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 6.0,
+    "feasibility": 6.5,
+    "punch": 8.5,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26186",
+   "composite": 24.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 7.5,
+    "demo_wow": 6.0,
+    "feasibility": 7.0,
+    "punch": 8.5,
+    "uniqueness": 5.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26104",
+   "composite": 24.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 6.5,
+    "feasibility": 5.5,
+    "punch": 8.0,
+    "uniqueness": 4.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26045",
+   "composite": 23.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 6.0,
+    "demo_wow": 4.5,
+    "feasibility": 7.0,
+    "punch": 8.5,
+    "uniqueness": 5.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26159",
+   "composite": 23.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 4.5,
+    "feasibility": 8.0,
+    "punch": 8.0,
+    "uniqueness": 4.0,
+    "win_prob": 4.0
+   }
+  },
+  {
+   "ps": "26103",
+   "composite": 23.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 6.0,
+    "demo_wow": 5.5,
+    "feasibility": 6.5,
+    "punch": 8.0,
+    "uniqueness": 4.5,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26153",
+   "composite": 23.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 5.5,
+    "feasibility": 5.5,
+    "punch": 8.5,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26100",
+   "composite": 22.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 6.5,
+    "demo_wow": 6.0,
+    "feasibility": 6.0,
+    "punch": 8.5,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26165",
+   "composite": 22.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 5.0,
+    "feasibility": 6.5,
+    "punch": 8.0,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26106",
+   "composite": 22.5,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 6.0,
+    "feasibility": 6.5,
+    "punch": 6.0,
+    "uniqueness": 4.0,
+    "win_prob": 5.0
+   }
+  },
+  {
+   "ps": "26068",
+   "composite": 22.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 5.5,
+    "feasibility": 6.5,
+    "punch": 8.5,
+    "uniqueness": 3.0,
+    "win_prob": 4.0
+   }
+  },
+  {
+   "ps": "26043",
+   "composite": 22.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 4.5,
+    "demo_wow": 4.5,
+    "feasibility": 8.0,
+    "punch": 7.5,
+    "uniqueness": 2.5,
+    "win_prob": 4.0
+   }
+  },
+  {
+   "ps": "26099",
+   "composite": 21.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 7.0,
+    "demo_wow": 4.5,
+    "feasibility": 6.5,
+    "punch": 8.0,
+    "uniqueness": 4.5,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26073",
+   "composite": 21.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.5,
+    "demo_wow": 5.5,
+    "feasibility": 7.5,
+    "punch": 5.0,
+    "uniqueness": 4.0,
+    "win_prob": 4.5
+   }
+  },
+  {
+   "ps": "26190",
+   "composite": 19.0,
+   "n_agents": 2,
+   "means": {
+    "data_risk": 5.0,
+    "demo_wow": 5.0,
+    "feasibility": 7.5,
+    "punch": 5.0,
+    "uniqueness": 2.5,
+    "win_prob": 4.0
+   }
+  }
+ ]
+}
