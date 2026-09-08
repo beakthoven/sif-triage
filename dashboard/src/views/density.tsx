@@ -99,8 +99,16 @@ function RankDelta({ delta }: { delta: number }) {
 
 /** Density: ranked site table (GET /api/density). The demo beat — ingest a
  *  Baghjan-class batch, then rows visibly re-sort with FLIP. Offline: the
- *  scripted mock snapshots stand in (UI never hard-fails). */
-export function DensityView({ lang }: { lang: Lang }) {
+ *  scripted mock snapshots stand in (UI never hard-fails). After a real
+ *  ingest, onIngested lets the app refetch the header count + feed queue
+ *  (they share server state with this view). */
+export function DensityView({
+  lang,
+  onIngested,
+}: {
+  lang: Lang;
+  onIngested?: () => void;
+}) {
   const [rows, setRows] = useState<DensityRow[]>(DENSITY_BEFORE);
   const [live, setLive] = useState(false);
   const [ingesting, setIngesting] = useState(false);
@@ -148,6 +156,8 @@ export function DensityView({ lang }: { lang: Lang }) {
         const result = await ingestCsv(toCsv(DEMO_INGEST_RECORDS));
         setIngestNote(`accepted ${result.accepted}/${result.received}`);
         setRows(await getDensity("site", rows));
+        // The ingest changed server state — header count + feed queue refetch.
+        onIngested?.();
       } catch {
         setLive(false);
         setIngestNote(null);

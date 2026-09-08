@@ -1,0 +1,71 @@
+{
+ "created": "2026-09-08T06:54:49Z",
+ "config": "masked",
+ "spec_sha256": "db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51",
+ "backbone": "answerdotai/ModernBERT-base",
+ "seq": 128,
+ "epochs": 3,
+ "export_gate_pass": false,
+ "files": {
+  "ckpt-ep1.pt": {
+   "sha256": "4b077a555c4f710da052635c37aeba752f7c13610452b384ced821847fe2675c",
+   "bytes": 1788449618
+  },
+  "ckpt-ep2.pt": {
+   "sha256": "f658e8df4e4be9e9087618d3edc484266c57cbedacfa94637e5286c7ddacdd2c",
+   "bytes": 1788450322
+  },
+  "ckpt-ep3.pt": {
+   "sha256": "a6695000a7bfe93e3ca3bd4433bbd314e40eec984f315755adae52fd933a28f9",
+   "bytes": 1788450962
+  },
+  "export_gate.json": {
+   "sha256": "ffa0f4b2acb55050e71e1669407bea7d0ca73e95af304cd78ba6ae4a3fdf4789",
+   "bytes": 638
+  },
+  "label_spec.yaml": {
+   "sha256": "96114b0961bc4365d7bb48c217654bc37904411fee12732839694641861b409a",
+   "bytes": 11557
+  },
+  "metrics-ep1.json": {
+   "sha256": "3384748228c7884a4073acc577a81163906fbbee3eebc2720e1c4dc531d409bb",
+   "bytes": 1527
+  },
+  "metrics-ep2.json": {
+   "sha256": "5646c78b72c897c0b168310ea74b6de512478292a707f7b760f0906b80b81064",
+   "bytes": 1532
+  },
+  "metrics-ep3.json": {
+   "sha256": "df8be1cf5e7096230dae320e52baf8b13b9c94d7082ae034981e91d6eb67030e",
+   "bytes": 1531
+  },
+  "metrics.json": {
+   "sha256": "df8be1cf5e7096230dae320e52baf8b13b9c94d7082ae034981e91d6eb67030e",
+   "bytes": 1531
+  },
+  "model.py": {
+   "sha256": "6027f4109436e1d58277bfa1fffc358c3c85278c65b3b6868f7b899d061312e3",
+   "bytes": 2108
+  },
+  "sif_multitask_fp32.onnx": {
+   "sha256": "ee4e6a2e2e051986a0ec5d466efa5838b116ddcdf6ba0a03ad002a252b5fb941",
+   "bytes": 2950082
+  },
+  "sif_multitask_fp32.onnx.data": {
+   "sha256": "57fe1efba451ea65570acfe8cbde39596f2f77ccc777eab0d9bbd78c4f837f75",
+   "bytes": 596084736
+  },
+  "sif_multitask_int8.onnx": {
+   "sha256": "bbd7799deea535a8a967a0f6e84b5dcb07da74e517813211e453fed8bb582db2",
+   "bytes": 151989330
+  },
+  "thresholds.json": {
+   "sha256": "4de372d3514a194b6ac11a965afe8ff6565c722f1b793ed524c2b06e6d32db66",
+   "bytes": 797
+  },
+  "train.py": {
+   "sha256": "62fa606b03f0fb104acb128a5f3d0d7eb2b11a7c971a5470351740f6fc6da3b6",
+   "bytes": 38962
+  }
+ }
+}

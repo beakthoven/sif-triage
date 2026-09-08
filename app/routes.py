@@ -69,18 +69,25 @@ def _wilson(p: float, n: int, z: float = 1.96) -> tuple[float, float]:
 
 
 @router.post("/classify", response_model=PredictionOut)
-def classify(body: ReportIn, req: Request, explain: bool = Query(default=False)) -> PredictionOut:
+def classify(
+    body: ReportIn,
+    req: Request,
+    explain: bool = Query(default=False),
+    llm: bool = Query(default=True),
+) -> PredictionOut:
     """Stateless single-report classification (no store — use /ingest to persist).
     ?explain=1 attaches a human explanation: the deterministic template is
     always present; the optional ollama rewording is null whenever the LLM is
     unavailable (async-safe — every call is bounded by the 8 s timeout and
-    falls back silently)."""
+    falls back silently). ?llm=0 pins the template only — the live-paste demo
+    path: a novel text is never in the reword cache, and a cold reword would
+    stall the card for up to 2x the timeout on CPU."""
     cfg = _cfg(req)
     pred = _predict_with_gates(_storage(req), _classifier(req), cfg, body.text)
     if explain:
         pred.explanation = build_explanation(
             pred, body.text, _storage(req),
-            use_llm=cfg.explain_llm, url=cfg.ollama_url,
+            use_llm=cfg.explain_llm and llm, url=cfg.ollama_url,
             model=cfg.ollama_model, timeout=cfg.explain_timeout_s,
         )
     return pred

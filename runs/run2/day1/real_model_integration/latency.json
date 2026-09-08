@@ -1,0 +1,22 @@
+{
+ "machine": "AMD Ryzen AI 7 350 (16 logical), CPUExecutionProvider, intra_op=8, ORT_ENABLE_ALL; power clamp RESOLVED (CPU_CLAMP_REPORT.md) \u2014 cores boost under load",
+ "model": "artifacts/models/masked-v1/sif_multitask_int8.onnx",
+ "single_text_predict": {
+  "n": 200,
+  "p50_ms": 11.94,
+  "p95_ms": 19.69,
+  "p99_ms": 40.16,
+  "mean_ms": 12.66,
+  "min_ms": 5.68,
+  "max_ms": 42.33,
+  "pass_p95_lt_100ms": true
+ },
+ "batch32_classify_only": {
+  "rows": 640,
+  "batch_size": 32,
+  "seconds": 16.255,
+  "rows_per_s": 39.4,
+  "ms_per_batch32": 812.8,
+  "pass_sla_30rps": true
+ }
+}

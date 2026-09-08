@@ -265,11 +265,18 @@ export async function getReport(id: number): Promise<Report | null> {
 }
 
 /** POST /api/classify — stateless single-report triage (latency measured
- *  client-side). Offline: an all-gray placeholder, never a fake score. */
-export async function classify(text: string): Promise<PredictionOut> {
+ *  client-side). opts.explain bundles the deterministic explanation template
+ *  (llm=0: a cold ollama reword on novel text would stall the card for
+ *  seconds — the template is the demo-safe floor). Offline: an all-gray
+ *  placeholder, never a fake score. */
+export async function classify(
+  text: string,
+  opts?: { explain?: boolean },
+): Promise<PredictionOut> {
   const t0 = performance.now();
+  const query = opts?.explain ? "?explain=1&llm=0" : "";
   try {
-    const p = await req<ApiPredictionOut>("/api/classify", {
+    const p = await req<ApiPredictionOut>(`/api/classify${query}`, {
       method: "POST",
       body: JSON.stringify({ text }),
     });

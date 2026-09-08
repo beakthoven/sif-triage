@@ -32,6 +32,19 @@ const STRINGS = {
   },
   chunkedBadge: { en: "CHUNKED · sliding-window scoring", hi: "CHUNKED · स्लाइडिंग-विंडो स्कोरिंग" },
   llmPhrased: { en: "phrased by local LLM", hi: "स्थानीय LLM द्वारा पुनर्लिखित" },
+  pasteTitle: { en: "Classify a report", hi: "रिपोर्ट वर्गीकृत करें" },
+  pastePlaceholder: {
+    en: "Paste a UA/UC or near-miss report here…",
+    hi: "UA/UC या नियर-मिस रिपोर्ट यहाँ पेस्ट करें…",
+  },
+  pasteButton: { en: "Classify", hi: "वर्गीकृत करें" },
+  pasteBusy: { en: "Classifying…", hi: "वर्गीकरण जारी…" },
+  pasteHint: { en: "Ctrl+Enter to classify", hi: "Ctrl+Enter से वर्गीकृत करें" },
+  liveChip: { en: "LIVE", hi: "लाइव" },
+  offlineNote: {
+    en: "API unreachable — offline placeholder, not a score",
+    hi: "API अनुपलब्ध — ऑफ़लाइन प्लेसहोल्डर, स्कोर नहीं",
+  },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

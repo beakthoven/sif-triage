@@ -1,0 +1,32 @@
+{
+ "sample": "2000 random rows, seed 42, artifacts/corpus/test.jsonl (masked_text)",
+ "n": 2000,
+ "n_pos": 1283,
+ "prevalence": 0.6415,
+ "auc_int8": 0.866248,
+ "auc_fp32": 0.87368,
+ "val_auc_reference": 0.9965776545446866,
+ "frozen_op_canonical": {
+  "threshold": 6.581278398140432e-05,
+  "tp": 1283,
+  "fp": 717,
+  "fn": 0,
+  "tn": 0,
+  "precision": 0.6415,
+  "recall": 1.0,
+  "f1": 0.7816,
+  "flag_rate": 1.0
+ },
+ "frozen_op_stale_insurance_thr": {
+  "threshold": 6.103742451126668e-05,
+  "tp": 1283,
+  "fp": 717,
+  "fn": 0,
+  "tn": 0,
+  "precision": 0.6415,
+  "recall": 1.0,
+  "f1": 0.7816,
+  "flag_rate": 1.0
+ },
+ "decision_note": "flag iff sigmoid(z/T) >= sigmoid(logit(thr)/T) <=> sigmoid(z) >= thr (identity asserted in onnx_score.self_check)"
+}

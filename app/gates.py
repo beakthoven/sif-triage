@@ -20,33 +20,50 @@ if TYPE_CHECKING:
     from .storage import Storage
 
 # --- NegEx-style negation gate ------------------------------------------------
-# A cue within ±_NEG_WINDOW tokens of an outcome/mechanism anchor marks the
-# report negated: "fell 4m. No injury occurred" must never be read as a
-# fracture. Negated high-severity-looking reports are forced to gray review —
-# never auto-green.
+# A cue within ±_NEG_WINDOW tokens of an OUTCOME stem marks the report
+# negated: "fell 4m. No injury occurred" must never be read as a fracture.
+# Negated high-severity-looking reports are forced to gray review — never
+# auto-green.
+#
+# Scope discipline (e2e B1, 2026-09-08 — the gate previously grayed the demo
+# hero text on 'without'~'fire' / 'could'~'fire'):
+#  - Anchors are OUTCOME stems ONLY. Mechanism/barrier words (fire, fell,
+#    LOTO, fire watch) are never anchors: "grinding without fire watch" is an
+#    absent-barrier SIGNAL to catch, not an outcome negation to route away.
+#  - Counterfactual markers are the near-miss register itself (the corpus is
+#    full of "could have been worse" / "almost" rows). They never TRIGGER the
+#    gate, and a marker within the window SUPPRESSES the cue~anchor pair it
+#    scopes ("no deaths — could have been worse" stays green-leaning).
 _NEGATION_CUES = (
-    "could have", "near miss", "did not", "was not", "were not",
-    "didn't", "wasn't", "weren't", "narrowly", "prevented", "avoided",
-    "without", "never", "almost", "none", "uninjured", "no", "not",
+    "near miss", "did not", "was not", "were not",
+    "didn't", "wasn't", "weren't", "prevented", "avoided",
+    "without", "never", "none", "uninjured", "no", "not",
+)
+# Counterfactual / near-miss register — suppressors, never cues.
+_COUNTERFACTUALS = (
+    "could have", "would have", "might have", "narrowly", "almost",
+    "nearly", "luckily", "fortunately",
 )
 _NEG_WINDOW = 5
 _NEGATION_RE = re.compile(
     r"\b(" + "|".join(re.escape(c) for c in _NEGATION_CUES) + r")\b", re.IGNORECASE
 )
+_COUNTERFACTUAL_RE = re.compile(
+    r"\b(" + "|".join(re.escape(c) for c in _COUNTERFACTUALS) + r")\b", re.IGNORECASE
+)
 
-# Outcome stems mirror label_spec.yaml masking stems (high-severity markers).
-# Stem = token-prefix match, except "sever" which is token-exact to exclude
-# "several" (same tradeoff as the frozen spec).
+# Outcome stems mirror label_spec.yaml masking stems (data_pipeline/masking.py
+# _OUTCOME_PATTERNS — the FROZEN set, mirrored here, not imported) plus the
+# plain outcome words harm/hurt/casualty/damage ("no one was hurt",
+# "no damage"). Stem = token-prefix match, except "sever" which is token-exact
+# to exclude "several" (same tradeoff as the frozen spec).
 _OUTCOME_STEMS = (
     "amputat", "fractur", "hospital", "kill", "fatal", "death", "died",
     "unconscious", "unresponsive", "resuscitat", "paraly", "coma", "icu",
     "airlift", "medevac", "surg", "succumb", "injur",
+    "harm", "hurt", "casualt", "damage",
 )
 _SEVER_TOKENS = {"sever", "severe", "severely", "severed", "severs", "severing"}
-_MECHANISM_STEMS = (
-    "fell", "fall", "struck", "crush", "caught", "burn", "explod", "explos",
-    "fire", "shock", "electrocut", "collaps", "engulf", "drown", "pinned",
-)
 
 # --- Drill/simulation filter --------------------------------------------------
 # Drills are not precursors (demo red-team SEV2-1). Phrase cues only: bare
@@ -66,7 +83,7 @@ _TOKEN_RE = re.compile(r"[A-Za-z0-9]+")
 def _is_anchor_token(tok: str) -> bool:
     if tok in _SEVER_TOKENS:
         return True
-    return tok.startswith(_OUTCOME_STEMS) or tok.startswith(_MECHANISM_STEMS)
+    return tok.startswith(_OUTCOME_STEMS)
 
 
 def gate_min_length(text: str, cfg: Settings) -> GateState:
@@ -101,23 +118,39 @@ def gate_min_length(text: str, cfg: Settings) -> GateState:
     )
 
 
+def _match_token_starts(rx: "re.Pattern[str]", text: str) -> list[int]:
+    """char offset -> token index, so cue/suppressor phrase matches map to
+    token positions."""
+    starts: list[int] = []
+    for m in rx.finditer(text):
+        char_pos = m.start()
+        tok_idx = sum(1 for tm in _TOKEN_RE.finditer(text) if tm.start() <= char_pos) - 1
+        starts.append(max(tok_idx, 0))
+    return starts
+
+
 def gate_negation(text: str) -> GateState:
-    """NegEx-style gate: a negation cue within ±5 tokens of an outcome or
-    high-energy mechanism term marks the report negated -> gray review."""
+    """NegEx-style gate, outcome-scoped: a negation cue within ±5 tokens of an
+    OUTCOME stem marks the report negated -> gray review.
+
+    Mechanism/barrier words are never anchors, and counterfactual near-miss
+    markers ("could have", "narrowly", "almost", ...) never trigger — a marker
+    within the window suppresses the cue~anchor pair it scopes."""
     tokens = _TOKEN_RE.findall(text.lower())
     if not tokens:
         return GateState(name="negation", triggered=False, action="gray")
-    # char offset -> token index, so cue-phrase matches map to token positions
-    cue_starts: list[int] = []
-    for m in _NEGATION_RE.finditer(text):
-        char_pos = m.start()
-        tok_idx = sum(1 for tm in _TOKEN_RE.finditer(text) if tm.start() <= char_pos) - 1
-        cue_starts.append(max(tok_idx, 0))
+    cue_starts = _match_token_starts(_NEGATION_RE, text)
     if not cue_starts:
         return GateState(name="negation", triggered=False, action="gray")
     anchor_idx = [i for i, tok in enumerate(tokens) if _is_anchor_token(tok)]
+    suppress_idx = _match_token_starts(_COUNTERFACTUAL_RE, text)
     pairs = [
-        (c, a) for c in cue_starts for a in anchor_idx if abs(c - a) <= _NEG_WINDOW
+        (c, a) for c in cue_starts for a in anchor_idx
+        if abs(c - a) <= _NEG_WINDOW
+        and not any(
+            min(c, a) - _NEG_WINDOW <= s <= max(c, a) + _NEG_WINDOW
+            for s in suppress_idx
+        )
     ]
     if not pairs:
         return GateState(name="negation", triggered=False, action="gray")
@@ -126,7 +159,7 @@ def gate_negation(text: str) -> GateState:
         name="negation",
         triggered=True,
         action="gray",
-        detail=f"negated high-severity language (cue~anchor within {_NEG_WINDOW} tokens): {shown}",
+        detail=f"negated outcome language (cue~outcome within {_NEG_WINDOW} tokens): {shown}",
     )
 
 

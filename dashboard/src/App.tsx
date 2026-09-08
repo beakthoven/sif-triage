@@ -80,6 +80,20 @@ export default function App() {
     r.prediction.gate_states.some((g) => g.triggered && g.action !== "badge"),
   );
 
+  // Live paste-classify: the stateless result is prepended to the queue
+  // optimistically (negative id, marked LIVE) — /api/classify never persists.
+  const onClassified = useCallback((report: Report) => {
+    setReports((cur) => [report, ...cur]);
+  }, []);
+
+  // B3: the density ingest beat changes server state — refetch the header
+  // count + feed queue. Optimistic LIVE rows (negative ids) survive the swap.
+  const refreshLive = useCallback(async () => {
+    const [h, reps] = await Promise.all([getHealth(), getReports()]);
+    setHealth(h);
+    setReports((cur) => [...cur.filter((r) => r.id < 0), ...reps]);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
@@ -131,10 +145,10 @@ export default function App() {
           </TabsList>
 
           <TabsContent value="feed">
-            <FeedView reports={reports} lang={lang} onOverride={onOverride} />
+            <FeedView reports={reports} lang={lang} onOverride={onOverride} onClassified={onClassified} />
           </TabsContent>
           <TabsContent value="density">
-            <DensityView lang={lang} />
+            <DensityView lang={lang} onIngested={refreshLive} />
           </TabsContent>
           <TabsContent value="patterns">
             <PatternsView />

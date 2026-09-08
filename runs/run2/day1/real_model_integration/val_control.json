@@ -1,0 +1,23 @@
+{
+ "int8_full_val": {
+  "n": 6820,
+  "auc": 0.993743,
+  "kaggle_int8_val_auc_expected": 0.904986,
+  "recall_at_frozen_op": 1.0,
+  "precision_at_frozen_op": 0.7943,
+  "flag_rate": 1.0,
+  "seconds": 168.7
+ },
+ "fp32_val_subset_seed5": {
+  "n": 1000,
+  "auc_fp32": 0.99731,
+  "auc_int8_same_rows": 0.992872,
+  "auc_drop": 0.004439,
+  "agreement_at_frozen_op": 0.995,
+  "seconds": 45.8
+ },
+ "torch_val_reference": {
+  "auc": 0.9965776545446866,
+  "op": "recall 1.0 @ thr 6.5813e-05, precision 0.80003"
+ }
+}

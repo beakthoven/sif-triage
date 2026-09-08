@@ -1,0 +1,29 @@
+export_gate.json: cached
+thresholds.json: cached
+metrics-ep3.json: cached
+metrics.json: cached
+metrics-ep1.json: cached
+metrics-ep2.json: cached
+model.py: cached
+label_spec.yaml: cached
+train.py: cached
+sif_multitask_fp32.onnx: cached
+sif_multitask_int8.onnx: cached
+sif_multitask_fp32.onnx.data: cached
+curl: (92) HTTP/2 stream 1 reset by server (error 0x2 INTERNAL_ERROR)
+export_gate.json: cached
+thresholds.json: cached
+metrics-ep3.json: cached
+metrics.json: cached
+metrics-ep1.json: cached
+metrics-ep2.json: cached
+model.py: cached
+label_spec.yaml: cached
+train.py: cached
+sif_multitask_fp32.onnx: cached
+sif_multitask_int8.onnx: cached
+sif_multitask_fp32.onnx.data: cached
+curl: (92) HTTP/2 stream 1 reset by server (error 0x2 INTERNAL_ERROR)
+ckpt-ep3.pt: ok (1788450962 B, sha256 verified)
+all 13 files retrieved + verified
+exit=0

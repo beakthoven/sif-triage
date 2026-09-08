@@ -11,12 +11,24 @@
 | label_spec.yaml | 96114b0961bc4365 | https://files.catbox.moe/y8df0c.yaml |
 | sha256 manifest | — | https://files.catbox.moe/p3j60c.txt |
 
-## train.py minimal bugfix (documented per task rules)
-Corpus rows carry the SIF label as `sif_label`; `normalize_row()` only probed
-`sif | sif_potential | label` and raised `ValueError: no sif label` on every
-row (confirmed via `--dry-run`). Fix: added `"sif_label"` to the fallback
-chain in `normalize_row()` (+ matching docstring line). No other change.
-train.py sha256 went 7ee4aa1e…(broken) → e1ce83e9…(fixed, staged).
+## train.py minimal bugfixes (documented per task rules)
+1. `sif_label` schema: corpus rows carry the SIF label only as `sif_label`;
+   `normalize_row()` probed `sif | sif_potential | label` and raised
+   `ValueError: no sif label` on every row (confirmed via `--dry-run`).
+   Fix: added `"sif_label"` to the fallback chain (+ docstring line).
+2. fp32-parity `np.concatenate` crash on per-batch `span_logits` (variable
+   pad length per batch) → per-batch running-max comparison.
+3. `--resume` with all epochs complete crashed on undefined `metrics` →
+   recompute val eval, proceed to export.
+4. value_info strip `FileExistsError` (dynamo pre-writes the `.onnx.data`
+   sidecar; `onnx.save_model` refuses to overwrite) → unlink stale sidecar.
+5. span fp32 parity now compares real tokens only (pad positions diverge
+   ~5 logits torch-vs-ONNX; deploy path never reads them).
+
+train.py sha256 chain: 7ee4aa1e…(broken) → e1ce83e9…(fix 1, staged v1) →
+6337ec32…(fixes 2-3, staged v2 = catbox g3dx5q.py) → 62fa606b…(fixes 4-5,
+final, catbox 71ci5r.py). Final kernels verified sha 62fa606b in-kernel;
+manifests confirm the same train.py sha.
 
 ## Deviation from runbook (Kaggle Dataset not created)
 Plan was MCP `upload_dataset_file` → dataset `beakthoven/sif26165-corpus-v1`.

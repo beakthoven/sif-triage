@@ -1,0 +1,20 @@
+{
+ "masked": {
+  "file": "artifacts/baselines/finetune_masked_test1500.jsonl",
+  "n": 1500,
+  "wall_seconds": 123.4,
+  "rows_per_s": 12.2,
+  "sif_threshold": 6.581278398140432e-05,
+  "temperature": 1.683972954750061,
+  "flag_rate": 1.0
+ },
+ "unmasked": {
+  "file": "artifacts/baselines/finetune_unmasked_test1500.jsonl",
+  "n": 1500,
+  "wall_seconds": 118.8,
+  "rows_per_s": 12.6,
+  "sif_threshold": 6.551666090070625e-05,
+  "temperature": 1.6731598377227783,
+  "flag_rate": 1.0
+ }
+}

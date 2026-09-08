@@ -1,11 +1,13 @@
-"""Adversarial suite — 15 hostile inputs vs the input gates + API contract.
+"""Adversarial suite — 17 hostile inputs vs the input gates + API contract.
 
 Runnable stdlib script (urllib only, no pytest). Spawns uvicorn on :8177
 against a throwaway DB, seeds the near-dup index with a training row and a
 synthetic row, then fires all 15 adversarial inputs from
 runs/run2/phase1-architecture/demo-red-teamer.md (§B.3 #1-10 + the 5 new
-attacks) at /api/classify and asserts each produces the expected gate state /
-no crash / valid schema. Exit code 0 = pass.
+attacks) plus 2 B1 regressions (2026-09-08 e2e: the negation gate grayed the
+demo hero text on 'without'~'fire' / 'could'~'fire') at /api/classify and
+asserts each produces the expected gate state / no crash / valid schema.
+Exit code 0 = pass.
 
 Run: .venv/bin/python tests/adversarial_suite.py
 """
@@ -45,6 +47,16 @@ SEED_SYNTH = (
 LONG_REPORT = (
     "Crew continued routine maintenance on the separator unit during the "
     "morning shift. " * 160  # 1920 words — the §B.3 #5 length-OOD case
+)
+
+# B1 regression fixtures (2026-09-08 e2e): the old NegEx fired on negation
+# cues near ANY mechanism term, graying the demo hero text via
+# 'without'~'fire', 'without'~'fell', 'could'~'fire'. "Without fire watch" is
+# an absent-barrier SIGNAL; "could have been" is the near-miss register.
+HERO_WELD = (
+    "During hot work at the well pad, a worker was grinding near live "
+    "flowline without fire watch; sparks fell near the flange. Could have "
+    "been a major fire."
 )
 
 # (id, label, text, expectation fn(gates: dict[str, GateState-like], pred) -> None)
@@ -159,6 +171,8 @@ CASES: list[dict] = [
                  "min-length must NOT eat a codes-heavy terse report"),
             _req("codes path" in g["min_length"].detail,
                  f"accepted via codes path ({g['min_length'].detail})"),
+            _req(not g["negation"].triggered,
+                 "negation must NOT gray an absent-barrier code report (B1)"),
             _req(p.rule_probs["energy_isolation"] >= 0.35,
                  "energy-isolation keyword tag attached"),
         ),
@@ -180,6 +194,33 @@ CASES: list[dict] = [
             _req(not any(gs.triggered and gs.action == "gray" for gs in g.values()),
                  "no gray gate on a clean first-aid case"),
         ),
+    },
+    {
+        "id": 16, "src": "B1-fix", "label": "hero weld report (absent barrier + counterfactual)",
+        # The 90-second demo's opening paste. 'without fire watch' = missing
+        # barrier (the SIGNAL), 'could have been a major fire' = near-miss
+        # register. Neither is an outcome negation — the card must score.
+        "text": HERO_WELD,
+        "expect": lambda g, p: (
+            _req(not g["negation"].triggered,
+                 f"'without fire watch'/'could have been' must NOT gray "
+                 f"({g['negation'].detail})"),
+            _req(not any(gs.triggered and gs.action == "gray" for gs in g.values()),
+                 "hero paste renders the scored triage card, no gray gate"),
+            _req(p.rule_probs["hot_work"] == max(p.rule_probs.values()),
+                 "hot_work leads on a grinding/sparks report"),
+        ),
+    },
+    {
+        "id": 17, "src": "B1-fix", "label": "absence of exposure ('no one was in the area')",
+        # Near-miss absence-of-exposure: GREEN-leaning, gray is for genuine
+        # ambiguity. Asserts the negation gate only — the mock score here
+        # (0.52) sits inside the confidence gray band by sha256 seed, an
+        # orthogonal intended behavior.
+        "text": "no one was in the area when the pipe fell",
+        "expect": lambda g, p: _req(
+            not g["negation"].triggered,
+            f"absence-of-exposure must NOT gray via negation ({g['negation'].detail})"),
     },
 ]
 
@@ -310,7 +351,7 @@ def main() -> int:
         if failures:
             print(f"\nADVERSARIAL SUITE FAIL — {len(failures)} failure(s)")
             return 1
-        print("\nADVERSARIAL SUITE PASS — 15/15 routed correctly, no crashes, schema valid")
+        print("\nADVERSARIAL SUITE PASS — 17/17 routed correctly, no crashes, schema valid")
         return 0
     finally:
         server.terminate()

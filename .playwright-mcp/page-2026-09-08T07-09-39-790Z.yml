@@ -1,0 +1,269 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=e8]
+        - paragraph [ref=e9]: OIL India · Triage Console
+      - generic [ref=e10]:
+        - generic [ref=e11]: LIVE · mock-0.1.0 · 11 reports
+        - group "UI language" [ref=e12]:
+          - button "EN" [pressed] [ref=e17]
+          - button "हिं" [ref=e18]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - tablist [ref=e21]:
+        - tab "Feed" [ref=e22]
+        - tab "Density" [ref=e23]
+        - tab "Patterns" [active] [selected] [ref=e24]
+        - tab "Review 1" [ref=e282]:
+          - text: Review
+          - generic [ref=e283]: "1"
+      - tabpanel "Patterns" [ref=e503]:
+        - generic [ref=e504]:
+          - tablist "pattern kind" [ref=e505]:
+            - tab "Site × Activity" [selected] [ref=e506]
+            - tab "Activity × Barrier" [ref=e507]
+          - paragraph [ref=e508]: Lift-ranked activity × site co-occurrence on structured facets. Wilson 95% CI on the SIF rate — no LLM tagging.
+          - generic [ref=e509]:
+            - generic [ref=e510]:
+              - generic [ref=e511]:
+                - 'heading "derrick/mast climbing × Workover Rig #7" [level=3] [ref=e513]'
+                - generic [ref=e514]: Working at Height
+                - generic [ref=e515]: "#1"
+              - generic [ref=e516]:
+                - generic [ref=e517]: 37 reports
+                - generic [ref=e518]: SIF rate 100per 100
+                - generic [ref=e519]:
+                  - text: lift
+                  - generic [ref=e520]: 1.5×
+                - generic [ref=e521]: 95% CI [0.91, 1.00]
+            - generic [ref=e522]:
+              - generic [ref=e523]:
+                - heading "DG exhaust duct inspection × Kathalguri GCS" [level=3] [ref=e525]
+                - generic [ref=e526]: Confined Space
+                - generic [ref=e527]: "#2"
+              - generic [ref=e528]:
+                - generic [ref=e529]: 31 reports
+                - generic [ref=e530]: SIF rate 100per 100
+                - generic [ref=e531]:
+                  - text: lift
+                  - generic [ref=e532]: 1.5×
+                - generic [ref=e533]: 95% CI [0.89, 1.00]
+            - generic [ref=e534]:
+              - generic [ref=e535]:
+                - heading "angle grinding on pipe rack × Duliajan GGS-4" [level=3] [ref=e537]
+                - generic [ref=e538]: Hot Work
+                - generic [ref=e539]: "#3"
+              - generic [ref=e540]:
+                - generic [ref=e541]: 30 reports
+                - generic [ref=e542]: SIF rate 100per 100
+                - generic [ref=e543]:
+                  - text: lift
+                  - generic [ref=e544]: 1.5×
+                - generic [ref=e545]: 95% CI [0.89, 1.00]
+            - generic [ref=e546]:
+              - generic [ref=e547]:
+                - heading "tank roof work × Baghjan EPS" [level=3] [ref=e549]
+                - generic [ref=e550]: Working at Height
+                - generic [ref=e551]: "#4"
+              - generic [ref=e552]:
+                - generic [ref=e553]: 27 reports
+                - generic [ref=e554]: SIF rate 100per 100
+                - generic [ref=e555]:
+                  - text: lift
+                  - generic [ref=e556]: 1.5×
+                - generic [ref=e557]: 95% CI [0.88, 1.00]
+            - generic [ref=e558]:
+              - generic [ref=e559]:
+                - heading "braze repair instrument air line × Baghjan EPS" [level=3] [ref=e561]
+                - generic [ref=e562]: Hot Work
+                - generic [ref=e563]: "#5"
+              - generic [ref=e564]:
+                - generic [ref=e565]: 27 reports
+                - generic [ref=e566]: SIF rate 100per 100
+                - generic [ref=e567]:
+                  - text: lift
+                  - generic [ref=e568]: 1.5×
+                - generic [ref=e569]: 95% CI [0.88, 1.00]
+            - generic [ref=e570]:
+              - generic [ref=e571]:
+                - heading "forklift unloading at drill store × Baghjan" [level=3] [ref=e573]
+                - generic [ref=e574]: Driving
+                - generic [ref=e575]: "#6"
+              - generic [ref=e576]:
+                - generic [ref=e577]: 26 reports
+                - generic [ref=e578]: SIF rate 100per 100
+                - generic [ref=e579]:
+                  - text: lift
+                  - generic [ref=e580]: 1.5×
+                - generic [ref=e581]: 95% CI [0.87, 1.00]
+            - generic [ref=e582]:
+              - generic [ref=e583]:
+                - heading "gas cutting abandoned flowline × Kathalguri" [level=3] [ref=e585]
+                - generic [ref=e586]: Hot Work
+                - generic [ref=e587]: "#7"
+              - generic [ref=e588]:
+                - generic [ref=e589]: 26 reports
+                - generic [ref=e590]: SIF rate 100per 100
+                - generic [ref=e591]:
+                  - text: lift
+                  - generic [ref=e592]: 1.5×
+                - generic [ref=e593]: 95% CI [0.87, 1.00]
+            - generic [ref=e594]:
+              - generic [ref=e595]:
+                - heading "hot work inside tank dike × Duliajan GGS-4" [level=3] [ref=e597]
+                - generic [ref=e598]: Hot Work
+                - generic [ref=e599]: "#8"
+              - generic [ref=e600]:
+                - generic [ref=e601]: 26 reports
+                - generic [ref=e602]: SIF rate 100per 100
+                - generic [ref=e603]:
+                  - text: lift
+                  - generic [ref=e604]: 1.5×
+                - generic [ref=e605]: 95% CI [0.87, 1.00]
+            - generic [ref=e606]:
+              - generic [ref=e607]:
+                - heading "reversing at drill-site laydown × Baghjan" [level=3] [ref=e609]
+                - generic [ref=e610]: Driving
+                - generic [ref=e611]: "#9"
+              - generic [ref=e612]:
+                - generic [ref=e613]: 25 reports
+                - generic [ref=e614]: SIF rate 100per 100
+                - generic [ref=e615]:
+                  - text: lift
+                  - generic [ref=e616]: 1.5×
+                - generic [ref=e617]: 95% CI [0.87, 1.00]
+            - generic [ref=e618]:
+              - generic [ref=e619]:
+                - heading "electric welding (power fluctuation) × Digboi" [level=3] [ref=e621]
+                - generic [ref=e622]: Hot Work
+                - generic [ref=e623]: "#10"
+              - generic [ref=e624]:
+                - generic [ref=e625]: 25 reports
+                - generic [ref=e626]: SIF rate 100per 100
+                - generic [ref=e627]:
+                  - text: lift
+                  - generic [ref=e628]: 1.5×
+                - generic [ref=e629]: 95% CI [0.87, 1.00]
+            - generic [ref=e630]:
+              - generic [ref=e631]:
+                - heading "monsoon-flooded flowline excavation entry × Duliajan GGS-2" [level=3] [ref=e633]
+                - generic [ref=e634]: Confined Space
+                - generic [ref=e635]: "#11"
+              - generic [ref=e636]:
+                - generic [ref=e637]: 23 reports
+                - generic [ref=e638]: SIF rate 100per 100
+                - generic [ref=e639]:
+                  - text: lift
+                  - generic [ref=e640]: 1.5×
+                - generic [ref=e641]: 95% CI [0.86, 1.00]
+            - generic [ref=e642]:
+              - generic [ref=e643]:
+                - heading "water tanker on narrow embankment road × Moran field roads" [level=3] [ref=e645]
+                - generic [ref=e646]: Driving
+                - generic [ref=e647]: "#12"
+              - generic [ref=e648]:
+                - generic [ref=e649]: 23 reports
+                - generic [ref=e650]: SIF rate 100per 100
+                - generic [ref=e651]:
+                  - text: lift
+                  - generic [ref=e652]: 1.5×
+                - generic [ref=e653]: 95% CI [0.86, 1.00]
+            - generic [ref=e654]:
+              - generic [ref=e655]:
+                - heading "mud tank entry on workover rig × Tengakhat" [level=3] [ref=e657]
+                - generic [ref=e658]: Confined Space
+                - generic [ref=e659]: "#13"
+              - generic [ref=e660]:
+                - generic [ref=e661]: 22 reports
+                - generic [ref=e662]: SIF rate 100per 100
+                - generic [ref=e663]:
+                  - text: lift
+                  - generic [ref=e664]: 1.5×
+                - generic [ref=e665]: 95% CI [0.85, 1.00]
+            - generic [ref=e666]:
+              - generic [ref=e667]:
+                - heading "handrail welding near drain × Baghjan EPS" [level=3] [ref=e669]
+                - generic [ref=e670]: Hot Work
+                - generic [ref=e671]: "#14"
+              - generic [ref=e672]:
+                - generic [ref=e673]: 22 reports
+                - generic [ref=e674]: SIF rate 100per 100
+                - generic [ref=e675]:
+                  - text: lift
+                  - generic [ref=e676]: 1.5×
+                - generic [ref=e677]: 95% CI [0.85, 1.00]
+            - generic [ref=e678]:
+              - generic [ref=e679]:
+                - 'heading "workover rig drawworks maintenance × Workover Rig #5" [level=3] [ref=e681]'
+                - generic [ref=e682]: Energy Isolation
+                - generic [ref=e683]: "#15"
+              - generic [ref=e684]:
+                - generic [ref=e685]: 20 reports
+                - generic [ref=e686]: SIF rate 100per 100
+                - generic [ref=e687]:
+                  - text: lift
+                  - generic [ref=e688]: 1.5×
+                - generic [ref=e689]: 95% CI [0.84, 1.00]
+            - generic [ref=e690]:
+              - generic [ref=e691]:
+                - 'heading "workover rig drawworks maintenance × Workover Rig #7" [level=3] [ref=e693]'
+                - generic [ref=e694]: Energy Isolation
+                - generic [ref=e695]: "#16"
+              - generic [ref=e696]:
+                - generic [ref=e697]: 20 reports
+                - generic [ref=e698]: SIF rate 100per 100
+                - generic [ref=e699]:
+                  - text: lift
+                  - generic [ref=e700]: 1.5×
+                - generic [ref=e701]: 95% CI [0.84, 1.00]
+            - generic [ref=e702]:
+              - generic [ref=e703]:
+                - heading "night convoy to remote well site × Baghjan" [level=3] [ref=e705]
+                - generic [ref=e706]: Driving
+                - generic [ref=e707]: "#17"
+              - generic [ref=e708]:
+                - generic [ref=e709]: 20 reports
+                - generic [ref=e710]: SIF rate 100per 100
+                - generic [ref=e711]:
+                  - text: lift
+                  - generic [ref=e712]: 1.5×
+                - generic [ref=e713]: 95% CI [0.84, 1.00]
+            - generic [ref=e714]:
+              - generic [ref=e715]:
+                - 'heading "mud pump liner change × Workover Rig #5" [level=3] [ref=e717]'
+                - generic [ref=e718]: Energy Isolation
+                - generic [ref=e719]: "#18"
+              - generic [ref=e720]:
+                - generic [ref=e721]: 19 reports
+                - generic [ref=e722]: SIF rate 100per 100
+                - generic [ref=e723]:
+                  - text: lift
+                  - generic [ref=e724]: 1.5×
+                - generic [ref=e725]: 95% CI [0.83, 1.00]
+            - generic [ref=e726]:
+              - generic [ref=e727]:
+                - heading "christmas tree lifting during workover × Baghjan EPS" [level=3] [ref=e729]
+                - generic [ref=e730]: Safe Mechanical Lifting
+                - generic [ref=e731]: "#19"
+              - generic [ref=e732]:
+                - generic [ref=e733]: 19 reports
+                - generic [ref=e734]: SIF rate 100per 100
+                - generic [ref=e735]:
+                  - text: lift
+                  - generic [ref=e736]: 1.5×
+                - generic [ref=e737]: 95% CI [0.83, 1.00]
+            - generic [ref=e738]:
+              - generic [ref=e739]:
+                - heading "old separator internal inspection × Dumduma" [level=3] [ref=e741]
+                - generic [ref=e742]: Confined Space
+                - generic [ref=e743]: "#20"
+              - generic [ref=e744]:
+                - generic [ref=e745]: 19 reports
+                - generic [ref=e746]: SIF rate 100per 100
+                - generic [ref=e747]:
+                  - text: lift
+                  - generic [ref=e748]: 1.5×
+                - generic [ref=e749]: 95% CI [0.83, 1.00]
+  - contentinfo [ref=e192]:
+    - paragraph [ref=e193]: Model proposes, HSE disposes. Your decision becomes a training label.
