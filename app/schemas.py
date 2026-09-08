@@ -64,6 +64,21 @@ class GateState(BaseModel):
     name: str
     triggered: bool
     detail: str = ""
+    # Advisory disposition: badge = annotate only, gray = review queue,
+    # block = reserved (no gate blocks today; gates never block ingestion).
+    action: Literal["badge", "gray", "block"] = "badge"
+
+
+class ExplanationOut(BaseModel):
+    """Human explanation for a prediction. The template is deterministic and
+    always present; `reworded` is the optional Ollama rewording (None when
+    the LLM is down or its output failed validation — see app/explain.py)."""
+    template: str
+    reworded: str | None = None
+    spans_quoted: list[str] = Field(default_factory=list)
+    source: Literal["template", "ollama"] = "template"
+    cached: bool = False
+    model_version: str = ""
 
 
 class PredictionOut(BaseModel):
@@ -73,6 +88,12 @@ class PredictionOut(BaseModel):
     evidence_spans: list[EvidenceSpan]
     gate_states: list[GateState]
     model_version: str
+    # True when the input overflowed seq_len and the sliding-window path ran
+    # (max-pooled head scores, best-window spans). False for the mock.
+    chunked: bool = False
+    # Filled only by POST /classify?explain=1 (never by the classifier itself,
+    # never persisted) — None on plain classify calls.
+    explanation: ExplanationOut | None = None
 
 
 class StoredReport(BaseModel):
@@ -128,15 +149,20 @@ class DensityRow(BaseModel):
 
 
 class PatternRow(BaseModel):
-    """Lift-ranked activity x site co-occurrence with honest stats
-    (n + Wilson CI). Structured facets only — no runtime LLM tagging."""
+    """Lift-ranked co-occurrence with honest stats (n + Wilson CI).
+    kind=site_activity: site×activity cell. kind=activity_barrier:
+    activity×barrier cell (site is null). rule = dominant IOGP rule tag.
+    Structured facets only — no runtime LLM tagging."""
     activity: str
-    site: str
     n: int
     sif_rate: float
     lift: float
     ci_low: float
     ci_high: float
+    site: str | None = None
+    barrier: str | None = None
+    rule: str | None = None
+    kind: str = "site_activity"
 
 
 class RuleInfo(BaseModel):

@@ -5,20 +5,25 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from .classifier import MockClassifier, RealOnnxClassifier, build_classifier
-from .config import Settings
+from .config import REPO_ROOT, Settings
+from .embedder import configure as configure_embedder
 from .routes import router
 from .schemas import HealthOut
 from .storage import SQLiteStorage
 
+DASHBOARD_DIST = REPO_ROOT / "dashboard" / "dist"
+
 
 def create_app(cfg: Settings | None = None) -> FastAPI:
     cfg = cfg or Settings()
+    configure_embedder(cfg.embed_model_dir)  # lazy MiniLM load, first embed pays it
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        app.state.storage = SQLiteStorage(cfg.db_path)
+        app.state.storage = SQLiteStorage(cfg.db_path, cfg.embed_index_dir)
         yield
         app.state.storage.close()
 
@@ -44,6 +49,12 @@ def create_app(cfg: Settings | None = None) -> FastAPI:
         )
 
     app.include_router(router, prefix="/api")
+    # Bare-metal demo spine: the prebuilt React dashboard is served by the
+    # same process (ARCHITECTURE: uvicorn + static React + SQLite, no docker).
+    # Mounted LAST so /api/* routes always win. Requires `npm run build` to
+    # have produced dashboard/dist — run.sh checks for it at bring-up.
+    if DASHBOARD_DIST.is_dir():
+        app.mount("/", StaticFiles(directory=DASHBOARD_DIST, html=True), name="dashboard")
     return app
 
 

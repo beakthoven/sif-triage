@@ -6,3 +6,7 @@ artifacts/
 *.onnx
 dist/
 .DS_Store
+.run/
+app/runtime.db
+packaging/wheels/
+packaging/sif-demo-usb-*.tar.gz

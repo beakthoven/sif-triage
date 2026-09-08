@@ -73,11 +73,20 @@ def primary_rule(rules: list[str]) -> str | None:
 
 
 def main() -> None:
-    with open(CORPUS / "train.jsonl", encoding="utf-8") as fh:
+    import argparse
+    ap = argparse.ArgumentParser(description="Merge QA-passing synthetic rounds into the training corpus")
+    ap.add_argument("--base", default=str(CORPUS / "train.jsonl"),
+                    help="base corpus JSONL (train.jsonl for round 1, train_final.jsonl for top-ups)")
+    ap.add_argument("--clean-dir", default=str(CLEAN))
+    ap.add_argument("--out", default=str(OUT))
+    ap.add_argument("--summary", default=str(CORPUS / "train_final_merge_summary.json"))
+    args = ap.parse_args()
+
+    with open(args.base, encoding="utf-8") as fh:
         train_rows = [json.loads(line) for line in fh]
 
     survivors: list[dict] = []
-    for path in sorted(CLEAN.glob("*.jsonl")):
+    for path in sorted(Path(args.clean_dir).glob("*.jsonl")):
         with open(path, encoding="utf-8") as fh:
             survivors.extend(json.loads(line) for line in fh)
 
@@ -124,7 +133,7 @@ def main() -> None:
             bad = [json.loads(l)["id"] for l in fh if l.startswith('{"id": "syn-') or '"syn-' in l[:30]]
         assert not bad, f"synthetic ids leaked into {split}: {bad[:5]}"
 
-    with open(OUT, "w", encoding="utf-8") as fh:
+    with open(args.out, "w", encoding="utf-8") as fh:
         for row in merged:
             fh.write(json.dumps({k: row[k] for k in KEYS15}, ensure_ascii=False) + "\n")
 
@@ -142,7 +151,7 @@ def main() -> None:
     for r in pos:
         for rule in r["rules"]:
             containment_counts[rule] += 1
-    assert sum(primary_counts.values()) == sum(1 for r in pos if r["rules"]), \
+    assert sum(v for k, v in primary_counts.items() if k is not None) == sum(1 for r in pos if r["rules"]), \
         "quota table does not sum to tagged positives"
 
     quota_table = {}
@@ -181,17 +190,17 @@ def main() -> None:
         "tagged_negatives": sum(1 for r in neg if r["rules"]),
         "masker_changes_on_synthetic": mask_changes,
     }
-    with open(CORPUS / "train_final_merge_summary.json", "w", encoding="utf-8") as fh:
+    with open(args.summary, "w", encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2)
 
-    print(f"train_final.jsonl: {n} rows = {len(train_rows)} corpus + {len(syn_out)} synthetic")
+    print(f"{args.out}: {n} rows = {len(train_rows)} base + {len(syn_out)} synthetic")
     print(f"mix ratios: {ratios}")
     print(f"prevalence: {prevalence:.4f} (spec target 0.40; frozen ratios imply ~0.65 — DEVIATION, adjudicate)")
     print(f"masker changes on synthetic: {mask_changes}")
     print("quota table (primary rule | quota -> actual, shortfall%):")
     for rule, t in quota_table.items():
         print(f"  {rule:26s} {t['quota_9000']:5d} -> {t['actual_primary']:5d}  ({t['shortfall_pct']:+.1f}%)")
-    print(f"summary -> {CORPUS / 'train_final_merge_summary.json'}")
+    print(f"summary -> {args.summary}")
 
 
 if __name__ == "__main__":

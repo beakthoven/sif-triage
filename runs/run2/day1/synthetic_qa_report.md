@@ -180,3 +180,166 @@ The §3 critique was that the gate conflates *OIL contractor register vs US OSHA
 **Guidance for top-up generators (to dodge these tells):** ban sentence-initial "At/Now/Near/During/Before/Around/One" in >10% of rows; ban the "At <site> ... <time> hrs" opener pattern; forbid explicit calendar dates with years; replace clipped closure sentences ("Training done.", "Entry made.", "Kept under observation.") with varied embedded clauses; distribute site types (reduce GGS/EPS frequency toward the 24-term distribution: more flowline/CTF/wellhead/SRP contexts); vary sentence-initial subjects (person-first, equipment-first, condition-first).
 
 **Disclosure (unchanged in substance):** the synthetic corpus remains detector-separable from real text at AUC ≈ 1.0 under both framings (US-OSHA-general and oil-gas-register-matched). Ship with disclosure; treat synthetic as register/coverage augmentation for thin rules, never as realism. Mitigation path is generator-side style diversification (above), not further row filtering — the templated-quartile cut already failed to move the AUC.
+
+## 9. v2 top-up round (Day-1 follow-up)
+
+Inputs: `artifacts/synthetic/raw_v2/*.jsonl` (9 files, 2,343 rows). Same pipeline, parameterized: `qa_synthetic.py --raw-dir raw_v2 --clean-dir clean_v2 --prior-clean-dir clean --skip-llmism`, then `merge_corpus.py --base train_final.jsonl`. **LLM-ism mitigation drop NOT applied** (orchestrator adjudication: the AUC≈1.0 separation is stylistic register, not templating; v2 was generated with diversity mandates; register is balanced across classes so the label is unconfounded — ship with disclosure).
+
+### 9.1 v2 per-file QA table
+
+| file | in | leak | ai-ism | dup(in-file) | J(cross, incl. vs v1 clean) | J(corpus) | survivors |
+|---|---|---|---|---|---|---|---|
+| cs_g.jsonl | 330 | 0 | 0 | 0 | 0 | 0 | **330** |
+| cs_h.jsonl | 333 | 0 | 0 | 0 | 0 | 0 | **333** |
+| drv_d.jsonl | 180 | 0 | 0 | 0 | 0 | 0 | **180** |
+| hw_c.jsonl | 260 | 0 | 0 | 0 | 0 | 0 | **260** |
+| mix_a.jsonl | 220 | 0 | 0 | 0 | 0 | 0 | **220** |
+| neg_k.jsonl | 290 | 0 | 0 | 0 | 0 | 0 | **290** |
+| neg_l.jsonl | 290 | 0 | 0 | 0 | 0 | 0 | **290** |
+| neg_m.jsonl | 290 | 0 | 0 | 0 | 0 | 0 | **290** |
+| wah_c.jsonl | 150 | 0 | 0 | 1 | 0 | 0 | **149** |
+| **TOTAL** | **2343** | **0** | **0** | **1** | **0** | **0** | **2342** |
+
+Single drop: `syn-wah-c-0108` (within-file 8-gram collision with wah_c row #27). The cross-file screen ran against all 6,684 v1 clean rows pre-indexed (never dropped) + intra-v2 — zero collisions; zero corpus collisions (79,109 real rows). Output: `artifacts/synthetic/clean_v2/*.jsonl`; stats: `artifacts/synthetic/qa_stats_v2.json`.
+
+### 9.2 Register-matched LLM-ism AUC — v1-only vs v1+v2
+
+Same protocol as §8: real pool = OSHA oil-gas NAICS 211/213 from `train.jsonl` (n=1,318), TF-IDF (1–2g, 5k) + LogReg, 10-fold CV, seed 42.
+
+| synthetic pool | balanced+length-matched AUC | unbalanced AUC |
+|---|---|---|
+| v1 only (6,684) | 1.0000 (n_syn=1019) | 1.0000 |
+| v1+v2 (9,026) | 1.0000 (n_syn=1146) | 1.0000 |
+
+**Diversity mandates did NOT move the detector** — AUC stays 1.0000. Top-20 tells (v1+v2, balanced) are the same register/stylistic axis as §8:
+
+`at (+3.062)`, `ggs (+1.703)`, `near (+1.538)`, `with (+1.456)`, `now (+1.438)`, `for (+1.403)`, `one (+1.391)`, `during (+1.306)`, `found (+1.305)`, `no (+1.238)`, `before (+1.219)`, `eps (+1.137)`, `2025 (+1.092)`, `duliajan (+1.061)`, `hrs (+1.048)`, `all (+1.045)`, `kept (+0.979)`, `not (+0.940)`, `at ggs (+0.936)`, `2024 (+0.913)`
+
+Confirms the adjudication: the separation is not templating that filtering can remove; it is the synthetic register itself. Disclosure stands; treat synthetic as coverage augmentation, never realism.
+
+### 9.3 Combined per-rule counts vs frozen quotas (clean + clean_v2, primary = spec tie-order)
+
+| rule | quota (9k) | actual (primary) | actual (containment) | shortfall | status |
+|---|---|---|---|---|---|
+| line_of_fire | 231 | 221 | 500 | +4.3% | within 10% |
+| working_at_height | 535 | 536 | 595 | -0.2% | **MET** |
+| hot_work | 586 | 590 | 593 | -0.7% | **MET** |
+| safe_mechanical_lifting | 677 | 684 | 718 | -1.0% | **MET** |
+| driving | 900 | 908 | 989 | -0.9% | **MET** |
+| energy_isolation | 1351 | 1364 | 1442 | -1.0% | **MET** |
+| confined_space | 1720 | 1720 | 1720 | +0.0% | **MET** |
+| _negatives_ | 3000 | 3003 | 3003 | -0.1% | **MET** |
+
+**All 7 rule quotas + negatives now MET or within 10%** (v1 shortfalls up to −43.7% are closed). Primary counts sum to tagged positives (6,023, asserted); tagged negatives: 85 (schema-valid). Note: `mix_a` tie-order primaries land sml 93 / ei 117 / lof 9 (+1 driving) — the brief's 90/110/20 assumes single-tag rows; multi-hot tags reassign under the frozen tie-order.
+
+### 9.4 Vocab coverage, combined pool (9,026 rows) — gate ≥50
+
+| term | v1 | v1+v2 | gate | status |
+|---|---|---|---|---|
+| GGS | 2372 | 2418 | 50 | ok |
+| GCS | 675 | 634 | 50 | ok |
+| EPS | 1267 | 1209 | 50 | ok |
+| CTF | 312 | 273 | 50 | ok |
+| wellhead/manifold | 358 | 326 | 50 | ok |
+| christmas tree | 211 | 178 | 50 | ok |
+| flowline | 356 | 392 | 50 | ok |
+| workover rig | 218 | 224 | 50 | ok |
+| BOP | 31 | 31 | 50 | **MISS** |
+| WOC (waiting on cement) | 17 | 13 | 50 | **MISS** |
+| mud pump/mud tank | 167 | 127 | 50 | ok |
+| SRP/horse head | 124 | 119 | 50 | ok |
+| H2S/sour gas | 119 | 144 | 50 | ok |
+| LEL/gas detector | 280 | 234 | 50 | ok |
+| kick | 6 | 11 | 50 | **MISS** |
+| POOH/RIH | 79 | 77 | 50 | ok |
+| flare pit | 72 | 58 | 50 | ok |
+| hot work/cold work permit | 170 | 110 | 50 | ok |
+| PSV | 99 | 112 | 50 | ok |
+| QRT | 248 | 224 | 50 | ok |
+| Duliajan | 1216 | 1165 | 50 | ok |
+| monsoon waterlogging | 113 | 88 | 50 | ok |
+| contractor (M/s ...) | 880 | 859 | 50 | ok |
+| wild elephant movement | 111 | 111 | 50 | ok |
+
+**Still missing (3/24): BOP 31, WOC 13, kick 11** (improved from 25/12/5 but gate not met). v2 targeted rule/negative quotas, not the well-control terms; a micro top-up (~40 BOP / ~40 WOC / ~40 kick rows) closes this, or it ships as a disclosed limitation (personal-safety LSR scope, SEV1 boundary).
+
+### 9.5 Final corpus v2
+
+- `artifacts/corpus/train_final_v2.jsonl`: **70,404 rows** = 68,062 (train_final) + 2,342 v2 survivors. Seed-42 shuffle; 15-key schema; masker re-run on v2 text: **0 changes** (asserted 0).
+- Prevalence: **0.6354** (was 0.6356; spec 0.40 inconsistency unchanged, still flagged).
+- Mix ratios: {'asrs_negative': 0.1709, 'osha_low_energy_negative': 0.151, 'osha_positive': 0.5498, 'synthetic_negative': 0.0427, 'synthetic_positive': 0.0855} — synthetic now 0.1282 of train (0.0855 pos / 0.0427 neg; frozen 0.10/0.05).
+
+### 9.6 Gold synthetic stratum filled
+
+- Command: `python3 gold/sample_gold.py --synthetic-file artifacts/synthetic/clean_combined.jsonl` (combined clean+clean_v2 pool, 9,026 rows, fields id/text/sif_label).
+- `artifacts/gold/gold_items.jsonl`: **500 rows** — osha_2024_25 300 (incl. 150 oil-gas of 364 available; proxy prevalence 0.7500, natural 0.6423), asrs 100, synthetic 100 (slots G0401–G0500 filled).
+- **150 double-labeled** (90 OSHA / 30 ASRS / 30 synthetic, as designed); 20-item pilot, all double-flagged; primary balance 125/125/125/125 across 4 labelers; secondary 38/38/37/37.
+- Sampler SELF-CHECK: PASS (composition, double design, labeler balance ≤2, pilot, no provenance/derived-label leakage, no unmasked outcome stems). Manifest: `artifacts/gold/sample_manifest.json`.
+
+### 9.7 v2 self-checks (all PASS)
+
+- train_final_v2 row count == train_final + v2 survivors (68,062 + 2,342 = 70,404) ✓
+- Per-file v2 drop accounting reconciles (2,343 = 2,342 + 1 dup) ✓
+- Zero outcome stems in clean_v2 (asserted in QA + masker 0 changes in merge) ✓
+- No `syn-` ids in val/test ✓; 15-key schema uniform; v2 Jaccard screens clean ✓
+- Combined quota primary counts sum == tagged positives (6,023) ✓
+
+## 10. Well-control micro top-up (v3, vocab gate closure)
+
+**Purpose:** close the last 3 vocab-gate misses (BOP 31, WOC 13, kick 11; gate ≥50). 161 rows hand-composed by the QA engineer (`artifacts/synthetic/raw_v3/_gen_wc_a.py` → `wc_a.jsonl`, ids `syn-wc-a-0001`…`0161`), following the v2 diversity mandates (varied openers, no year-dates pattern, no staccato repetition, unique well numbers/times per row) and the §8 tell-avoidance guidance. Constraint discovered during authoring: well-control register's natural *kill line / kill mud / killed* vocabulary is **unusable — "kill" is a frozen outcome stem** (`\bkill\w*`); all such wording replaced with bullhead/choke/weighted-mud/control-sheet phrasing before QA. Two outcome-stem near-misses caught pre-QA: "pulsation severe enough" (severe is a stem) and "lost but cracked eye" (loss-of-eye pattern).
+
+- Composition: ~55 BOP-context rows (BOP test, ram change, nipple-up, annular packing, accumulator), ~48 WOC rows (WOC cut short, plug bump, float equipment, gas migration during setting), ~58 kick rows (pit gain, flow check, shut-in drill, gas-cut mud — all sif_potential=1, well_control=true, some tagged line_of_fire/energy_isolation where the narrative justifies).
+- Totals: sif_potential 115 pos / 46 neg; register 115 near_miss / 29 ua_uc_observation / 17 drill; well_control=true on all 161.
+
+### 10.1 v3 QA (stages 1–6; LLM-ism drop skipped per adjudication)
+
+| rows in | schema | leaks | ai-ism | within-file dup | cross-file J (vs v1+v2, 9,026 rows) | corpus J | survivors |
+|---|---|---|---|---|---|---|---|
+| 161 | 0 | 0 | 0 | 0 | 0 | 0 | **161** |
+
+All 161 rows pass every gate on first run — zero within-file 8-gram collisions (hand-varied prose), zero Jaccard ≥0.5 vs 9,026 prior synthetic rows or 79,109 real corpus rows. Output: `artifacts/synthetic/clean_v3/wc_a.jsonl`; stats: `artifacts/synthetic/qa_stats_v3.json`.
+
+### 10.2 Combined vocab coverage (clean + clean_v2 + clean_v3 = 9,187 rows) — gate ≥50
+
+| term | v1+v2 | v3 added | combined | status |
+|---|---|---|---|---|
+| GGS | 2418 | 0 | 2418 | ok |
+| GCS | 634 | 0 | 634 | ok |
+| EPS | 1209 | 0 | 1209 | ok |
+| CTF | 273 | 0 | 273 | ok |
+| wellhead/manifold | 326 | 15 | 341 | ok |
+| christmas tree | 178 | 0 | 178 | ok |
+| flowline | 392 | 4 | 396 | ok |
+| workover rig | 224 | 1 | 225 | ok |
+| BOP | 31 | 53 | 84 | ok |
+| WOC (waiting on cement) | 13 | 43 | 56 | ok |
+| mud pump/mud tank | 127 | 5 | 132 | ok |
+| SRP/horse head | 119 | 0 | 119 | ok |
+| H2S/sour gas | 144 | 2 | 146 | ok |
+| LEL/gas detector | 234 | 1 | 235 | ok |
+| kick | 11 | 50 | 61 | ok |
+| POOH/RIH | 77 | 1 | 78 | ok |
+| flare pit | 58 | 1 | 59 | ok |
+| hot work/cold work permit | 110 | 1 | 111 | ok |
+| PSV | 112 | 0 | 112 | ok |
+| QRT | 224 | 0 | 224 | ok |
+| Duliajan | 1165 | 1 | 1166 | ok |
+| monsoon waterlogging | 88 | 0 | 88 | ok |
+| contractor (M/s ...) | 859 | 4 | 863 | ok |
+| wild elephant movement | 111 | 0 | 111 | ok |
+
+**ALL 24 OIL TERMS NOW ≥ 50 — VOCAB GATE: PASS.** The three former misses: BOP 31→**84**, WOC 13→**56**, kick 11→**61**.
+
+### 10.3 Final corpus (v3)
+
+- `artifacts/corpus/train_final_v3.jsonl`: **70,565 rows** = 70,404 (train_final_v2) + 161 v3 survivors. Seed-42 shuffle, 15-key schema, masker re-run on v3 text: **0 changes** (asserted).
+- Synthetic pool total: **9,187 rows** (6,684 v1 + 2,342 v2 + 161 v3) — now inside the spec's [8000, 10000] band and above the frozen 9,000 target.
+- Prevalence: **0.6356**; mix ratios: {'asrs_negative': 0.1706, 'osha_low_energy_negative': 0.1507, 'osha_positive': 0.5486, 'synthetic_negative': 0.0432, 'synthetic_positive': 0.087}.
+- Synthetic positives now 6,138 (89 untagged — mostly WOC/kick barrier contexts with no LSR mapping, schema-valid); negatives 3,049. Rule quotas unchanged in substance from §9.3 (v3 adds small primary counts: lof +13, ei +6, sml +4, cs/wah/hw +1 each).
+
+### 10.4 v3 self-checks (all PASS)
+
+- train_final_v3 rows == train_final_v2 + v3 survivors (70,404 + 161 = 70,565) ✓
+- Zero outcome stems in clean_v3 (pre-QA scan + QA stage 2 + masker assertion) ✓
+- Quota-table primary counts sum to tagged positives (fixed assertion to exclude untagged-None primaries — v3 introduced the first untagged positives) ✓
+- No `syn-` ids in val/test; 15-key schema uniform ✓

@@ -106,8 +106,8 @@ def main() -> int:
         check(len(pred.evidence_spans) > 0, "anchors produced spans")
         check(pred.well_control is True, "well-control tag on kick/BOP language")
         check({g.name for g in pred.gate_states} == {
-            "min_length", "negation", "language", "confidence", "drill", "near_dup",
-        }, "all 6 gates reported")
+            "min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input",
+        }, "all 7 gates reported")
         _, pred2_raw = req("POST", "/classify", {"text": SAMPLE_REPORT})
         check(pred_raw == pred2_raw, "deterministic: same text -> same prediction")
 

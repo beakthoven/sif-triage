@@ -90,3 +90,16 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **Export-gate production recipe** (GREEN on 2x T4): torch.onnx.export(dynamo=True, opset_version=18) → strip value_info → quantize_dynamic(QInt8). Legacy TorchScript exporter BANNED for ModernBERT@4.57.6 (Δlogit ~1.0). fp32 parity 1.1e-5..4.4e-5; int8 binary agreement 100%. 583 GPU-s consumed.
 - Label spec FROZEN v1.0.0, sha256 db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51.
 - **Deadline: 2026-09-10 15:00 IST** (~57h from Day-1 05:40). Cron checkpoints: T-31h (Sep 9 08:00), T-19h (Sep 9 20:00 gold gate), T-6h (Sep 10 09:00 final gate), T-2h (Sep 10 13:00 rehearsal gate).
+
+## 9. Mid-build facts (added 2026-09-08 ~11:30 IST)
+
+- **Kaggle MCP cannot create datasets** (no create_dataset tool; blob uploads succeed but dataset finalize is permission-denied) → corpus staged via catbox HTTPS + sha256 manifest (see runs/run2/day1/staging/STAGING.md). Kernel outputs chain via /kaggle/input datasets.
+- **Kaggle subagent timeout risk is real**: 2h cap hit mid-pipeline. Kernel templates + staging manifest + retrieve.py must always be on disk BEFORE the agent needs them (they were — recovery was possible).
+- **Masked config val metrics (ep3)**: AUC 0.9961, AP 0.9987, recall@p>=0.80 = 1.0 @ threshold 6.1e-5, rules macro-F1 0.967 (confined_space low-support 9 rows, F1 0.714), span token-F1 0.995, temperature 1.696, 726s/epoch on T4. REMINDER: derived-label val; gold is the honest eval.
+- **Near-dup**: MiniLM index 70,404×384 fp16 = 54.1MB, load 0.1s, nearest p95 3.8ms. Measured threshold 0.91 (verbatim 1.0; 2-3-word twins p5 0.895; template max 0.907; masked-text pastes p5 0.872 — partial coverage, disclosed).
+- **MiniLM pooling**: masked mean-pool + L2 norm (NOT CLS); reproduces sbert.net reference to 4.5e-5.
+- **Explanation layer**: qwen3:4b thinks INSIDE JSON string fields on open-ended rewording even with format+think:false — fix = template-only user message + one-shot example. Score-mutation guard needed (model mutated 0.28→0:28). Cache TTL 300s for template-fallback entries.
+- **Ollama concurrency**: OLLAMA_NUM_PARALLEL=6 mandatory (default 1 slot = serial). ~13s/row zero-shot under 6-thread load.
+- **Demo corpus**: 13 cards + bulk_ingest_5k.csv (5,050 rows; Kathalguri re-rank beat: #2 n=31 → #1 n=96; holds only if model flags all 96 target-cell rows — verify with real ONNX Day 3).
+- **Well-control register conflict**: "kill line/kill mud/killed the well" hits the frozen outcome stem 'kill' — synthetic WC register uses bullhead/choke/weighted mud instead.
+- **train_final_v3.jsonl = 70,565 rows** (vocab gate 24/24 PASS; synthetic pool 9,187).

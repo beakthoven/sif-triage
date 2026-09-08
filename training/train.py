@@ -624,7 +624,17 @@ def export_and_gate(model, val_feats, collate, device, args, sif_op,
             r = sess.run(None, {"input_ids": b["input_ids"].numpy(),
                                 "attention_mask": b["attention_mask"].numpy()})
             for k, v in zip(("sif_logit", "rule_logits", "span_logits"), r):
-                d = float(np.abs(o[k].float().cpu().numpy() - v).max())
+                t = o[k].float().cpu().numpy()
+                if k == "span_logits":
+                    # BUGFIX (Day-1, unmasked run): pad-position span outputs
+                    # diverge torch-vs-ONNX (~4.8) — undefined territory the
+                    # deploy path never reads (collect_logits slices [:n]).
+                    # Parity is over real tokens only, matching the Day-1
+                    # gate's implicit all-real-token inputs.
+                    real = b["attention_mask"].numpy().astype(bool)
+                    d = float(np.abs(t - v)[real].max()) if real.any() else 0.0
+                else:
+                    d = float(np.abs(t - v).max())
                 max_d[k] = max(max_d[k], d)
     fp32_ok = True
     for k, d in max_d.items():
@@ -636,6 +646,13 @@ def export_and_gate(model, val_feats, collate, device, args, sif_op,
     # --- value_info strip (opset-18 annotation conflict), keep external data
     m = onnx.load(str(fp32_path))
     del m.graph.value_info[:]
+    # BUGFIX (Day-1, unmasked run): the dynamo exporter already wrote the
+    # external-data sidecar; onnx.save_model refuses to overwrite it
+    # (FileExistsError). Tensors are fully loaded into `m`, so the stale
+    # sidecar is safe to remove first.
+    stale = fp32_path.parent / (ONNX_FP32 + ".data")
+    if stale.exists():
+        stale.unlink()
     onnx.save_model(m, str(fp32_path), save_as_external_data=True,
                     all_tensors_to_one_file=True,
                     location=ONNX_FP32 + ".data")

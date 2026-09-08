@@ -116,9 +116,9 @@ def shingles(text: str, n: int = NGRAM) -> list[int]:
     return [int.from_bytes(hashlib.blake2b(g.encode(), digest_size=8).digest(), "big") for g in grams]
 
 
-def load_raw() -> dict[str, list[dict]]:
+def load_raw(raw_dir: Path) -> dict[str, list[dict]]:
     files = {}
-    for path in sorted(RAW_DIR.glob("*.jsonl")):
+    for path in sorted(raw_dir.glob("*.jsonl")):
         rows = []
         with open(path, encoding="utf-8") as fh:
             for lineno, line in enumerate(fh, 1):
@@ -199,8 +199,21 @@ class NgramIndex:
 
 
 def main() -> None:
-    files = load_raw()
-    CLEAN_DIR.mkdir(parents=True, exist_ok=True)
+    import argparse
+    ap = argparse.ArgumentParser(description="Global QA for synthetic OIL-register corpus rounds")
+    ap.add_argument("--raw-dir", default=str(RAW_DIR))
+    ap.add_argument("--clean-dir", default=str(CLEAN_DIR))
+    ap.add_argument("--stats", default=str(STATS_PATH))
+    ap.add_argument("--prior-clean-dir", action="append", default=None,
+                    help="clean dir from an earlier round; rows are indexed for the "
+                         "cross-file Jaccard screen but never dropped (repeatable)")
+    ap.add_argument("--skip-llmism", action="store_true",
+                    help="skip stage 8 (LLM-ism detector + mitigation drop)")
+    args = ap.parse_args()
+    raw_dir, clean_dir, stats_path = Path(args.raw_dir), Path(args.clean_dir), Path(args.stats)
+
+    files = load_raw(raw_dir)
+    clean_dir.mkdir(parents=True, exist_ok=True)
 
     stats: dict[str, dict] = {}
     drop_log: list[dict] = []
@@ -254,6 +267,16 @@ def main() -> None:
     syn_idx = NgramIndex(df_cap=SYN_DF_CAP)
     jmax: dict[str, float] = {}
     global_i = 0
+    if args.prior_clean_dir:
+        n_prior = 0
+        for prior_dir in args.prior_clean_dir:
+            for path in sorted(Path(prior_dir).glob("*.jsonl")):
+                with open(path, encoding="utf-8") as fh:
+                    for line in fh:
+                        syn_idx.add(global_i, shingles(json.loads(line)["text"]))
+                        global_i += 1
+                        n_prior += 1
+        print(f"stage 5: pre-indexed {n_prior} prior-round clean rows (screen-only, never dropped)", flush=True)
     for fname in files:
         kept = []
         for row in after_filters[fname]:
@@ -304,7 +327,7 @@ def main() -> None:
     for fname in files:
         rows = after_filters[fname]
         stats[fname]["survivors_pre_llmism"] = len(rows)
-        with open(CLEAN_DIR / fname, "w", encoding="utf-8") as fh:
+        with open(clean_dir / fname, "w", encoding="utf-8") as fh:
             for row in rows:
                 out = dict(row)
                 out["jaccard_max"] = round(jmax.get(row["id"], 0.0), 4)
@@ -320,7 +343,12 @@ def main() -> None:
     vocab_misses = {k: v for k, v in vocab.items() if v < VOCAB_GATE}
 
     # ---- stage 8: LLM-ism detector -----------------------------------------
-    llmism = run_llmism(survivors, stats)
+    if args.skip_llmism:
+        llmism = {"status": "skipped (--skip-llmism): orchestrator adjudication — "
+                             "AUC~1.0 separation is stylistic register, not templating; "
+                             "no mitigation drop applied this round"}
+    else:
+        llmism = run_llmism(survivors, stats, clean_dir)
 
     # ---- self-checks --------------------------------------------------------
     leaks_after = sum(1 for row in survivors if _PATTERN.search(row["text"]))
@@ -354,7 +382,7 @@ def main() -> None:
         "llmism": llmism,
         "drop_log": drop_log,
     }
-    with open(STATS_PATH, "w", encoding="utf-8") as fh:
+    with open(stats_path, "w", encoding="utf-8") as fh:
         json.dump(out, fh, indent=2)
 
     print(f"\nrows in: {out['totals']['rows_in']}  survivors: {out['totals']['survivors']}")
@@ -364,12 +392,15 @@ def main() -> None:
           f"corpus J: {out['totals']['corpus_jaccard_dropped']}  "
           f"llm-ism: {out['totals']['llmism_dropped']}")
     print(f"vocab misses (<{VOCAB_GATE} rows): {vocab_misses or 'NONE'}")
-    print(f"LLM-ism AUC: {llmism['auc_initial']:.4f} (gate < 0.9)"
-          + (f" -> after mitigation: {llmism.get('auc_after_mitigation'):.4f}" if llmism.get("auc_after_mitigation") else ""))
-    print(f"stats -> {STATS_PATH}")
+    if args.skip_llmism:
+        print(f"LLM-ism: {llmism['status']}")
+    else:
+        print(f"LLM-ism AUC: {llmism['auc_initial']:.4f} (gate < 0.9)"
+              + (f" -> after mitigation: {llmism.get('auc_after_mitigation'):.4f}" if llmism.get("auc_after_mitigation") else ""))
+    print(f"stats -> {stats_path}")
 
 
-def run_llmism(survivors: list[dict], stats: dict[str, dict]) -> dict:
+def run_llmism(survivors: list[dict], stats: dict[str, dict], clean_dir: Path = CLEAN_DIR) -> dict:
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.linear_model import LogisticRegression
     from sklearn.model_selection import StratifiedKFold, cross_val_predict

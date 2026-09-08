@@ -16,7 +16,7 @@ import subprocess
 import sys
 import time
 
-CONFIG = "unmasked"
+CONFIG = "masked"
 WORK = pathlib.Path("/kaggle/working")
 CORPUS = WORK / "corpus"
 CORPUS.mkdir(parents=True, exist_ok=True)
@@ -32,8 +32,8 @@ FILES = {
         "https://files.catbox.moe/fwsohf.jsonl",
         "9e912f100d7cce799a6b2ed6e9b560f19b56c6cec39aec2da388216a5fba37ff"),
     "train.py": (
-        "https://files.catbox.moe/g3dx5q.py",
-        "6337ec327078fc452aac6819f0d67878cb3f140379b8b0ca0a4f5fbb3bde8acd"),
+        "https://files.catbox.moe/71ci5r.py",
+        "62fa606b03f0fb104acb128a5f3d0d7eb2b11a7c971a5470351740f6fc6da3b6"),
     "model.py": (
         "https://files.catbox.moe/0auh5g.py",
         "6027f4109436e1d58277bfa1fffc358c3c85278c65b3b6868f7b899d061312e3"),

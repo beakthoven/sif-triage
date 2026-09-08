@@ -42,13 +42,43 @@ rewording with template fallback) → React dashboard with 4 engineered gray sta
 
 ## Quickstart
 
-<!-- TODO: one-command startup (run.sh: uvicorn + static React + SQLite) — owner: API agent -->
+One command brings up the whole demo — **bare-metal, 100% offline, no docker**
+(uvicorn + static React dashboard + SQLite; ARCHITECTURE runtime section):
+
 ```bash
-# Placeholder — the runtime bring-up lands here once app/ is built.
-# Design target: bare-metal, offline, no docker on the critical path.
-pip install -r requirements.txt
-# run.sh  (uvicorn + static dashboard + SQLite)  ← to be added
+./run.sh            # preflight → ollama → API+dashboard on http://127.0.0.1:8177/
+./run.sh --stop     # stop what run.sh started (pidfiles in .run/)
 ```
+
+`run.sh` checks the .venv, the prebuilt dashboard, and the ONNX model artifact
+(clear error + retrieval hint if the model is missing; dev-only bypass:
+`./run.sh --allow-mock`). If ollama isn't running it starts one with
+`OLLAMA_NUM_PARALLEL=6` (DECISION_LOG D18); an already-running ollama is reused
+and never killed by `--stop`. If ollama is absent entirely, the deterministic
+explanation templates carry the demo (template fallback by design).
+
+**System requirements:** Linux x86_64 · Python 3.14 · 4 cores · 8 GB RAM free
+(+3.2 GB if qwen3:4b rewording runs) · no network at demo time.
+
+First-time setup (needs network once):
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cd dashboard && npm ci && npm run build && cd ..
+```
+
+**Offline / USB install:** `packaging/make_tarball.sh` builds the air-gapped
+bundle (code + prebuilt dashboard + model artifacts + vendored tokenizer +
+Python wheels, excluding `data/` and `runs/` raw research — see
+[`packaging/manifest.md`](packaging/manifest.md) for contents, exact sizes, and
+ollama model-blob instructions). On the target: `packaging/install.sh` then
+`./run.sh`. `packaging/selfcheck.sh` runs two full
+start→health→classify→stop cycles as the bring-up proof.
+
+**Demo flow:** open `http://127.0.0.1:8177/` → paste/upload incident reports →
+triage card with amber review-priority band + highlighted evidence spans →
+site/activity precursor-density ranking → pattern cards with n + Wilson CIs →
+Confirm/Not-SIF override queue ("model proposes, HSE disposes").
 
 Dev/training environment (torch CPU wheel locally; real training on Kaggle):
 ```bash

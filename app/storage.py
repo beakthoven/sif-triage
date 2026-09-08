@@ -7,8 +7,10 @@ CREATE IF NOT EXISTS + schema_version row.
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Protocol
@@ -16,6 +18,11 @@ from typing import Protocol
 import numpy as np
 
 from .schemas import OverrideIn, PredictionOut, ReportIn, StoredOverride, StoredReport
+
+log = logging.getLogger(__name__)
+
+CORPUS_NPY = "corpus_embeddings_fp16.npy"
+CORPUS_IDS = "corpus_ids.jsonl"
 
 SCHEMA_VERSION = 1
 
@@ -59,6 +66,11 @@ CREATE TABLE IF NOT EXISTS embeddings (
     report_id INTEGER PRIMARY KEY REFERENCES reports(id),
     vector BLOB NOT NULL
 );
+CREATE TABLE IF NOT EXISTS precomputed (
+    key TEXT PRIMARY KEY,
+    payload TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 """
 
 
@@ -74,14 +86,16 @@ class Storage(Protocol):
     def list_reports(self, limit: int = 100, offset: int = 0) -> list[StoredReport]: ...
     def add_override(self, ov: OverrideIn) -> int: ...
     def list_overrides(self, report_id: int | None = None) -> list[StoredOverride]: ...
-    def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int, float]]: ...
+    def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int | str, float]]: ...
+    def save_precomputed(self, key: str, payload: dict) -> None: ...
+    def load_precomputed(self, key: str) -> dict | None: ...
     def count_reports(self) -> int: ...
     def count_overrides(self) -> int: ...
     def close(self) -> None: ...
 
 
 class SQLiteStorage:
-    def __init__(self, db_path: Path) -> None:
+    def __init__(self, db_path: Path, corpus_index_dir: Path | None = None) -> None:
         self.db_path = Path(db_path)
         self._lock = threading.Lock()  # SQLite single-writer
         self._conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
@@ -94,6 +108,31 @@ class SQLiteStorage:
                 "INSERT OR IGNORE INTO schema_meta (id, version) VALUES (1, ?)",
                 (SCHEMA_VERSION,),
             )
+        # Precomputed MiniLM corpus index (training + synthetic rows) so the
+        # near-dup banner catches verbatim training-row paste attacks
+        # (ARCHITECTURE runtime; demo red-teamer attack (d)).
+        self._base_ids: list[str] = []
+        self._base_mat: np.ndarray | None = None
+        if corpus_index_dir is not None:
+            self._load_corpus_index(Path(corpus_index_dir))
+
+    def _load_corpus_index(self, index_dir: Path) -> None:
+        """Load corpus_embeddings_fp16.npy + corpus_ids.jsonl at startup.
+        fp16 memmap is upcast to fp32 in RAM once (70,404 x 384 = ~108 MB):
+        fp16 matmul has no fast CPU path, so the fp32 copy is the query-side
+        win. Absent files degrade silently to session-rows-only indexing."""
+        npy, ids_file = index_dir / CORPUS_NPY, index_dir / CORPUS_IDS
+        if not npy.exists() or not ids_file.exists():
+            log.warning("corpus index not found under %s; near-dup covers session rows only", index_dir)
+            return
+        t0 = time.perf_counter()
+        mat = np.load(npy, mmap_mode="r").astype(np.float32)
+        base_ids = [json.loads(line)["id"] for line in ids_file.open(encoding="utf-8")]
+        if mat.shape[0] != len(base_ids):
+            raise ValueError(f"corpus index misaligned: {mat.shape[0]} vectors vs {len(base_ids)} ids")
+        self._base_mat, self._base_ids = mat, base_ids
+        log.info("corpus near-dup index loaded: %d x %d fp32 in %.2fs",
+                 mat.shape[0], mat.shape[1], time.perf_counter() - t0)
 
     # -- writes ----------------------------------------------------------
     def add_report(self, report: ReportIn) -> int:
@@ -198,9 +237,10 @@ class SQLiteStorage:
         ]
 
     # -- near-dup index ----------------------------------------------------
-    # ponytail: full table scan + rebuild per query; exact and fine for the demo
-    # corpus (n<=~10k). Upgrade path: invalidate-on-write cache, then memmap
-    # index once the 110k-row synthetic corpus joins the index.
+    # The query fans out over two tiers: the precomputed corpus index (fp32,
+    # in RAM — one 70k x 384 matmul, ~10-25 ms) and session-ingested rows
+    # (full table scan + rebuild per query; ponytail: fine at demo-scale
+    # n<=~10k, upgrade path is an invalidate-on-write cache).
     def _index(self) -> tuple[list[int], np.ndarray]:
         rows = self._conn.execute(
             "SELECT report_id, vector FROM embeddings ORDER BY report_id"
@@ -211,24 +251,47 @@ class SQLiteStorage:
         mat = np.stack([np.frombuffer(r["vector"], dtype=np.float32) for r in rows])
         return ids, mat
 
-    def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int, float]]:
+    def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int | str, float]]:
+        """Top-k cosine over corpus index (str corpus ids) + session rows (int
+        report ids), merged. exclude_text filters only session rows — corpus
+        rows are exactly what a verbatim training-row paste must match."""
+        v = np.asarray(vec, dtype=np.float32).ravel()
+        scored: list[tuple[int | str, float]] = []
+        if self._base_mat is not None:
+            sims = self._base_mat @ v  # L2-normalized both sides -> cosine
+            take = min(len(sims), max(k, 8))
+            top = np.argpartition(-sims, take - 1)[:take]
+            scored.extend((self._base_ids[int(i)], float(sims[int(i)])) for i in top)
         ids, mat = self._index()
-        if not ids:
-            return []
-        v = np.asarray(vec, dtype=np.float32)
-        sims = mat @ v  # both sides L2-normalized -> cosine
-        order = np.argsort(-sims)
-        out: list[tuple[int, float]] = []
-        for i in order:
-            rid = ids[int(i)]
-            if exclude_text is not None:
+        if ids:
+            sims = mat @ v
+            scored.extend((ids[int(i)], float(sims[int(i)])) for i in np.argsort(-sims))
+        scored.sort(key=lambda t: -t[1])
+        out: list[tuple[int | str, float]] = []
+        for rid, sim in scored:
+            if exclude_text is not None and isinstance(rid, int):
                 row = self._conn.execute("SELECT text FROM reports WHERE id = ?", (rid,)).fetchone()
                 if row and row["text"] == exclude_text:
                     continue  # exact self-match, not a near-dup signal
-            out.append((rid, float(sims[int(i)])))
+            out.append((rid, sim))
             if len(out) >= k:
                 break
         return out
+
+    # -- precomputed payloads (e.g. pattern-mining stats) -------------------
+    def save_precomputed(self, key: str, payload: dict) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "INSERT OR REPLACE INTO precomputed (key, payload, created_at)"
+                " VALUES (?, ?, ?)",
+                (key, json.dumps(payload), _utcnow()),
+            )
+
+    def load_precomputed(self, key: str) -> dict | None:
+        row = self._conn.execute(
+            "SELECT payload FROM precomputed WHERE key = ?", (key,)
+        ).fetchone()
+        return json.loads(row["payload"]) if row else None
 
     def count_reports(self) -> int:
         return int(self._conn.execute("SELECT COUNT(*) FROM reports").fetchone()[0])
