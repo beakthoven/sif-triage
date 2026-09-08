@@ -72,6 +72,7 @@ case "${1:-start}" in
                 continue
             fi
             nohup "$PY" gold/labeler_app.py --labeler "$lab" --port "$port" \
+                --host "${HOST:-127.0.0.1}" \
                 >> "$RUN_DIR/$lab.log" 2>&1 &
             echo $! > "$RUN_DIR/$lab.pid"
         done
