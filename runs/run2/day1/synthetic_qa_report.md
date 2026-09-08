@@ -343,3 +343,40 @@ All 161 rows pass every gate on first run — zero within-file 8-gram collisions
 - Zero outcome stems in clean_v3 (pre-QA scan + QA stage 2 + masker assertion) ✓
 - Quota-table primary counts sum to tagged positives (fixed assertion to exclude untagged-None primaries — v3 introduced the first untagged positives) ✓
 - No `syn-` ids in val/test; 15-key schema uniform ✓
+
+## 11. First-aid negative top-up (v4, ruling D21)
+
+**Purpose:** the model false-positives first-aid cases — the `first-aid-green` demo card scores **0.964 HIGH** (fp32 confirms 0.980 — real behavior) because the OSHA corpus has zero first-aid register. D21 ruled a data fix, not a demo dodge: ~500 targeted first-aid/low-severity negatives → train_final_v4 → retrain masked-v2 tonight.
+
+**Generation:** `artifacts/synthetic/raw_v4/_gen_fa_a.py` (seeded combinatorial generator, seed 20260908) → `fa_a.jsonl`, ids `syn-fa-a-0001`…`0500`. Composition exactly: **200 first-aid treatments** (small cut 34 / minor bruise 30 / splinter removed 32 / dust-in-eye rinsed 32 / minor burn cooled under water 34 / ankle sprain 32 / mock first-aid drill 6), **150 near-miss-with-minor-contact** (hammer graze 28 / bumped head on valve 24 / rope friction mark 18 / spanner-slip knuckle 18 / wire scratch 14 / pinch 14 / speck bounce 14 / ladder slip caught 10 / chain hook brush 10), **150 low-severity process observations** (loose-fitting drip tightened 35 / minor rust wire-brushed+painted 25 / housekeeping 30 / drip-tray cleaned 15 / faded sign replaced 15 / small mechanical fixes 30). All rows `sif_potential=0`, `well_control=false`; `rules=[]` except **25 rows (5.0%)** with one genuinely low-energy rule tag (hot_work ×11 spatter-on-PPE, working_at_height ×6 last-rung/ladder-slip, driving ×4 cab-descent bruise, line_of_fire ×2 guarded-grinder dust, energy_isolation ×1 verified-dead J-box, safe_mechanical_lifting ×1 carton twinge). Register: ua_uc_observation 250 / near_miss 244 / drill 6. Sites: 124 distinct values (32 named installations + parameterized well numbers).
+
+**Constraint engineering (the hard part of this round):**
+- First-aid prose loves outcome stems. Handled by construction + in-loop assert: no `first-degree burn` (degree_burn stem — "small burn mark / cooled under running water" used), no `surgical spirit` (`surgical` is a stem — "antiseptic lotion" used), dispensary/first aid room instead of hospital, no injur*/severe/fracture wording anywhere. The in-loop assert caught one live slip (`hospital referral slip` in a drill row template) — fixed before emission.
+- QA stage 4 drops a row for sharing even ONE 8-gram with an earlier row, so no fixed phrase may exceed ~7 tokens. Every sentence in the generator is compositional (slots every ≤7 tokens); uniqueness enforced by greedy acceptance against the exact `qa_synthetic.shingles` function, with re-rolls. A capacity probe (`/tmp/fa_capacity_check.py`, isolated per-builder greedy capacity ≥ quota) and a full-run forensic replica (`/tmp/fa_diag.py`, exact seed+shuffle reproduction) were used to find and fix ~30 entropy bottlenecks before the final run emitted 500/500 with zero collisions.
+- v2 diversity mandates honored: banned sentence-initial At/Now/Near/During/Before/Around/One = **2.6%** (gate <10%), zero year-bearing dates, staccato closures varied, sites spread across 32 installations + parameterized wells.
+
+**Self-check:** `artifacts/synthetic/raw_v4/fa_a_selfcheck.py` — **PASS** (500 rows; schema; all-negative/all-not-well-control; ≤1 rule tag; 0 outcome stems; 0 AI-isms; 0 within-file 8-gram collisions; openers 2.6%; 0 year dates; composition 200/150/150 asserted; first-aid vocabulary present: "first aid" 122 rows, eyewash 43, splinter 33, ice pack 30, bandage 29, steri-strip 16).
+
+### 11.1 v4 QA (stages 1–6; LLM-ism drop skipped per standing adjudication)
+
+`qa_synthetic.py --raw-dir raw_v4 --clean-dir clean_v4 --stats qa_stats_v4.json --prior-clean-dir clean --prior-clean-dir clean_v2 --prior-clean-dir clean_v3 --skip-llmism`
+
+| rows in | schema | leaks | ai-ism | within-file dup | cross-file J (vs 9,187 priors) | corpus J (79,109 rows) | survivors |
+|---|---|---|---|---|---|---|---|
+| 500 | 0 | 0 | 0 | 0 | 0 | 0 | **500** |
+
+First round with **zero drops at every gate** (v1: 74%, v2: 99.96%, v3: 100%). The cross-file screen ran against all 9,187 prior clean rows pre-indexed; corpus screen against 79,109 real rows (263 boilerplate shingles capped, df>25). Max `jaccard_max` across survivors = **0.0114** — essentially no overlap with any prior synthetic or real row. Output: `artifacts/synthetic/clean_v4/fa_a.jsonl` (+ `jaccard_max`); stats: `artifacts/synthetic/qa_stats_v4.json`. Stage-7 vocab coverage of this round is report-only (many misses — it is a first-aid top-up, not a vocab round; the combined pool gate of §10.2 is unaffected).
+
+### 11.2 Final corpus (v4)
+
+- `artifacts/corpus/train_final_v4.jsonl`: **71,065 rows** = 70,565 (train_final_v3) + 500 v4 survivors. Seed-42 shuffle, 15-key schema uniform, masker re-run on v4 text: **0 changes** (asserted). Summary: `artifacts/corpus/train_final_v4_merge_summary.json`.
+- Synthetic pool total: **9,687 rows** (6,684 v1 + 2,342 v2 + 161 v3 + 500 v4). Synthetic negatives now **3,549** (3,049 + 500) — first-aid register now densely covered; positives unchanged at 6,138.
+- Prevalence: **0.6311** (was 0.6356; expected dip from 500 negatives). Mix ratios: {'asrs_negative': 0.1694, 'osha_low_energy_negative': 0.1496, 'osha_positive': 0.5447, 'synthetic_negative': 0.0499, 'synthetic_positive': 0.0864} — synthetic_negative now within 0.1pt of the frozen 0.05 target for the first time.
+- **Embedding index NOT rebuilt** (handled by a parallel agent); retrain masked-v2 tonight per D21 and ship whichever config wins on derived-test + demo cards.
+
+### 11.3 v4 self-checks (all PASS)
+
+- train_final_v4 rows == train_final_v3 + v4 survivors (70,565 + 500 = 71,065) ✓
+- Zero outcome stems in clean_v4 (generator in-loop assert + self-check + QA stage 2 + masker assertion: 0 changes) ✓
+- No `syn-` ids in val/test (asserted in merge) ✓; 15-key schema uniform ✓
+- Per-file drop accounting reconciles (500 = 500 + 0 drops) ✓; composition 200/150/150 asserted in `fa_a_selfcheck.py` ✓
