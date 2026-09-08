@@ -8,8 +8,10 @@ import { t, type Lang } from "@/lib/phrasebook";
 import type { Report } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Feed: report queue + triage card with evidence highlights, or Sentinel
- *  gray-state cards when one or more input gates fired. */
+/** Feed: report queue + triage card with evidence highlights. Gray-action
+ *  gates (min_length/negation/language/confidence/drill) swap the card for
+ *  Sentinel gray-state cards; badge-action gates (near_dup, long_input)
+ *  annotate the triage card itself. */
 export function FeedView({
   reports,
   lang,
@@ -37,7 +39,9 @@ export function FeedView({
     );
   }
 
-  const triggered = selected.prediction.gate_states.filter((g) => g.triggered);
+  const grayGates = (r: Report) =>
+    r.prediction.gate_states.filter((g) => g.triggered && g.action !== "badge");
+  const triggered = grayGates(selected);
 
   return (
     <div className="space-y-6">
@@ -51,7 +55,10 @@ export function FeedView({
             <Separator />
             <ul>
               {reports.map((r) => {
-                const gated = r.prediction.gate_states.some((g) => g.triggered);
+                const gated = grayGates(r).length > 0;
+                const dup = r.prediction.gate_states.some(
+                  (g) => g.name === "near_dup" && g.triggered,
+                );
                 const active = r.id === selected.id;
                 return (
                   <li key={r.id}>
@@ -72,6 +79,11 @@ export function FeedView({
                           #{r.id} · {r.reported_at}
                         </span>
                       </span>
+                      {dup && !gated && (
+                        <span className="rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
+                          DUP
+                        </span>
+                      )}
                       {gated ? (
                         <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
                           GATE

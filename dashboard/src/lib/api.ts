@@ -1,12 +1,14 @@
-import { DENSITY_BEFORE, OVERRIDES, PATTERNS, REPORTS } from "./mock";
+import { DENSITY_BEFORE, MOCK_EXPLANATIONS, OVERRIDES, PATTERNS, REPORTS } from "./mock";
 import type {
   Band,
   DensityRow,
+  ExplanationOut,
   GateState,
   HealthOut,
   IngestResult,
   MetricsSummary,
   OverrideOut,
+  PatternKind,
   PatternOut,
   PredictionOut,
   Report,
@@ -47,6 +49,8 @@ interface ApiPredictionOut {
   evidence_spans: { start: number; end: number; text: string }[];
   gate_states: GateState[];
   model_version: string;
+  chunked?: boolean;
+  explanation?: ExplanationOut | null;
 }
 
 interface ApiStoredReport {
@@ -66,12 +70,15 @@ interface ApiDensityRow {
 
 interface ApiPatternRow {
   activity: string;
-  site: string;
   n: number;
   sif_rate: number;
   lift: number;
   ci_low: number;
   ci_high: number;
+  site: string | null;
+  barrier: string | null;
+  rule: string | null;
+  kind: PatternKind;
 }
 
 interface ApiStoredOverride {
@@ -113,6 +120,11 @@ function ruleMeta(): typeof RULE_META {
   return liveRuleMeta ?? RULE_META;
 }
 
+/** Display name for a rule key (live /api/rules metadata when fetched). */
+export function ruleDisplayName(code: string): string {
+  return ruleMeta()[code]?.display ?? code;
+}
+
 /** Review-priority band (D14) derived from the calibrated score — the API
  *  contract carries no band. Thresholds match the server's gray band
  *  [0.40, 0.60] and the demo fixtures. */
@@ -120,9 +132,9 @@ export function bandFor(score: number): Band {
   return score >= 0.7 ? "HIGH" : score >= 0.4 ? "MODERATE" : "LOW";
 }
 
-async function req<T>(path: string, init?: RequestInit): Promise<T> {
+async function req<T>(path: string, init?: RequestInit, timeoutMs = TIMEOUT_MS): Promise<T> {
   const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const res = await fetch(`${BASE}${path}`, {
       ...init,
@@ -160,7 +172,8 @@ function adaptPrediction(p: ApiPredictionOut): PredictionOut {
     evidence_spans: p.evidence_spans,
     gate_states: p.gate_states,
     model_version: p.model_version,
-    explanation: "",
+    chunked: p.chunked ?? false,
+    explanation: p.explanation ?? null,
   };
 }
 
@@ -274,10 +287,12 @@ export async function classify(text: string): Promise<PredictionOut> {
           name: "confidence",
           triggered: true,
           detail: "API unreachable — offline demo mode",
+          action: "gray",
         },
       ],
       model_version: "offline",
-      explanation: "",
+      chunked: false,
+      explanation: null,
     };
   }
 }
@@ -293,6 +308,29 @@ export async function ingest(
   });
 }
 
+/** POST /api/ingest with a CSV body — the bulk-upload demo path (the server
+ *  maps narrative/description/report aliases onto the text column). Throws
+ *  when the API is unreachable. */
+export async function ingestCsv(csv: string): Promise<IngestResult> {
+  return req<IngestResult>("/api/ingest", {
+    method: "POST",
+    body: JSON.stringify({ csv, source: "dashboard" }),
+  });
+}
+
+/** GET /api/reports/{id}/explanation — fetched lazily when the triage-card
+ *  expander opens (never blocks the card). A cold call pays one bounded
+ *  ollama attempt server-side (8s cap), so the client waits up to 12s;
+ *  cached/template answers return in ms. null when unreachable, missing,
+ *  or the report has no prediction — the caller then hides the section. */
+export async function getExplanation(reportId: number): Promise<ExplanationOut | null> {
+  try {
+    return await req<ExplanationOut>(`/api/reports/${reportId}/explanation`, undefined, 12_000);
+  } catch {
+    return MOCK_EXPLANATIONS[reportId] ?? null;
+  }
+}
+
 /** GET /api/density — precursor-density ranking. rank is the sorted position;
  *  prev_rank comes from the caller's previous snapshot (the re-rank beat). */
 export async function getDensity(
@@ -306,13 +344,17 @@ export async function getDensity(
   }
 }
 
-/** GET /api/patterns — lift-ranked activity × site co-occurrence. */
-export async function getPatterns(): Promise<PatternOut[]> {
+/** GET /api/patterns?kind= — lift-ranked co-occurrence.
+ *  site_activity: activity × site cells. activity_barrier: activity ×
+ *  barrier cells (served from the precomputed synthetic-corpus stats). */
+export async function getPatterns(
+  kind: PatternKind = "site_activity",
+): Promise<PatternOut[]> {
   try {
-    const rows = await req<ApiPatternRow[]>("/api/patterns");
-    return rows.map((r, i) => ({ id: `PAT-${i + 1}`, ...r }));
+    const rows = await req<ApiPatternRow[]>(`/api/patterns?kind=${kind}`);
+    return rows.map((r, i) => ({ id: `${kind}-${i + 1}`, ...r }));
   } catch {
-    return PATTERNS;
+    return PATTERNS.filter((p) => p.kind === kind);
   }
 }
 

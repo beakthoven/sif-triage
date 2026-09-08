@@ -1,6 +1,8 @@
 import type {
   DensityRow,
   EvidenceSpan,
+  ExplanationOut,
+  GateAction,
   GateKind,
   GateState,
   OverrideOut,
@@ -54,13 +56,27 @@ const ALL_GATES: GateKind[] = [
   "confidence",
   "drill",
   "near_dup",
+  "long_input",
 ];
+
+/** Mirrors app/gates.py: near_dup + long_input are badge-only (annotate the
+ *  triage card); the rest route to the gray review queue when triggered. */
+const GATE_ACTIONS: Record<GateKind, GateAction> = {
+  min_length: "gray",
+  negation: "gray",
+  language: "gray",
+  confidence: "gray",
+  drill: "gray",
+  near_dup: "badge",
+  long_input: "badge",
+};
 
 function gateStates(...triggered: GateKind[]): GateState[] {
   return ALL_GATES.map((name) => ({
     name,
     triggered: triggered.includes(name),
     detail: triggered.includes(name) ? "offline demo fixture" : "",
+    action: GATE_ACTIONS[name],
   }));
 }
 
@@ -103,6 +119,105 @@ const G4_TEXT =
   "from the monkey board, falling above the occupied drill floor, landing about a " +
   "metre from the floorman on shift.";
 
+const R5_TEXT =
+  "During the night shift at the Moran GGS-1 compressor station, the operations " +
+  "crew carried out a scheduled pigging run on the 8-inch condensate line. Before " +
+  "launching, the receiver isolation valve was found passing, so the crew bled " +
+  "the trapped pressure to the flare and re-seated the valve. While the pig was " +
+  "in transit, the line pressure trend showed two unexplained drops, each " +
+  "recovering within ten minutes. On arrival, the pig brought out heavy wax and " +
+  "a piece of gasket material that did not match any flange on the launcher. The " +
+  "crew walked the line with a gas detector and found a faint reading near the " +
+  "road crossing sleeve, but no visible seep. The sleeve was excavated the next " +
+  "morning and the coating was found disbonded over a length of about one metre, " +
+  "with shallow external corrosion pitting underneath. The line was kept in " +
+  "service at reduced pressure pending a sleeve repair, and the finding was " +
+  "logged for the integrity review board with a recommendation to add the " +
+  "crossing to the annual close-interval survey.";
+
+/** Offline fallback for GET /api/reports/{id}/explanation (app/explain.py
+ *  shape): the deterministic template is always present; the reworded
+ *  paragraph demonstrates the optional Ollama path (source/cached honest). */
+export const MOCK_EXPLANATIONS: Record<number, ExplanationOut> = {
+  2614: {
+    template:
+      "Triage score 0.87 — flagged for HSE review.\n" +
+      "IOGP rules implicated: Line of Fire (0.91), Working at Height (0.64).\n" +
+      'Evidence phrases: "above the occupied drill floor", "1 m from the floorman", "No barricade or dropped-object netting".',
+    reworded:
+      "This report is flagged for HSE review with a triage score of 0.87. The " +
+      "implicated IOGP rules are Line of Fire (0.91) and Working at Height " +
+      '(0.64), supported by the evidence phrases "above the occupied drill ' +
+      'floor" and "1 m from the floorman".',
+    spans_quoted: ["above the occupied drill floor", "1 m from the floorman"],
+    source: "ollama",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+  2601: {
+    template:
+      "Triage score 0.74 — flagged for HSE review.\n" +
+      "IOGP rules implicated: Energy Isolation (0.55).\n" +
+      "Well-control/barrier tag: raised.\n" +
+      'Evidence phrases: "pulling the BOP before cement had fully set", "gas was detected at the shale shakers", "reduced from 48 h to 12 h".',
+    reworded: null,
+    spans_quoted: [
+      "pulling the BOP before cement had fully set",
+      "gas was detected at the shale shakers",
+      "reduced from 48 h to 12 h",
+    ],
+    source: "template",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+  2597: {
+    template:
+      "Triage score 0.62 — flagged for HSE review.\n" +
+      "IOGP rules implicated: Energy Isolation (0.58).\n" +
+      'Evidence phrases: "pinhole leak weeping crude", "not barricaded".',
+    reworded: null,
+    spans_quoted: ["pinhole leak weeping crude", "not barricaded"],
+    source: "template",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+  2588: {
+    template:
+      "Triage score 0.18 — below the review threshold.\n" +
+      "No IOGP rule crossed its display threshold.\n" +
+      "Evidence phrases: none extracted.",
+    reworded: null,
+    spans_quoted: [],
+    source: "template",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+  2615: {
+    template:
+      "Triage score 0.85 — flagged for HSE review.\n" +
+      "IOGP rules implicated: Line of Fire (0.90).\n" +
+      'Evidence phrases: "above the occupied drill floor".\n' +
+      "Advisory gates: near_dup (matches a training record — memory, not generalization).",
+    reworded: null,
+    spans_quoted: ["above the occupied drill floor"],
+    source: "template",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+  2619: {
+    template:
+      "Triage score 0.44 — flagged for HSE review.\n" +
+      "IOGP rules implicated: Energy Isolation (0.51).\n" +
+      'Evidence phrases: "receiver isolation valve was found passing".\n' +
+      "Advisory gates: long_input (chunked: 173 words > 120; sliding-window max-pool applies).",
+    reworded: null,
+    spans_quoted: ["receiver isolation valve was found passing"],
+    source: "template",
+    cached: true,
+    model_version: "mock-0.1.0",
+  },
+};
+
 export const REPORTS: Report[] = [
   {
     id: 2614,
@@ -130,9 +245,8 @@ export const REPORTS: Report[] = [
       ]),
       gate_states: gateStates(),
       model_version: "mock-0.1.0",
-      explanation:
-        "Dropped object from the derrick into an occupied area with no exclusion " +
-        "zone below — classic Line-of-Fire exposure on a workover rig.",
+      chunked: false,
+      explanation: MOCK_EXPLANATIONS[2614],
     },
   },
   {
@@ -161,9 +275,8 @@ export const REPORTS: Report[] = [
       ]),
       gate_states: gateStates(),
       model_version: "mock-0.1.0",
-      explanation:
-        "Well-control barrier stack degraded: BOP pulled before cement set, gas at " +
-        "shakers, compressed workover window. Baghjan-class precursor signature.",
+      chunked: false,
+      explanation: MOCK_EXPLANATIONS[2601],
     },
   },
   {
@@ -188,9 +301,8 @@ export const REPORTS: Report[] = [
       evidence_spans: spanify(R3_TEXT, ["pinhole leak weeping crude", "not barricaded"]),
       gate_states: gateStates(),
       model_version: "mock-0.1.0",
-      explanation:
-        "Loss of containment on a live flowline with missing secondary controls " +
-        "(barricade, spill kit).",
+      chunked: false,
+      explanation: MOCK_EXPLANATIONS[2597],
     },
   },
   {
@@ -209,9 +321,8 @@ export const REPORTS: Report[] = [
       evidence_spans: [],
       gate_states: gateStates(),
       model_version: "mock-0.1.0",
-      explanation:
-        "Low-energy slip event, same-level, caught by the worker. Routine " +
-        "housekeeping precursor.",
+      chunked: false,
+      explanation: MOCK_EXPLANATIONS[2588],
     },
   },
   {
@@ -230,7 +341,8 @@ export const REPORTS: Report[] = [
       evidence_spans: [],
       gate_states: gateStates("confidence"),
       model_version: "mock-0.1.0",
-      explanation: "",
+      chunked: false,
+      explanation: null,
     },
   },
   {
@@ -249,7 +361,8 @@ export const REPORTS: Report[] = [
       evidence_spans: spanify(G2_TEXT, ["sling slipped while lifting a casing"]),
       gate_states: gateStates("negation"),
       model_version: "mock-0.1.0",
-      explanation: "",
+      chunked: false,
+      explanation: null,
     },
   },
   {
@@ -268,7 +381,8 @@ export const REPORTS: Report[] = [
       evidence_spans: [],
       gate_states: gateStates("language"),
       model_version: "mock-0.1.0",
-      explanation: "",
+      chunked: false,
+      explanation: null,
     },
   },
   {
@@ -287,7 +401,31 @@ export const REPORTS: Report[] = [
       evidence_spans: spanify(G4_TEXT, ["above the occupied drill floor"]),
       gate_states: gateStates("near_dup"),
       model_version: "mock-0.1.0",
-      explanation: "",
+      chunked: false,
+      explanation: MOCK_EXPLANATIONS[2615],
+    },
+  },
+  {
+    id: 2619,
+    text: R5_TEXT,
+    site: "Moran GGS-1",
+    activity: "Pipeline pigging",
+    contractor: null,
+    reported_at: "2026-09-07",
+    prediction: {
+      sif_score: 0.44,
+      band: "MODERATE",
+      latency_ms: 52,
+      rules: rules(
+        [["energy_isolation", "Energy Isolation", 0.51]],
+        ...PTW_BYPASS_OOS,
+      ),
+      well_control: false,
+      evidence_spans: spanify(R5_TEXT, ["receiver isolation valve was found passing"]),
+      gate_states: gateStates("long_input"),
+      model_version: "mock-0.1.0",
+      chunked: true,
+      explanation: MOCK_EXPLANATIONS[2619],
     },
   },
 ];
@@ -303,9 +441,37 @@ function validateMock(): void {
         );
       }
     }
+    const ex = r.prediction.explanation;
+    if (ex) {
+      if (!ex.template.trim()) throw new Error(`empty template in ${r.id}`);
+      for (const q of ex.spans_quoted) {
+        if (!r.text.includes(q)) {
+          throw new Error(`explanation span not verbatim in ${r.id}: "${q}"`);
+        }
+      }
+      if (ex.reworded && !ex.reworded.includes(r.prediction.sif_score.toFixed(2))) {
+        throw new Error(`reworded explanation lost the triage score in ${r.id}`);
+      }
+    }
+    if (r.prediction.chunked && r.text.split(/\s+/).length <= 120) {
+      throw new Error(`chunked badge on a short report in ${r.id}`);
+    }
+  }
+  for (const p of PATTERNS) {
+    if (p.kind === "activity_barrier" && (p.site !== null || p.barrier === null)) {
+      throw new Error(`activity_barrier row malformed: ${p.id}`);
+    }
+    if (p.kind === "site_activity" && p.site === null) {
+      throw new Error(`site_activity row missing site: ${p.id}`);
+    }
+  }
+  // Every mock explanation is attached to the report it describes.
+  for (const id of Object.keys(MOCK_EXPLANATIONS)) {
+    if (!REPORTS.some((r) => r.id === Number(id))) {
+      throw new Error(`MOCK_EXPLANATIONS orphan: ${id}`);
+    }
   }
 }
-validateMock();
 
 /** Offline fallback for GET /api/density — two snapshots: prev (pre-ingest)
  *  and current (post-ingest re-rank). The demo beat: Baghjan EPS climbs to #1. */
@@ -327,14 +493,20 @@ export const DENSITY_AFTER: DensityRow[] = [
   { key: "Naharkatia Warehouse", n_reports: 93, n_flagged: 12, sif_rate: 0.129, mean_score: 0.203, rank: 6, prev_rank: 5 },
 ];
 
-/** Offline fallback for GET /api/patterns — lift-ranked activity × site
- *  co-occurrence with n + Wilson CI. */
+/** Offline fallback for GET /api/patterns?kind= — lift-ranked co-occurrence
+ *  with n + Wilson CI. site_activity: activity × site; activity_barrier:
+ *  activity × barrier (site null), rule = dominant IOGP rule tag. */
 export const PATTERNS: PatternOut[] = [
-  { id: "PAT-1", activity: "Workover operations", site: "Duliajan — Workover Rig #7", n: 14, sif_rate: 0.43, lift: 3.2, ci_low: 0.31, ci_high: 0.58 },
-  { id: "PAT-2", activity: "Well servicing", site: "Baghjan EPS", n: 11, sif_rate: 0.38, lift: 2.8, ci_low: 0.24, ci_high: 0.49 },
-  { id: "PAT-3", activity: "Flowline patrol", site: "GGS-2, Duliajan", n: 9, sif_rate: 0.32, lift: 2.4, ci_low: 0.18, ci_high: 0.41 },
-  { id: "PAT-4", activity: "Lifting operations", site: "Tengakhat — Rig #3 pipe yard", n: 7, sif_rate: 0.27, lift: 2.1, ci_low: 0.12, ci_high: 0.33 },
-  { id: "PAT-5", activity: "Hot work", site: "Moran GGS-1", n: 5, sif_rate: 0.24, lift: 1.9, ci_low: 0.08, ci_high: 0.29 },
+  { id: "site_activity-1", kind: "site_activity", activity: "Workover operations", site: "Duliajan — Workover Rig #7", barrier: null, rule: "line_of_fire", n: 14, sif_rate: 0.43, lift: 3.2, ci_low: 0.31, ci_high: 0.58 },
+  { id: "site_activity-2", kind: "site_activity", activity: "Well servicing", site: "Baghjan EPS", barrier: null, rule: "energy_isolation", n: 11, sif_rate: 0.38, lift: 2.8, ci_low: 0.24, ci_high: 0.49 },
+  { id: "site_activity-3", kind: "site_activity", activity: "Flowline patrol", site: "GGS-2, Duliajan", barrier: null, rule: "energy_isolation", n: 9, sif_rate: 0.32, lift: 2.4, ci_low: 0.18, ci_high: 0.41 },
+  { id: "site_activity-4", kind: "site_activity", activity: "Lifting operations", site: "Tengakhat — Rig #3 pipe yard", barrier: null, rule: "safe_mechanical_lifting", n: 7, sif_rate: 0.27, lift: 2.1, ci_low: 0.12, ci_high: 0.33 },
+  { id: "site_activity-5", kind: "site_activity", activity: "Hot work", site: "Moran GGS-1", barrier: null, rule: "hot_work", n: 5, sif_rate: 0.24, lift: 1.9, ci_low: 0.08, ci_high: 0.29 },
+  { id: "activity_barrier-1", kind: "activity_barrier", activity: "Well servicing", site: null, barrier: "BOP function test overdue", rule: "energy_isolation", n: 16, sif_rate: 0.44, lift: 3.4, ci_low: 0.33, ci_high: 0.6 },
+  { id: "activity_barrier-2", kind: "activity_barrier", activity: "Workover operations", site: null, barrier: "Dropped-object zone not barricaded", rule: "line_of_fire", n: 13, sif_rate: 0.39, lift: 3.0, ci_low: 0.27, ci_high: 0.55 },
+  { id: "activity_barrier-3", kind: "activity_barrier", activity: "Lifting operations", site: null, barrier: "Sling inspection lapsed", rule: "safe_mechanical_lifting", n: 10, sif_rate: 0.31, lift: 2.5, ci_low: 0.19, ci_high: 0.46 },
+  { id: "activity_barrier-4", kind: "activity_barrier", activity: "Flowline patrol", site: null, barrier: "Spill kit missing at station", rule: "energy_isolation", n: 8, sif_rate: 0.28, lift: 2.2, ci_low: 0.15, ci_high: 0.42 },
+  { id: "activity_barrier-5", kind: "activity_barrier", activity: "Hot work", site: null, barrier: "Gas test not repeated after break", rule: "hot_work", n: 6, sif_rate: 0.25, lift: 2.0, ci_low: 0.1, ci_high: 0.38 },
 ];
 
 /** Offline fallback for GET /api/review — overrides already logged
@@ -371,3 +543,5 @@ export const OVERRIDES: OverrideOut[] = [
     ts: "2026-09-06T11:07:55+05:30",
   },
 ];
+
+validateMock();

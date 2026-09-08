@@ -74,8 +74,10 @@ export default function App() {
     [reports],
   );
 
+  // Only gray-action gates route to the review queue; badge gates
+  // (near_dup, long_input) annotate the triage card in place.
   const gated = reports.filter((r) =>
-    r.prediction.gate_states.some((g) => g.triggered),
+    r.prediction.gate_states.some((g) => g.triggered && g.action !== "badge"),
   );
 
   return (

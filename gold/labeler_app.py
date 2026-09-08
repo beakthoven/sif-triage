@@ -263,9 +263,16 @@ def main() -> int:
     labels_dir.mkdir(parents=True, exist_ok=True)
     labels_file = labels_dir / f"{labeler}.jsonl"
 
-    srv = ThreadingHTTPServer(
-        ("127.0.0.1", args.port), make_handler(queue, labels_file, labeler)
-    )
+    try:
+        srv = ThreadingHTTPServer(
+            ("127.0.0.1", args.port), make_handler(queue, labels_file, labeler)
+        )
+    except OSError as e:
+        print(f"[{labeler}] ERROR: cannot bind 127.0.0.1:{args.port} ({e}). "
+              f"Another instance is probably already running on this port — "
+              f"use it, or stop it first (gold/start_labeling.sh --stop).",
+              file=sys.stderr)
+        return 2
     print(f"[{labeler}] {len(queue)} items queued (pilot first). "
           f"Open http://127.0.0.1:{args.port}/  — Ctrl-C to stop; "
           f"re-run to resume. Labels append to {labels_file}")

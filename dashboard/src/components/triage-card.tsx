@@ -1,16 +1,25 @@
-import { CircleCheck, CircleX, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, Zap } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { BandBadge } from "@/components/band-badge";
 import { HighlightedText } from "@/components/highlighted-text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { getExplanation } from "@/lib/api";
 import { t, type Lang } from "@/lib/phrasebook";
-import type { Report } from "@/lib/types";
+import type { ExplanationOut, Report } from "@/lib/types";
 
 /**
  * THE triage card (money shot). Amber "review priority" band — never red,
  * never "detected", score labeled "triage score" and shown as a band,
  * per D14 / UX SEV1-1. Equal-weight Confirm / Not-SIF override buttons;
  * footer: "model proposes, HSE disposes".
+ *
+ * Badge gates annotate here instead of routing to the gray queue:
+ * near_dup -> amber-striped "memory, not generalization" banner;
+ * chunked / long_input -> CHUNKED badge. The explanation expander fetches
+ * GET /api/reports/{id}/explanation lazily — async with a skeleton, the
+ * card never blocks on it; template always renders, the ollama rewording
+ * is shown when (and only when) the API produced one.
  */
 export function TriageCard({
   report,
@@ -26,6 +35,9 @@ export function TriageCard({
   const oos = p.rules.filter((r) => !r.in_scope);
   const top = inScope[0];
   const second = inScope[1];
+  const nearDup = p.gate_states.find((g) => g.name === "near_dup" && g.triggered);
+  const longInput = p.gate_states.find((g) => g.name === "long_input" && g.triggered);
+  const chunked = p.chunked || longInput !== undefined;
 
   return (
     <Card className="overflow-hidden border-border py-0">
@@ -37,6 +49,21 @@ export function TriageCard({
         </span>
       </div>
 
+      {/* Near-dup banner: badge gate, amber-striped, never gray. */}
+      {nearDup && (
+        <div className="hazard-stripe-dense flex items-center gap-3 px-4 py-2">
+          <span className="flex items-center gap-2 rounded-sm bg-background/90 px-2 py-1 text-sm font-medium text-primary">
+            <Copy className="size-4 shrink-0" aria-hidden />
+            {t(lang, "nearDupBanner")}
+          </span>
+          {nearDup.detail && (
+            <span className="hidden rounded-sm bg-background/90 px-2 py-1 font-mono text-xs text-muted-foreground lg:inline">
+              {nearDup.detail}
+            </span>
+          )}
+        </div>
+      )}
+
       <CardContent className="space-y-4 px-5 pt-4">
         <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
           <span>
@@ -47,6 +74,14 @@ export function TriageCard({
             <span className="font-semibold text-foreground">{p.sif_score.toFixed(2)}</span>
           </span>
           {p.latency_ms > 0 && <span>{p.latency_ms}ms</span>}
+          {chunked && (
+            <span
+              className="rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary"
+              title={longInput?.detail}
+            >
+              {t(lang, "chunkedBadge")}
+            </span>
+          )}
           <span className="ml-auto">
             {report.site} · {report.activity}
           </span>
@@ -79,9 +114,7 @@ export function TriageCard({
 
         <HighlightedText text={report.text} spans={p.evidence_spans} />
 
-        {p.explanation && (
-          <p className="text-sm text-muted-foreground">{p.explanation}</p>
-        )}
+        <ExplanationSection report={report} lang={lang} />
       </CardContent>
 
       <CardFooter className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-4 [.border-t]:pt-4">
@@ -109,5 +142,92 @@ export function TriageCard({
         </p>
       </CardFooter>
     </Card>
+  );
+}
+
+/** Lazily-fetched explanation. The template is the deterministic floor and
+ *  always renders once loaded; the ollama rewording is additive, labeled,
+ *  and never required. Loading shows a skeleton — the card itself never
+ *  blocks on this fetch (offline -> mock fallback -> quiet unavailable). */
+function ExplanationSection({ report, lang }: { report: Report; lang: Lang }) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [explanation, setExplanation] = useState<ExplanationOut | null>(
+    report.prediction.explanation,
+  );
+  const requestedFor = useRef<number | null>(
+    report.prediction.explanation ? report.id : null,
+  );
+
+  // New report selected -> reset to its bundled explanation (if any).
+  useEffect(() => {
+    setExplanation(report.prediction.explanation);
+    requestedFor.current = report.prediction.explanation ? report.id : null;
+  }, [report.id, report.prediction.explanation]);
+
+  useEffect(() => {
+    if (!open || requestedFor.current === report.id) return;
+    requestedFor.current = report.id;
+    let cancel = false;
+    setLoading(true);
+    getExplanation(report.id)
+      .then((ex) => {
+        if (!cancel) setExplanation(ex);
+      })
+      .finally(() => {
+        if (!cancel) setLoading(false);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [open, report.id]);
+
+  return (
+    <div className="rounded-md border border-border">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left font-medium text-foreground transition-colors hover:bg-muted/60"
+      >
+        {open ? (
+          <ChevronUp className="size-4 text-primary" aria-hidden />
+        ) : (
+          <ChevronDown className="size-4 text-primary" aria-hidden />
+        )}
+        {t(lang, "whyScore")}
+        {explanation?.source === "ollama" && (
+          <span className="ml-auto rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">
+            {t(lang, "llmPhrased")}
+            {explanation.cached ? " · cached" : ""}
+          </span>
+        )}
+      </button>
+      {open && (
+        <div className="space-y-3 border-t border-border px-4 py-3">
+          {loading ? (
+            <div className="space-y-2" aria-busy="true" aria-label="loading explanation">
+              <div className="h-3 w-3/4 animate-pulse rounded-sm bg-muted" />
+              <div className="h-3 w-full animate-pulse rounded-sm bg-muted" />
+              <div className="h-3 w-5/6 animate-pulse rounded-sm bg-muted" />
+            </div>
+          ) : explanation ? (
+            <>
+              {explanation.reworded && (
+                <p className="text-foreground">{explanation.reworded}</p>
+              )}
+              <p className="font-mono text-sm whitespace-pre-line text-muted-foreground">
+                {explanation.template}
+              </p>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Explanation unavailable — the deterministic template is produced
+              by the API when it is reachable.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

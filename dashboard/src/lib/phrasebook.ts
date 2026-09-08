@@ -25,6 +25,13 @@ const STRINGS = {
   overrides: { en: "Logged overrides", hi: "दर्ज ओवरराइड" },
   translationAvailable: { en: "translation available", hi: "अनुवाद उपलब्ध" },
   reportQueue: { en: "Report queue", hi: "रिपोर्ट कतार" },
+  whyScore: { en: "Why this score?", hi: "यह स्कोर क्यों?" },
+  nearDupBanner: {
+    en: "Matches a training record — memory, not generalization",
+    hi: "प्रशिक्षण रिकॉर्ड से मेल — सामान्यीकरण नहीं, स्मृति",
+  },
+  chunkedBadge: { en: "CHUNKED · sliding-window scoring", hi: "CHUNKED · स्लाइडिंग-विंडो स्कोरिंग" },
+  llmPhrased: { en: "phrased by local LLM", hi: "स्थानीय LLM द्वारा पुनर्लिखित" },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

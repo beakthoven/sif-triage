@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getDensity, getHealth, ingest } from "@/lib/api";
+import { getDensity, getHealth, ingestCsv } from "@/lib/api";
 import { DENSITY_AFTER, DENSITY_BEFORE } from "@/lib/mock";
 import { t, type Lang } from "@/lib/phrasebook";
 import type { DensityRow } from "@/lib/types";
@@ -18,18 +18,19 @@ import { useFlip } from "@/lib/use-flip";
 import { cn } from "@/lib/utils";
 
 /* The demo ingest batch: Baghjan-class well-servicing precursors. In live mode
- * these go through POST /api/ingest (real classification + storage) and the
- * density table is re-fetched — the re-rank beat is real, not scripted. */
+ * these go through POST /api/ingest as a CSV body (the bulk-upload path —
+ * real parse, classification + storage) and the density table is re-fetched:
+ * the re-rank beat is real, not scripted. */
 const DEMO_INGEST_RECORDS: Record<string, unknown>[] = [
   {
-    text: "While pulling the BOP on Well BGN-11 before the cement had fully set, pit gain was noticed and gas showed at the shale shakers. The well was shut in and mud weight raised the same shift.",
+    text: "While pulling the BOP on Well BGN-11 before the cement had fully set, pit gain was noticed and gas showed at the shale shakers. The well was shut in and mud weight raised the same shift. Reported to the shift supervisor.",
     site: "Baghjan EPS",
     activity: "Well servicing",
     contractor: "DeepWell Services",
     date: "2026-09-07",
   },
   {
-    text: "During night shift at Baghjan EPS the workover window was cut from 48 h to 12 h and the crew kept tripping in hole with returns climbing at the flowline. No senior officer on site at the time.",
+    text: "During night shift at Baghjan EPS the workover window was cut from 48 h to 12 h and the crew kept tripping in hole with returns climbing at the flowline. No senior officer on site at the time. Crew stood down pending review.",
     site: "Baghjan EPS",
     activity: "Well servicing",
     date: "2026-09-07",
@@ -47,19 +48,33 @@ const DEMO_INGEST_RECORDS: Record<string, unknown>[] = [
     date: "2026-09-07",
   },
   {
-    text: "Annular preventer element found past its inspection date during BOP function test at Baghjan EPS. Test was postponed twice this month due to rig-up work.",
+    text: "Annular preventer element found past its inspection date during BOP function test at Baghjan EPS. Test was postponed twice this month due to rig-up work. Crew raised it in the safety meeting.",
     site: "Baghjan EPS",
     activity: "Well servicing",
     contractor: "DeepWell Services",
     date: "2026-09-07",
   },
   {
-    text: "Mud weight found 0.2 ppg below program at the start of the evening tour at Well BGN-11. Pit level alarm was also not responding during the drill floor check.",
+    text: "Mud weight found 0.2 ppg below program at the start of the evening tour at Well BGN-11. Pit level alarm was also not responding during the drill floor check. Well was shut in as a precaution.",
     site: "Baghjan EPS",
     activity: "Well servicing",
     date: "2026-09-07",
   },
 ];
+
+const CSV_COLUMNS = ["text", "site", "activity", "contractor", "date"] as const;
+
+/** Minimal CSV serializer for the demo batch (texts contain commas/quotes). */
+function toCsv(rows: Record<string, unknown>[]): string {
+  const esc = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  return [
+    CSV_COLUMNS.join(","),
+    ...rows.map((r) => CSV_COLUMNS.map((c) => esc(r[c])).join(",")),
+  ].join("\n");
+}
 
 function RankDelta({ delta }: { delta: number }) {
   if (delta === 0)
@@ -90,6 +105,7 @@ export function DensityView({ lang }: { lang: Lang }) {
   const [live, setLive] = useState(false);
   const [ingesting, setIngesting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [ingestNote, setIngestNote] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const setRowRef = useFlip(rows);
 
@@ -125,14 +141,16 @@ export function DensityView({ lang }: { lang: Lang }) {
     setIngesting(true);
     setProgress(0);
     if (live) {
-      // Live beat: real ingest, then re-fetch — ranks derived from the
-      // pre-ingest snapshot drive the FLIP re-sort.
+      // Live beat: CSV upload through the bulk-ingest path, then re-fetch —
+      // ranks derived from the pre-ingest snapshot drive the FLIP re-sort.
       startProgress();
       try {
-        await ingest(DEMO_INGEST_RECORDS);
+        const result = await ingestCsv(toCsv(DEMO_INGEST_RECORDS));
+        setIngestNote(`accepted ${result.accepted}/${result.received}`);
         setRows(await getDensity("site", rows));
       } catch {
         setLive(false);
+        setIngestNote(null);
         setRows((cur) => (cur === DENSITY_BEFORE ? DENSITY_AFTER : DENSITY_BEFORE));
       } finally {
         stopProgress();
@@ -173,10 +191,13 @@ export function DensityView({ lang }: { lang: Lang }) {
             className="h-2 min-w-48 flex-1 overflow-hidden rounded-full bg-muted"
           >
             <div
-              className="hazard-stripe-dense h-full transition-[width] duration-100"
+              className="hazard-stripe-dense hazard-animated h-full transition-[width] duration-100"
               style={{ width: `${progress}%` }}
             />
           </div>
+        )}
+        {ingestNote && !ingesting && (
+          <p className="font-mono text-xs text-muted-foreground">{ingestNote}</p>
         )}
         {topClimber && !ingesting && (
           <p className="font-mono text-sm text-primary">

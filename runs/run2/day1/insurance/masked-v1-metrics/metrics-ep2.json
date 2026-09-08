@@ -1,0 +1,79 @@
+{
+ "sif": {
+  "auc": 0.9967131799510293,
+  "average_precision": 0.998834985754538,
+  "operating_point": {
+   "threshold": 0.0002376672302183595,
+   "recall": 1.0,
+   "precision": 0.8000295377344557,
+   "floor_unreachable": false
+  }
+ },
+ "rules": {
+  "line_of_fire": {
+   "f1": 0.987535182951347,
+   "threshold": 0.82,
+   "support": 3738,
+   "low_support": false
+  },
+  "working_at_height": {
+   "f1": 0.9549612948627727,
+   "threshold": 0.76,
+   "support": 1412,
+   "low_support": false
+  },
+  "driving": {
+   "f1": 0.9743589743589743,
+   "threshold": 0.95,
+   "support": 217,
+   "low_support": false
+  },
+  "energy_isolation": {
+   "f1": 0.969187675070028,
+   "threshold": 0.92,
+   "support": 180,
+   "low_support": false
+  },
+  "hot_work": {
+   "f1": 0.9575551782682513,
+   "threshold": 0.53,
+   "support": 299,
+   "low_support": false
+  },
+  "safe_mechanical_lifting": {
+   "f1": 0.9477611940298507,
+   "threshold": 0.93,
+   "support": 279,
+   "low_support": false
+  },
+  "confined_space": {
+   "f1": 0.7142857142857143,
+   "threshold": 0.38,
+   "support": 9,
+   "low_support": true
+  }
+ },
+ "span": {
+  "token_f1": 0.9950572904965176,
+  "tp_fp_fn": [
+   4429,
+   22,
+   22
+  ]
+ },
+ "rules_macro_f1_min_support": 0.9652265832568707,
+ "temperature": 1.4068896770477295,
+ "epoch": 2,
+ "train_loss_mean": 0.09668601246451723,
+ "span_drops": {
+  "train": {
+   "span_drop_no_anchor": 30357,
+   "span_drop_misaligned": 26
+  },
+  "val": {
+   "span_drop_no_anchor": 3778,
+   "span_drop_misaligned": 1
+  }
+ },
+ "epoch_seconds": 713.9
+}

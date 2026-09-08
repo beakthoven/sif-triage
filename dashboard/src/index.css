@@ -129,6 +129,20 @@
       transparent 12px
     );
   }
+  /* Animated tape for the ingest progress bar — one tile (12px) period at
+   * 45deg is 12*sqrt(2) ≈ 16.97px along x. Static under reduced-motion via
+   * the global media query below. */
+  @keyframes hazard-slide {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 16.97px 0;
+    }
+  }
+  .hazard-animated {
+    animation: hazard-slide 0.7s linear infinite;
+  }
   /* Amber evidence-span highlight: navy text on amber, never color-only. */
   .span-highlight {
     @apply rounded-sm px-0.5 font-medium;

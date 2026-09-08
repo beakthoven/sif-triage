@@ -4,28 +4,35 @@
  * evidence_spans, gate_states, model_version). Presentation-only additions
  * (band, latency_ms, explanation, rank/prev_rank) are derived client-side in
  * api.ts. Endpoints: POST /api/classify, POST /api/ingest, GET /api/reports,
- * GET /api/reports/{id}, GET /api/density, GET /api/rules, GET /api/patterns,
- * GET|POST /api/review, GET /api/metrics/summary, GET /api/health.
+ * GET /api/reports/{id}, GET /api/reports/{id}/explanation, GET /api/density,
+ * GET /api/rules, GET /api/patterns?kind=, GET|POST /api/review,
+ * GET /api/metrics/summary, GET /api/health.
  */
 
 /** Band semantics per D14: "review priority" band, never "%", never red.
  *  Derived client-side from sif_score (the API returns no band). */
 export type Band = "HIGH" | "MODERATE" | "LOW";
 
-/** The 6 Sentinel input gates (app/gates.py). triggered=true means "routed
- *  to review, never auto-cleared" — gates annotate, they never block. */
+/** The 7 Sentinel input gates (app/gates.py). action decides the UI:
+ *  "gray" routes to the review queue (gray-state card, never auto-cleared);
+ *  "badge" annotates the triage card only (near_dup banner, chunked);
+ *  "block" is reserved — no gate blocks today. */
 export type GateKind =
   | "min_length"
   | "negation"
   | "language"
   | "confidence"
   | "drill"
-  | "near_dup";
+  | "near_dup"
+  | "long_input";
+
+export type GateAction = "badge" | "gray" | "block";
 
 export interface GateState {
   name: GateKind;
   triggered: boolean;
   detail: string;
+  action: GateAction;
 }
 
 /** Char offsets are computed server-side against canonical text and
@@ -46,6 +53,18 @@ export interface RuleScore {
   in_scope: boolean;
 }
 
+/** GET /api/reports/{id}/explanation (app/explain.py). The template is
+ *  deterministic and always present; reworded is the optional Ollama
+ *  rewording (null whenever the LLM is down or failed validation). */
+export interface ExplanationOut {
+  template: string;
+  reworded: string | null;
+  spans_quoted: string[];
+  source: "template" | "ollama";
+  cached: boolean;
+  model_version: string;
+}
+
 /** API PredictionOut (app/schemas.py) + client-derived presentation fields. */
 export interface PredictionOut {
   sif_score: number; // calibrated triage score; labeled "triage score"
@@ -56,7 +75,8 @@ export interface PredictionOut {
   evidence_spans: EvidenceSpan[];
   gate_states: GateState[];
   model_version: string;
-  explanation: string; // deterministic template; "" until the renderer ships
+  chunked: boolean; // long input overflowed seq_len — sliding-window path ran
+  explanation: ExplanationOut | null; // only via /classify?explain=1; else fetched on expand
 }
 
 /** API StoredReport flattened for the UI: id is the server row id (int). */
@@ -83,12 +103,19 @@ export interface DensityRow {
   prev_rank: number;
 }
 
-/** GET /api/patterns row — lift-ranked activity × site co-occurrence,
- *  n + Wilson CI. id is assigned client-side for list keys. */
+/** GET /api/patterns row — lift-ranked co-occurrence with n + Wilson CI.
+ *  kind=site_activity: activity × site cell (barrier null).
+ *  kind=activity_barrier: activity × barrier cell (site null).
+ *  rule = dominant IOGP rule tag. id is assigned client-side for list keys. */
+export type PatternKind = "site_activity" | "activity_barrier";
+
 export interface PatternOut {
   id: string;
+  kind: PatternKind;
   activity: string;
-  site: string;
+  site: string | null;
+  barrier: string | null;
+  rule: string | null;
   n: number;
   sif_rate: number;
   lift: number;

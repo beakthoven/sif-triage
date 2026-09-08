@@ -74,10 +74,16 @@ def main():
     outdir = pathlib.Path(sys.argv[3])
     outdir.mkdir(parents=True, exist_ok=True)
     failures = []
+    skipped = []
     for name, meta in sorted(manifest["files"].items(),
                              key=lambda kv: kv[1]["bytes"]):
         if name not in urls:
             failures.append(f"{name}: NO URL in session output")
+            continue
+        if urls[name] is None:
+            skipped.append(name)
+            print(f"{name}: skipped (deferred, still in kernel bundle)",
+                  flush=True)
             continue
         try:
             n, msg = retrieve(name, urls[name], meta["bytes"],

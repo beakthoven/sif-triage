@@ -6,6 +6,7 @@ import {
   Info,
   Languages,
   Ruler,
+  Scissors,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { GateKind, GateState, Report } from "@/lib/types";
@@ -53,7 +54,13 @@ const GATE_META: Record<
     icon: Copy,
     name: "Near-duplicate",
     sentence:
-      "Matches a training record — memory, not generalization. Routed to review, never auto-cleared.",
+      "Matches a training record — memory, not generalization. Shown as a banner on the triage card.",
+  },
+  long_input: {
+    icon: Scissors,
+    name: "Long report (chunked)",
+    sentence:
+      "Over 120 words — scored with the sliding-window path (length out of distribution). Shown as a chunked badge.",
   },
 };
 
@@ -64,6 +71,7 @@ const GATE_ORDER: GateKind[] = [
   "confidence",
   "drill",
   "near_dup",
+  "long_input",
 ];
 
 export function GrayStateCard({ report, gate }: { report: Report; gate: GateState }) {

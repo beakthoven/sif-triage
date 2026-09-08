@@ -41,7 +41,7 @@ export function ReviewView({
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           {gatedReports.map((r) =>
             r.prediction.gate_states
-              .filter((g) => g.triggered)
+              .filter((g) => g.triggered && g.action !== "badge")
               .map((g) => (
                 <GrayStateCard key={`${r.id}-${g.name}`} report={r} gate={g} />
               )),
