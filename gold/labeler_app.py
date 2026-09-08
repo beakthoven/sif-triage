@@ -255,6 +255,8 @@ def main() -> int:
     ap.add_argument("--labels-dir", default="artifacts/gold/labels")
     ap.add_argument("--port", type=int, default=8001)
     ap.add_argument("--seed", type=int, default=SEED)
+    ap.add_argument("--host", default="127.0.0.1",
+                    help="bind address; use 0.0.0.0 to allow teammates over LAN")
     args = ap.parse_args()
 
     labeler = args.labeler if args.labeler.startswith("labeler_") else f"labeler_{args.labeler}"
@@ -265,16 +267,16 @@ def main() -> int:
 
     try:
         srv = ThreadingHTTPServer(
-            ("127.0.0.1", args.port), make_handler(queue, labels_file, labeler)
+            (args.host, args.port), make_handler(queue, labels_file, labeler)
         )
     except OSError as e:
-        print(f"[{labeler}] ERROR: cannot bind 127.0.0.1:{args.port} ({e}). "
+        print(f"[{labeler}] ERROR: cannot bind {args.host}:{args.port} ({e}). "
               f"Another instance is probably already running on this port — "
               f"use it, or stop it first (gold/start_labeling.sh --stop).",
               file=sys.stderr)
         return 2
     print(f"[{labeler}] {len(queue)} items queued (pilot first). "
-          f"Open http://127.0.0.1:{args.port}/  — Ctrl-C to stop; "
+          f"Open http://{args.host}:{args.port}/  — Ctrl-C to stop; "
           f"re-run to resume. Labels append to {labels_file}")
     try:
         srv.serve_forever()

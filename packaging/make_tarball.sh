@@ -5,7 +5,9 @@
 # precomputed pattern stats, frozen label spec, run.sh, wheels for offline
 # pip install. EXCLUDES data/ and runs/ raw research, dev/training code,
 # .venv, and git history (artifacts/ and *.onnx are gitignored — this
-# tarball is the transport for the model).
+# tarball is the transport for the model). Model payload is the ship variant
+# only (masked-v2, runs/run2/day2/ship_decision.md) — the other variants are
+# repo-side provenance, not demo payload (5.6 GB -> ~0.7 GB).
 #
 # Usage:
 #   packaging/make_tarball.sh                build (fails if model missing)
@@ -36,10 +38,10 @@ STAMP="$(date +%Y%m%d)"
 OUT="packaging/sif-demo-usb-${STAMP}.tar.gz"
 
 tar -czf "$OUT" \
-    --exclude='__pycache__' --exclude='*.pyc' --exclude='app/runtime.db' \
+    --exclude='__pycache__' --exclude='*.pyc' --exclude='app/runtime.db*' \
     app \
     dashboard/dist \
-    artifacts/models \
+    artifacts/models/masked-v2 \
     artifacts/patterns \
     spec/label_spec.yaml \
     requirements.txt \
