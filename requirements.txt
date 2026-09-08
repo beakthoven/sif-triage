@@ -1,0 +1,11 @@
+# Runtime dependencies — SIF-Precursor Detection Engine (PS 26165)
+# 100% local runtime: FastAPI + onnxruntime INT8 model + SQLite/numpy index.
+# NO torch here by design: training/export happens on Kaggle (see requirements-dev.txt).
+fastapi
+uvicorn[standard]
+pydantic>=2
+numpy>=2
+onnxruntime>=1.23
+tokenizers
+pandas>=2
+pyarrow

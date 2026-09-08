@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --font-heading: var(--font-sans);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * SIF dashboard theme — navy #0B1220 primary (designed/rehearsed at 1920x1080).
+ * Amber #FBBF24 on navy = 11.2:1 contrast (WCAG AAA, projector-robust).
+ * No red/green pairing anywhere: band semantics are amber/intensity, not color hue.
+ */
+:root {
+    --navy: #0b1220;
+    --amber: #fbbf24;
+    --background: #0b1220;
+    --foreground: #f1f5f9;
+    --card: #111c31;
+    --card-foreground: #f1f5f9;
+    --popover: #111c31;
+    --popover-foreground: #f1f5f9;
+    --primary: #fbbf24;
+    --primary-foreground: #0b1220;
+    --secondary: #1b2946;
+    --secondary-foreground: #e2e8f0;
+    --muted: #16223c;
+    --muted-foreground: #94a3b8;
+    --accent: #2b3c5e;
+    --accent-foreground: #fbbf24;
+    --destructive: #b91c1c;
+    --border: #263652;
+    --input: #263652;
+    --ring: #fbbf24;
+    --chart-1: #fbbf24;
+    --chart-2: #94a3b8;
+    --chart-3: #64748b;
+    --chart-4: #475569;
+    --chart-5: #334155;
+    --radius: 0.5rem;
+    --sidebar: #0b1220;
+    --sidebar-foreground: #f1f5f9;
+    --sidebar-primary: #fbbf24;
+    --sidebar-primary-foreground: #0b1220;
+    --sidebar-accent: #16223c;
+    --sidebar-accent-foreground: #fbbf24;
+    --sidebar-border: #263652;
+    --sidebar-ring: #fbbf24;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  html {
+    @apply font-sans;
+    font-size: 18px; /* spec: base 18px, min 16px — projector-legible */
+    }
+  body {
+    @apply bg-background text-foreground;
+    font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer components {
+  /*
+   * Signature hazard-tape stripe: 45deg amber/navy diagonal, pure CSS.
+   * Used on triage card headers — instantly recognizable in screenshots.
+   */
+  .hazard-stripe {
+    background-color: var(--navy);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--amber) 0px,
+      var(--amber) 12px,
+      transparent 12px,
+      transparent 24px
+    );
+  }
+  .hazard-stripe-dense {
+    background-color: var(--navy);
+    background-image: repeating-linear-gradient(
+      -45deg,
+      var(--amber) 0px,
+      var(--amber) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+  /* Amber evidence-span highlight: navy text on amber, never color-only. */
+  .span-highlight {
+    @apply rounded-sm px-0.5 font-medium;
+    background-color: color-mix(in oklab, var(--amber) 88%, transparent);
+    color: var(--navy);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

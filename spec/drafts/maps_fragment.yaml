@@ -1,0 +1,135 @@
+# maps_fragment.yaml — label-spec component A (DRAFT for H2 freeze, D9/D15)
+# Generated 2026-09-08. Source of truth + verification: data_pipeline/oiics_maps.py
+# (self-check asserts every value below against data/January2015toNovember2025.csv).
+# Measured numbers and rationale: spec/drafts/maps_draft.md.
+
+era_boundary: "2024-01-01"   # v1 = 2015-2023 (n=88250), v2 = 2024-2025 (n=17746)
+
+# --- FROZEN SIF-positive definition (D15): candidate B_middle ----------------
+# strict high-energy mechanism codes, era-consistent (v1 65.52% / v2 64.21%,
+# overall 65.30%, n=69214). Code-only, deterministic.
+sif_definition: B_middle
+sif_prefixes:
+  v1: ["31", "32", "43", "44", "45", "51", "62", "63", "64", "65"]
+  v2: ["31", "32", "41", "51", "63", "64", "65", "66"]
+sif_candidates_measured:
+  A_strict: { v1: 0.6040, v2: 0.5557 }   # legacy 5-mechanism, era-translated
+  B_middle: { v1: 0.6552, v2: 0.6421 }   # FROZEN
+  C_broad:  { v1: 0.7432, v2: 0.7350 }   # + transportation 2x + oxygen 56
+  D_keyword_union: { overall: 0.7587 }   # incl. narrative LFs; not code-deterministic
+legacy_era_blind_anchor: { overall: 0.5543, v2_only: 0.3073 }  # D9 collapse warning
+
+# --- Dual era-conditional rule maps (prefix = first 2 chars of Event code) ---
+rules:
+  - line_of_fire
+  - working_at_height
+  - driving
+  - energy_isolation
+  - hot_work
+  - safe_mechanical_lifting
+  - confined_space
+
+rule_map:
+  v1:
+    line_of_fire: ["62", "63", "64", "65"]
+    working_at_height: ["43", "44", "45"]   # 45 = PFAS-arrested fall (n=64)
+    driving: ["20", "21", "22", "23", "24", "25", "26", "27"]
+    energy_isolation: ["51"]
+    hot_work: ["31", "32"]                  # v1: 31=fires, 32=explosions
+    safe_mechanical_lifting: []             # keyword-LF only
+    confined_space: ["56"]                  # oxygen deficiency
+  v2:
+    line_of_fire: ["63", "64", "65", "66"]  # 63=collapse/engulfment in v2
+    working_at_height: ["41"]               # 42 (stepping between levels) unmapped
+    driving: ["20", "21", "22", "23", "24", "25", "26", "27"]
+    energy_isolation: ["51"]
+    hot_work: ["31", "32"]                  # v2: 31=explosions, 32=fires (swapped)
+    safe_mechanical_lifting: []             # keyword-LF only
+    confined_space: ["56"]
+
+renumbered_crossrule: ["41", "43", "44", "45", "62", "66"]   # era-keyed collisions
+renumbered_same_rule: ["22", "23", "24", "25", "31", "32", "63", "64", "65"]
+
+# --- Keyword labeling functions (multi-hot; narrative + SourceTitle, case-insens.)
+keyword_lfs:
+  confined_space:
+    - '\bconfined space\b'
+    - '\bmanhole\b'
+    - '\btank entry\b'
+    - '\bvessel entry\b'
+    - '\benter(?:ed|ing) (?:the |a )?(?:tank|vessel|silo|vault|pit|bin|hopper)\b'
+    - '\binside (?:the |a )?(?:tank|vessel|silo)\b'
+  energy_isolation:
+    - '\block\s?out\b'
+    - '\btag\s?out\b'
+    - '\blockout\b'
+    - '\btagout\b'
+    - '\benergized\b'
+    - '\bde-?energiz'
+    - '\bstored energy\b'
+    - '\barc flash\b'
+    - '\bunexpectedly (?:started|activated|energized)'
+  hot_work:
+    - '\bhot work\b'
+    - '\bweld'
+    - '\btorch\b'
+    - '\bgrind'
+    - '\bcutting (?:torch|metal|steel)'
+    - '\bspark'
+  safe_mechanical_lifting:
+    - '\bcrane\b'
+    - '\brigging\b'
+    - '\bhoist'
+    - '\bsuspended load\b'
+    - '\boverhead load\b'
+    - '\bsling\b'
+    - '\bdropped load\b'
+  driving:
+    - '\bfork\s?lift\b'
+    - '\bskid steer\b'
+  line_of_fire:
+    - '\bstruck by\b'
+    - '\bcaught (?:in|between)\b'
+    - '\bcrushed\b'
+    - '\bpinch'
+    - '\bran over\b'
+  working_at_height: []   # code-only; "fell from" too noisy
+
+# primary_rule precedence: keyword matches first, then rare-first tie order
+primary_tie_order:
+  - confined_space
+  - energy_isolation
+  - safe_mechanical_lifting
+  - hot_work
+  - driving
+  - working_at_height
+  - line_of_fire
+
+# --- Well-control/barrier tag (Baghjan-class; n=185, 0.175%) ------------------
+# Bare "kick" deliberately excluded (collides with violence titles).
+wellcontrol_keywords:
+  - '\bblowout\b'
+  - '\bblow-out\b'
+  - '\bblowout preventer\b'
+  - '\bwell control\b'
+  - '\bwell-control\b'
+  - '\bbop\b'
+  - '\bworkover\b'
+  - '\bchristmas tree\b'
+  - '\bh2s\b'
+  - '\bhydrogen sul[fp]hide\b'
+  - '\bgas migration\b'
+  - '\blost circulation\b'
+  - '\bsnubbing\b'
+  - '\bcoiled tubing\b'
+  - '\bwellhead\b'
+
+measured:
+  rule_distribution_multi_hot:
+    v1: { line_of_fire: 48.78, working_at_height: 17.37, driving: 11.55,
+          energy_isolation: 2.32, hot_work: 3.78, safe_mechanical_lifting: 3.55,
+          confined_space: 0.29, unmatched: 24.05, multi_rule: 11.39 }
+    v2: { line_of_fire: 47.41, working_at_height: 17.64, driving: 12.03,
+          energy_isolation: 2.78, hot_work: 3.77, safe_mechanical_lifting: 4.30,
+          confined_space: 0.66, unmatched: 24.52, multi_rule: 12.57 }
+  well_control: { n: 185, pct: 0.175, v1: 152, v2: 33 }

@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Binary artifacts — never let git mangle these
+*.onnx binary
+*.parquet binary
+*.png binary
+*.jpg binary
+*.zip binary
+*.pyc binary

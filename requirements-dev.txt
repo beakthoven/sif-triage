@@ -1,0 +1,12 @@
+# Dev/training dependencies — NOT installed in the runtime environment.
+# torch: install the CPU wheel locally (training itself runs on Kaggle GPUs):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# transformers pinned per DECISION_LOG D12 (optimum-onnx rejected; hand-rolled
+# torch.onnx.export + onnxruntime.quantize_dynamic — quantize_dynamic needs ORT>=1.17,
+# renamed from quant_dynamic in ORT 1.29).
+transformers==4.57.6
+datasets
+scikit-learn
+pytest
+onnxruntime>=1.23
+huggingface_hub

@@ -1,0 +1,281 @@
+# ==============================================================
+# label_spec.yaml — FROZEN v1.0.0 (Day-1 H2 freeze, 2026-09-08 05:45 IST)
+# SIH 2026 PS 26165 — SIF-Precursor Detection Engine
+# Frozen by: orchestrator adjudication of spec/drafts/maps_fragment.yaml
+#            + spec/drafts/protocol_fragment.yaml (both swarm-drafted,
+#            self-checked against data/January2015toNovember2025.csv).
+# Any change to this file = version bump + re-derivation of all labels.
+# ==============================================================
+spec_version: 1.0.0
+frozen_at: "2026-09-08T05:45:00+05:30"
+
+# --- Orchestrator adjudications at freeze ---
+adjudications:
+  sif_definition: "B_middle FROZEN (D15): era-consistent strict high-energy mechanism set; v1 65.52% / v2 64.21% positive, era gap 1.3pp. A_strict rejected (4.8pp era gap), C_broad rejected (mixed mechanisms), D_keyword rejected (not code-deterministic)."
+  span_head: "KEEP weakly-supervised (D2); fallback = keyword-attribution if span quality poor at training review."
+  synthetic_target_rows: 9000   # frozen within the [8000,10000] band; quotas below are for 9000
+  vocab_coverage_floor_N: 50    # each of the 24 OIL terms must appear in >= 50 synthetic rows
+  cs_ei_support_weakness: "confined_space 0.35% / energy_isolation 2.40% of real positives — synthetic quotas carry them; disclosed as limitation; macro-F1 only over rules with >=50 gold positives."
+
+era_boundary: "2024-01-01"   # v1 = 2015-2023 (n=88250), v2 = 2024-2025 (n=17746)
+
+# --- FROZEN SIF-positive definition (D15): candidate B_middle ----------------
+# strict high-energy mechanism codes, era-consistent (v1 65.52% / v2 64.21%,
+# overall 65.30%, n=69214). Code-only, deterministic.
+sif_definition: B_middle
+sif_prefixes:
+  v1: ["31", "32", "43", "44", "45", "51", "62", "63", "64", "65"]
+  v2: ["31", "32", "41", "51", "63", "64", "65", "66"]
+sif_candidates_measured:
+  A_strict: { v1: 0.6040, v2: 0.5557 }   # legacy 5-mechanism, era-translated
+  B_middle: { v1: 0.6552, v2: 0.6421 }   # FROZEN
+  C_broad:  { v1: 0.7432, v2: 0.7350 }   # + transportation 2x + oxygen 56
+  D_keyword_union: { overall: 0.7587 }   # incl. narrative LFs; not code-deterministic
+legacy_era_blind_anchor: { overall: 0.5543, v2_only: 0.3073 }  # D9 collapse warning
+
+# --- Dual era-conditional rule maps (prefix = first 2 chars of Event code) ---
+rules:
+  - line_of_fire
+  - working_at_height
+  - driving
+  - energy_isolation
+  - hot_work
+  - safe_mechanical_lifting
+  - confined_space
+
+rule_map:
+  v1:
+    line_of_fire: ["62", "63", "64", "65"]
+    working_at_height: ["43", "44", "45"]   # 45 = PFAS-arrested fall (n=64)
+    driving: ["20", "21", "22", "23", "24", "25", "26", "27"]
+    energy_isolation: ["51"]
+    hot_work: ["31", "32"]                  # v1: 31=fires, 32=explosions
+    safe_mechanical_lifting: []             # keyword-LF only
+    confined_space: ["56"]                  # oxygen deficiency
+  v2:
+    line_of_fire: ["63", "64", "65", "66"]  # 63=collapse/engulfment in v2
+    working_at_height: ["41"]               # 42 (stepping between levels) unmapped
+    driving: ["20", "21", "22", "23", "24", "25", "26", "27"]
+    energy_isolation: ["51"]
+    hot_work: ["31", "32"]                  # v2: 31=explosions, 32=fires (swapped)
+    safe_mechanical_lifting: []             # keyword-LF only
+    confined_space: ["56"]
+
+renumbered_crossrule: ["41", "43", "44", "45", "62", "66"]   # era-keyed collisions
+renumbered_same_rule: ["22", "23", "24", "25", "31", "32", "63", "64", "65"]
+
+# --- Keyword labeling functions (multi-hot; narrative + SourceTitle, case-insens.)
+keyword_lfs:
+  confined_space:
+    - '\bconfined space\b'
+    - '\bmanhole\b'
+    - '\btank entry\b'
+    - '\bvessel entry\b'
+    - '\benter(?:ed|ing) (?:the |a )?(?:tank|vessel|silo|vault|pit|bin|hopper)\b'
+    - '\binside (?:the |a )?(?:tank|vessel|silo)\b'
+  energy_isolation:
+    - '\block\s?out\b'
+    - '\btag\s?out\b'
+    - '\blockout\b'
+    - '\btagout\b'
+    - '\benergized\b'
+    - '\bde-?energiz'
+    - '\bstored energy\b'
+    - '\barc flash\b'
+    - '\bunexpectedly (?:started|activated|energized)'
+  hot_work:
+    - '\bhot work\b'
+    - '\bweld'
+    - '\btorch\b'
+    - '\bgrind'
+    - '\bcutting (?:torch|metal|steel)'
+    - '\bspark'
+  safe_mechanical_lifting:
+    - '\bcrane\b'
+    - '\brigging\b'
+    - '\bhoist'
+    - '\bsuspended load\b'
+    - '\boverhead load\b'
+    - '\bsling\b'
+    - '\bdropped load\b'
+  driving:
+    - '\bfork\s?lift\b'
+    - '\bskid steer\b'
+  line_of_fire:
+    - '\bstruck by\b'
+    - '\bcaught (?:in|between)\b'
+    - '\bcrushed\b'
+    - '\bpinch'
+    - '\bran over\b'
+  working_at_height: []   # code-only; "fell from" too noisy
+
+# primary_rule precedence: keyword matches first, then rare-first tie order
+primary_tie_order:
+  - confined_space
+  - energy_isolation
+  - safe_mechanical_lifting
+  - hot_work
+  - driving
+  - working_at_height
+  - line_of_fire
+
+# --- Well-control/barrier tag (Baghjan-class; n=185, 0.175%) ------------------
+# Bare "kick" deliberately excluded (collides with violence titles).
+wellcontrol_keywords:
+  - '\bblowout\b'
+  - '\bblow-out\b'
+  - '\bblowout preventer\b'
+  - '\bwell control\b'
+  - '\bwell-control\b'
+  - '\bbop\b'
+  - '\bworkover\b'
+  - '\bchristmas tree\b'
+  - '\bh2s\b'
+  - '\bhydrogen sul[fp]hide\b'
+  - '\bgas migration\b'
+  - '\blost circulation\b'
+  - '\bsnubbing\b'
+  - '\bcoiled tubing\b'
+  - '\bwellhead\b'
+
+measured:
+  rule_distribution_multi_hot:
+    v1: { line_of_fire: 48.78, working_at_height: 17.37, driving: 11.55,
+          energy_isolation: 2.32, hot_work: 3.78, safe_mechanical_lifting: 3.55,
+          confined_space: 0.29, unmatched: 24.05, multi_rule: 11.39 }
+    v2: { line_of_fire: 47.41, working_at_height: 17.64, driving: 12.03,
+          energy_isolation: 2.78, hot_work: 3.77, safe_mechanical_lifting: 4.30,
+          confined_space: 0.66, unmatched: 24.52, multi_rule: 12.57 }
+  well_control: { n: 185, pct: 0.175, v1: 152, v2: 33 }
+
+  algorithm: token_level_neutralization   # D6; clause-strip REJECTED (19.1% empty rows)
+  token: "[OUTCOME]"
+  apply_to: [positives, negatives]        # 96.8% of low-energy negatives hospitalized
+  collapse_adjacent_tokens: true
+  case_insensitive: true
+  implementation: data_pipeline/masking.py
+  self_check:
+    sample_rows: 5000
+    seed: 42
+    measured:
+      empty_rate: 0.0          # gate: must be 0
+      rows_with_hit: 0.753
+      mean_tokens_masked_per_row: 1.01
+      median_length_preserved: 1.0
+  stems:
+    # multi-word phrases (matched before single-word stems)
+    - "crush syndrome"
+    - "loss of / lost ... eye(s)"
+    - "(first|second|third|1st|2nd|3rd)[-]degree burn(s)"
+    - "intensive care (unit)"
+    - "trauma center/centre"
+    - "life[-]flight"
+    # single-word stems (inflection-covered via \\w* suffix; see masking.py)
+    - amputat
+    - fractur
+    - hospital
+    - kill
+    - fatal
+    - death
+    - died
+    - "sever(e|ely|ed|ing|s)"   # NOT "several"
+    - unconscious
+    - unresponsive
+    - resuscitat
+    - paraly
+    - coma
+    - icu
+    - airlift
+    - medevac
+    - "surgery/surgical"
+    - succumb
+    - injur
+  known_tradeoffs:
+    - "sever alternation explicitly excludes 'several'"
+    - "injur masks 'no injury occurred' -> 'no [OUTCOME] occurred'; negation survives"
+    - "bare 'burn' NOT masked (Hot Work mechanism signal); degree-qualified only"
+    - "coma/airlift rare proper-noun hits accepted"
+
+negatives:
+  sources:
+    asrs_weak:
+      weak_label_fields: [Events_Anomaly, "Assessments.1_Primary Problem"]
+      prescreen: drop_high_energy_anomaly_rows   # Day-1 open item: anomaly semantics spot-check
+      usage: train_only_never_eval
+    osha_low_energy_masked:
+      pool_codes: {v1: ["42x", "7xx"], v2: ["43x", "7xx"]}   # same-level falls + overexertion
+      pool_rows_measured: 14961
+      exclude_amputated_rows: 219
+      masked: true
+    synthetic:
+      see: synthetic_corpus.negatives
+  train_mix_ratios:
+    osha_positive: 0.55
+    osha_low_energy_negative: 0.15
+    asrs_negative: 0.15
+    synthetic_positive: 0.10
+    synthetic_negative: 0.05
+  target_train_prevalence: 0.40
+  threshold_tuning: "val split, precision >= 0.80"
+
+splits:
+  policy: temporal_hard
+  train_end: "2023-12-31"
+  test_range: ["2024-01-01", "2025-11-30"]   # 17,746 rows
+  employer_grouping: within_train_only        # 42.0% of test rows share employer with train
+  cross_boundary_near_dup_screen:
+    method: 8gram_jaccard_distinctive_shingles
+    drop_threshold: 0.5                        # measured 0.13% of test at J>=0.5
+    report_threshold: 0.3                      # measured 0.53%
+  dedup_order: [exact_dedup_pre_split, temporal_split, boundary_screen]
+  leakage_audit: splits.json                   # normalized-employer overlap + boundary counts
+
+synthetic_corpus:
+  target_rows: [8000, 10000]                   # quota table below is for 9000 (6000 pos / 3000 neg)
+  generation: dev_time_cloud_llm               # contamination-separated, see contamination
+  register_seeds:
+    - "2,756 OSHA oil-gas NAICS (211/213) narratives, outcome-masked + entity-swapped"
+    - "SmartQHSE major-process-safety-incidents-2026 vignettes"
+    - "OIL vocabulary list (24 terms, hse-domain-reviewer.md)"
+  rule_quota_rule: dampened_inverse_frequency    # w ~ 1/sqrt(n_seed)
+  seed_counts: {line_of_fire: 1610, working_at_height: 300, hot_work: 250,
+                safe_mechanical_lifting: 187, driving: 106, energy_isolation: 47,
+                confined_space: 29}
+  positive_quotas_9000: {line_of_fire: 231, working_at_height: 535, hot_work: 586,
+                         safe_mechanical_lifting: 677, driving: 900,
+                         energy_isolation: 1351, confined_space: 1720}
+  negatives_9000: 3000                            # low-energy OIL-register, no rule tag
+  quality_gates:
+    dedup: "8-gram Jaccard vs corpus+OSHA; per-row jaccard_max recorded"
+    outcome_leak: "reject/regenerate rows matching unmasked outcome stems"
+    llm_ism_detector: "TF-IDF+LogReg real-vs-synth 10-fold AUC < 0.9 (iterate gen params)"
+    vocab_coverage: "each of 24 OIL terms in >= N rows (N set at freeze)"
+  caveat: "detector-weak != indistinguishable"
+
+gold:
+  n: 500
+  composition:
+    osha_2024_25: 300      # incl. up to 150 of the 364 available oil-gas NAICS rows
+    asrs: 100
+    synthetic: 100
+  prevalence_target: ">= 0.40 SIF-positive"   # recall CI width <= 0.12 on real stratum
+  labeling:
+    visible_to_labeler: [masked_narrative, EventTitle]   # NatureTitle/part-of-body/outcomes hidden
+    forbidden_to_labeler: [model_output, llm_output, provenance, rationale]
+    volume: "500 single + 150 double-labeled subset, 6-8 person-hours, start Day 2 evening"
+    calibration_pilot: 20                       # before spec freeze
+    adjudication: "3rd labeler cites frozen spec"
+    agreement: "Fleiss' kappa on double-labeled subset, human-vs-human only, bootstrap SE"
+  reporting:
+    headline_strata: [osha_2024_25, asrs]      # real-only
+    synthetic_stratum: reported_separately_never_pooled
+    per_stratum_reporting: true
+    operating_point: "threshold frozen on dev (derived labels, p>=0.80), applied once to gold"
+
+contamination:
+  rule: "generator_llm != zeroshot_baseline_llm (qwen3:8b local) != label_spec_llm"
+  provider_separation_documented: deck_appendix
+  contamination_graph_published: README
+  label_spec_authorship: "humans citing IOGP/OISD rule text only; no LLM-drafted examples"
+  runtime_near_dup_index_includes_synthetic: true
+spec_sha256: db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51
