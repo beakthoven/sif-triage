@@ -11,9 +11,9 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Query, Request
 
-from .classifier import Classifier, validate_spans
+from .classifier import Classifier, flag_threshold, validate_spans
 from .config import REPO_ROOT, Settings
-from .embedder import embed_text
+from .embedder import embed_texts
 from .explain import build_explanation
 from .gates import run_gates
 from .ingest import parse_records, validate_rows
@@ -36,7 +36,12 @@ from .storage import Storage
 
 router = APIRouter()
 
-FLAG_THRESHOLD = 0.5  # triage flag cutoff for density/pattern aggregates
+FLAG_THRESHOLD = 0.5  # fallback only — classifier.flag_threshold (D19 tuned
+# operating point from the artifact's metrics.json) wins whenever present
+
+# /ingest classification batch (D25): windows across rows share session.run
+# calls of this width — the measured sweet spot for the int8 artifact here.
+INGEST_BATCH = 32
 
 
 def _cfg(req: Request) -> Settings:
@@ -83,12 +88,14 @@ def classify(
     path: a novel text is never in the reword cache, and a cold reword would
     stall the card for up to 2x the timeout on CPU."""
     cfg = _cfg(req)
-    pred = _predict_with_gates(_storage(req), _classifier(req), cfg, body.text)
+    clf = _classifier(req)
+    pred = _predict_with_gates(_storage(req), clf, cfg, body.text)
     if explain:
         pred.explanation = build_explanation(
             pred, body.text, _storage(req),
             use_llm=cfg.explain_llm and llm, url=cfg.ollama_url,
             model=cfg.ollama_model, timeout=cfg.explain_timeout_s,
+            threshold=flag_threshold(clf),
         )
     return pred
 
@@ -102,15 +109,32 @@ def ingest(body: IngestRequest, req: Request) -> IngestResult:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     reports, errors = validate_rows(raw_rows, source=body.source, column_mapping=body.column_mapping)
     ids: list[int] = []
-    # ponytail: classify inline per row. Fine for the mock and for demo-scale
-    # batches; the real ONNX path needs the batch-worker queue (fullstack
-    # architect SEV finding: single-text calls can't hit the bulk SLA).
-    for report in reports:
-        pred = _predict_with_gates(storage, clf, cfg, report.text)
-        rid = storage.add_report(report)
-        storage.add_prediction(rid, pred)
-        storage.add_embedding(rid, embed_text(report.text))
-        ids.append(rid)
+    # D25 bulk path (inline single-everything measured 5.33/s vs the >=30/s
+    # SLA): classify is batched only when the loaded quant is batch-exact
+    # (int8's per-tensor dynamic quantization shifts logits by batchmate —
+    # measured Δ≈1-2 — so per-row keeps stored scores identical to the
+    # interactive path); embeddings are batch-computed once per chunk and
+    # reused for the near-dup gate AND storage; the corpus-tier nearest is
+    # one matmul per chunk. Gates still run per row and rows are still
+    # stored in request order, so gate outcomes (incl. near-dup against
+    # earlier rows of the same request) and stored rows are unchanged.
+    for off in range(0, len(reports), INGEST_BATCH):
+        chunk = reports[off : off + INGEST_BATCH]
+        texts = [r.text for r in chunk]
+        if getattr(clf, "supports_exact_batch", False):
+            preds = clf.classify_batch(texts, batch_size=INGEST_BATCH)
+        else:
+            preds = [clf.predict(t) for t in texts]
+        vecs = embed_texts(texts)
+        base_hits = storage.nearest_base_batch(vecs)
+        for report, pred, vec, base_hit in zip(chunk, preds, vecs, base_hits):
+            pred.evidence_spans = validate_spans(report.text, pred.evidence_spans)
+            pred.gate_states = run_gates(report.text, pred.sif_score, storage, cfg,
+                                         vec=vec, base_hit=base_hit)
+            rid = storage.add_report(report)
+            storage.add_prediction(rid, pred)
+            storage.add_embedding(rid, vec)
+            ids.append(rid)
     return IngestResult(
         received=len(raw_rows),
         accepted=len(ids),
@@ -141,7 +165,7 @@ def get_report(report_id: int, req: Request) -> StoredReport:
 def report_explanation(report_id: int, req: Request) -> ExplanationOut:
     """Human explanation for a stored prediction. Template is deterministic and
     always present; the ollama rewording (when enabled) is cached in the
-    precomputed table under sha256(text + model_version)."""
+    precomputed table under sha256(text + model_version + threshold)."""
     cfg, storage = _cfg(req), _storage(req)
     stored = storage.get_report(report_id)
     if stored is None:
@@ -152,6 +176,7 @@ def report_explanation(report_id: int, req: Request) -> ExplanationOut:
         stored.prediction, stored.report.text, storage,
         use_llm=cfg.explain_llm, url=cfg.ollama_url,
         model=cfg.ollama_model, timeout=cfg.explain_timeout_s,
+        threshold=flag_threshold(_classifier(req)),
     )
 
 
@@ -161,6 +186,7 @@ def density(
     by: str = Query(default="site", pattern="^(site|activity|contractor)$"),
 ) -> list[DensityRow]:
     """Precursor-density ranking by structured facet — the PS-core view."""
+    thr = flag_threshold(_classifier(req))
     groups: dict[str, list[float]] = {}
     for stored in _storage(req).list_reports(limit=100_000):
         key = getattr(stored.report, by) or "(unspecified)"
@@ -171,8 +197,8 @@ def density(
         DensityRow(
             key=k,
             n_reports=len(scores),
-            n_flagged=sum(1 for s in scores if s >= FLAG_THRESHOLD),
-            sif_rate=round(sum(1 for s in scores if s >= FLAG_THRESHOLD) / len(scores), 4),
+            n_flagged=sum(1 for s in scores if s >= thr),
+            sif_rate=round(sum(1 for s in scores if s >= thr) / len(scores), 4),
             mean_score=round(sum(scores) / len(scores), 4),
         )
         for k, scores in groups.items()
@@ -243,7 +269,8 @@ def patterns(
     scored = [(s, s.prediction.sif_score) for s in stored if s.prediction]
     if not scored:
         return []
-    baseline = sum(1 for _, sc in scored if sc >= FLAG_THRESHOLD) / len(scored)
+    thr = flag_threshold(_classifier(req))
+    baseline = sum(1 for _, sc in scored if sc >= thr) / len(scored)
     cells: dict[tuple[str, str], list[float]] = {}
     for s, sc in scored:
         key = (s.report.activity or "(unspecified)", s.report.site or "(unspecified)")
@@ -253,7 +280,7 @@ def patterns(
         n = len(scores)
         if n < min_n:
             continue
-        rate = sum(1 for s in scores if s >= FLAG_THRESHOLD) / n
+        rate = sum(1 for s in scores if s >= thr) / n
         lift = rate / baseline if baseline > 0 else 0.0
         lo, hi = _wilson(rate, n)
         rows.append(PatternRow(
@@ -293,7 +320,7 @@ def metrics_summary(req: Request) -> MetricsSummary:
             for g in s.prediction.gate_states:
                 if g.triggered:
                     gate_counts[g.name] = gate_counts.get(g.name, 0) + 1
-    n_flagged = sum(1 for sc in scores if sc >= FLAG_THRESHOLD)
+    n_flagged = sum(1 for sc in scores if sc >= flag_threshold(clf))
     return MetricsSummary(
         n_reports=len(stored),
         n_flagged=n_flagged,

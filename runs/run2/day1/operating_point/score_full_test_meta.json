@@ -1,0 +1,33 @@
+{
+ "test": "artifacts/corpus/test.jsonl",
+ "n": 17731,
+ "prevalence": 0.642321,
+ "configs": [
+  {
+   "config": "masked",
+   "model_dir": "artifacts/models/masked-v1",
+   "text_field": "masked_text",
+   "quant": "int8",
+   "n": 17731,
+   "wall_seconds": 777.6,
+   "rows_per_s": 22.8,
+   "frozen_threshold_raw": 6.581278398140432e-05,
+   "frozen_threshold_cal": 0.003276146126671459,
+   "temperature": 1.683972954750061,
+   "out": "runs/run2/day1/operating_point/scores_masked_test.jsonl"
+  },
+  {
+   "config": "unmasked",
+   "model_dir": "artifacts/models/unmasked-v1",
+   "text_field": "text",
+   "quant": "int8",
+   "n": 17731,
+   "wall_seconds": 991.6,
+   "rows_per_s": 17.9,
+   "frozen_threshold_raw": 6.551666090070625e-05,
+   "frozen_threshold_cal": 0.003149196228973092,
+   "temperature": 1.6731598377227783,
+   "out": "runs/run2/day1/operating_point/scores_unmasked_test.jsonl"
+  }
+ ]
+}

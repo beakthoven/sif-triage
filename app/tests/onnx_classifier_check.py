@@ -1,6 +1,6 @@
-"""Runnable self-check for RealOnnxClassifier against the export-gate model
-(random weights — same module/heads as the trained artifact; this checks the
-CONTRACT, not model quality). Exits 0 on pass.
+"""Runnable self-check for RealOnnxClassifier against the shipped trained
+artifact (artifacts/models/masked-v1 — int8 default, fp32 fallback; D19/D20).
+This checks the CONTRACT, not model quality. Exits 0 on pass.
 
 Run: .venv/bin/python app/tests/onnx_classifier_check.py
      SIF_MODEL_QUANT=fp32 .venv/bin/python app/tests/onnx_classifier_check.py
@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO_ROOT))
 from app.classifier import MockClassifier, RealOnnxClassifier, build_classifier  # noqa: E402
 from app.schemas import RULE_KEYS, PredictionOut  # noqa: E402
 
-MODEL_DIR = REPO_ROOT / "artifacts" / "export-gate" / "final-green"
+MODEL_DIR = REPO_ROOT / "artifacts" / "models" / "masked-v1"  # the ship artifact
 
 SAMPLE = (
     "During well intervention at Baghjan field, a worker was grinding without "
@@ -45,13 +45,15 @@ def assert_valid(pred: PredictionOut, text: str) -> None:
 
 
 def main() -> int:
-    print("[1] factory fallback")
+    print("[1] factory resolution")
+    clf = build_classifier(REPO_ROOT / "artifacts" / "models" / "no-such-dir", "mock-0.1.0")
+    check(isinstance(clf, MockClassifier), "missing model dir -> MockClassifier fallback")
     clf = build_classifier(REPO_ROOT / "artifacts" / "models" / "masked-v1", "mock-0.1.0")
-    check(isinstance(clf, MockClassifier), "empty model dir -> MockClassifier")
+    check(isinstance(clf, RealOnnxClassifier), "masked-v1 ship artifact -> RealOnnxClassifier")
 
     print(f"[2] real load ({MODEL_DIR.relative_to(REPO_ROOT)})")
     clf = build_classifier(MODEL_DIR, "mock-0.1.0")
-    check(isinstance(clf, RealOnnxClassifier), "export-gate dir -> RealOnnxClassifier")
+    check(isinstance(clf, RealOnnxClassifier), "masked-v1 dir -> RealOnnxClassifier")
     print(f"      quant={clf.quant} version={clf.model_version} T={clf.temperature}")
 
     print("[3] contract on sample report")
@@ -61,6 +63,20 @@ def main() -> int:
     check(pred.chunked is False, "short input not chunked")
     check(len(pred.evidence_spans) > 0, "spans non-empty (threshold or fallback)")
     check(pred.model_dump_json() == clf.predict(SAMPLE).model_dump_json(), "deterministic")
+
+    print("[3b] classify_batch contract (D25)")
+    batch_texts = [SAMPLE, "LOTO not applied", "x"]
+    batch = clf.classify_batch(batch_texts, batch_size=2)
+    check(len(batch) == 3, "one PredictionOut per input")
+    for bp, bt in zip(batch, batch_texts):
+        assert_valid(bp, bt)
+    if clf.supports_exact_batch:
+        check(batch[0].model_dump_json() == pred.model_dump_json(),
+              "batch-exact quant: batch == single-row predict")
+    else:
+        # int8 per-tensor dynamic quantization shifts logits by batchmate
+        # (measured Δ≈1-2, D25) — contract checked, score equality not asserted.
+        print("      note: int8 quant — batch scores drift by batchmate (D25); equality not asserted")
 
     print("[4] chunked path — 1,500-word input (crash safety)")
     words = ("worker was grinding near the flange without face shield during lifting "

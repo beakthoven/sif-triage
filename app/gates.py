@@ -13,6 +13,8 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+import numpy as np
+
 from .config import Settings
 from .schemas import GateState
 
@@ -206,7 +208,9 @@ def gate_drill(text: str) -> GateState:
     )
 
 
-def gate_near_dup(text: str, storage: "Storage", cfg: Settings) -> GateState:
+def gate_near_dup(text: str, storage: "Storage", cfg: Settings,
+                  vec: "np.ndarray | None" = None,
+                  base_hit: "tuple[int | str, float] | None" = None) -> GateState:
     """Near-duplicate banner over the MiniLM cosine index.
 
     The index = precomputed training+synthetic corpus (loaded from .npy at
@@ -216,13 +220,23 @@ def gate_near_dup(text: str, storage: "Storage", cfg: Settings) -> GateState:
     attack the banner exists for. In the /ingest flow gates run before the
     row's own embedding is stored, so there is no self-match. Threshold is
     MEASURED from the MiniLM embedding curve
-    (artifacts/embeddings/threshold_report.md)."""
-    from .embedder import embed_text  # local import: lazy-loads the model
+    (artifacts/embeddings/threshold_report.md).
 
-    vec = embed_text(text)
-    nearest = storage.nearest(vec, k=1)
-    if nearest and nearest[0][1] >= cfg.near_dup_threshold:
-        rid, sim = nearest[0]
+    vec/base_hit let the bulk-ingest path pass the row's batch-computed
+    embedding and chunk-level corpus-tier top-1 (D25); the merged top-1 over
+    base+session tiers is identical to a full nearest() query."""
+    if vec is None:
+        from .embedder import embed_text  # local import: lazy-loads the model
+
+        vec = embed_text(text)
+    if base_hit is None:
+        base_hit = storage.nearest_base_batch(np.asarray(vec, dtype=np.float32)[None, :])[0]
+    session_hit = storage.nearest_session(vec)
+    best: tuple[int | str, float] | None = base_hit
+    if session_hit is not None and (best is None or session_hit[1] > best[1]):
+        best = session_hit
+    if best is not None and best[1] >= cfg.near_dup_threshold:
+        rid, sim = best
         return GateState(
             name="near_dup",
             triggered=True,
@@ -230,7 +244,7 @@ def gate_near_dup(text: str, storage: "Storage", cfg: Settings) -> GateState:
             detail=f"near-dup banner: cosine={sim:.3f} with index row {rid} "
             f"(>= {cfg.near_dup_threshold})",
         )
-    detail = f"max cosine={nearest[0][1]:.3f}" if nearest else "index empty"
+    detail = f"max cosine={best[1]:.3f}" if best is not None else "index empty"
     return GateState(name="near_dup", triggered=False, action="badge", detail=detail)
 
 
@@ -249,7 +263,12 @@ def gate_long_input(text: str, cfg: Settings) -> GateState:
     return GateState(name="long_input", triggered=False, action="badge")
 
 
-def run_gates(text: str, score: float, storage: "Storage", cfg: Settings) -> list[GateState]:
+def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
+              vec: "np.ndarray | None" = None,
+              base_hit: "tuple[int | str, float] | None" = None) -> list[GateState]:
+    # vec/base_hit (optional) are the bulk-ingest path's batch-computed
+    # embedding + corpus-tier top-1 (D25); None = compute per row (the
+    # /classify path, unchanged).
     # Order is load-bearing (smoke test addresses drill by index 4).
     specs = (
         ("min_length", lambda: gate_min_length(text, cfg)),
@@ -257,7 +276,7 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings) -> lis
         ("language", lambda: gate_language(text, cfg)),
         ("confidence", lambda: gate_confidence(score, cfg)),
         ("drill", lambda: gate_drill(text)),
-        ("near_dup", lambda: gate_near_dup(text, storage, cfg)),
+        ("near_dup", lambda: gate_near_dup(text, storage, cfg, vec=vec, base_hit=base_hit)),
         ("long_input", lambda: gate_long_input(text, cfg)),
     )
     states: list[GateState] = []

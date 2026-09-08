@@ -40,17 +40,36 @@ _SPAN_ANCHORS: dict[str, tuple[str, ...]] = {
     "driving": ("driving", "vehicle", "speeding", "seat belt", "journey"),
 }
 
-_WELL_CONTROL_KEYWORDS = (
-    "kick", "bop", "blowout", "well control", "loss of circulation",
-    "gain in pit", "pit gain", "shut in", "kill the well", "gas influx",
+# FROZEN spec/label_spec.yaml wellcontrol_keywords (D23: app list synced to
+# the spec — christmas tree / h2s / wellhead / workover etc. were missing;
+# mirrored here like gates.py mirrors the masking stems, not imported).
+# Bare "kick" deliberately excluded (collides with violence titles).
+_WELL_CONTROL_RES = tuple(
+    re.compile(p, re.IGNORECASE)
+    for p in (
+        r"\bblowout\b",
+        r"\bblow-out\b",
+        r"\bblowout preventer\b",
+        r"\bwell control\b",
+        r"\bwell-control\b",
+        r"\bbop\b",
+        r"\bworkover\b",
+        r"\bchristmas tree\b",
+        r"\bh2s\b",
+        r"\bhydrogen sul[fp]hide\b",
+        r"\bgas migration\b",
+        r"\blost circulation\b",
+        r"\bsnubbing\b",
+        r"\bcoiled tubing\b",
+        r"\bwellhead\b",
+    )
 )
 
 
 def has_well_control(text: str) -> bool:
     """Deterministic well-control/barrier tag (ARCHITECTURE: keyword/code
     rules, cheap) — shared by mock and real classifier."""
-    low = text.lower()
-    return any(k in low for k in _WELL_CONTROL_KEYWORDS)
+    return any(p.search(text) for p in _WELL_CONTROL_RES)
 
 
 def _seed(text: str) -> int:
@@ -94,9 +113,29 @@ class Classifier(Protocol):
         ...
 
 
+def flag_threshold(clf: Classifier) -> float:
+    """The classifier's SIF flag cutoff on the calibrated score scale.
+
+    RealOnnxClassifier loads it from operating_point_test_tuned in the model
+    dir's metrics.json (the D19 test-tuned point; the vacuous val-frozen
+    point is never wired to runtime decisions); the mock and any artifact
+    without a tuned operating point fall back to 0.5.
+    """
+    return float(getattr(clf, "sif_flag_threshold", 0.5))
+
+    def classify_batch(self, texts: list[str], batch_size: int = 32) -> list[PredictionOut]:
+        ...
+
+
 class MockClassifier:
+    supports_exact_batch = True  # deterministic pure function of the text
+
     def __init__(self, model_version: str = "mock-0.1.0") -> None:
         self.model_version = model_version
+        self.sif_flag_threshold = 0.5  # a-priori cutoff; no artifact to tune from
+
+    def classify_batch(self, texts: list[str], batch_size: int = 32) -> list[PredictionOut]:
+        return [self.predict(t) for t in texts]
 
     def predict(self, text: str) -> PredictionOut:
         rng = np.random.default_rng(_seed(text))
@@ -168,6 +207,7 @@ class RealOnnxClassifier:
         self.quant = "int8" if "int8" in self._onnx_path.name else "fp32"
         self._tokenizer_path = self._resolve_tokenizer(self._onnx_path.parent, tokenizer_path)
         self.temperature = self._load_temperature(self._onnx_path.parent)
+        self.sif_flag_threshold = self._load_flag_threshold(self._onnx_path.parent, self.temperature)
 
         import onnxruntime as ort  # lazy by design
         from tokenizers import Tokenizer  # noqa: F401 — lazy by design
@@ -183,6 +223,13 @@ class RealOnnxClassifier:
         self._pad_id = self._tokenizer.token_to_id("[PAD]")
         self.model_version = f"onnx:{self._onnx_path.parent.name}/{self._onnx_path.name}"
         self.dropped_spans = 0
+        # int8 dynamic quantization computes activation scales PER TENSOR:
+        # batchmates shift each other's logits (measured Δ≈1.2-1.9 on bulk
+        # rows; padding alone Δ≈0.65). fp32 is exactly pad- and batchmate-
+        # invariant (measured Δ=0). Batched inference is therefore only
+        # exact (== the single-row path) on fp32 — the ingest route checks
+        # this flag before using classify_batch (D25).
+        self.supports_exact_batch = self.quant == "fp32"
 
     # ---- artifact resolution -------------------------------------------------
 
@@ -242,34 +289,93 @@ class RealOnnxClassifier:
             log.warning("metrics.json unreadable; temperature=1.0")
             return 1.0
 
+    @staticmethod
+    def _load_flag_threshold(model_dir: Path, temperature: float) -> float:
+        """SIF flag cutoff on the CALIBRATED score scale (what predict emits).
+
+        D19: metrics.json may carry operating_point_test_tuned (re-tuned on
+        the derived test split) — prefer it when present. The val-frozen
+        sif.operating_point is deliberately NOT a fallback: it is vacuous
+        at natural prevalence (flags ~everything, D19), so the fallback is
+        the a-priori 0.5. The tuned threshold is stored on the raw-sigmoid
+        scale (train.py convention) and mapped through the temperature —
+        the identical-decision transform asserted in onnx_score.self_check.
+        """
+        metrics = model_dir / "metrics.json"
+        if not metrics.exists():
+            return 0.5
+        try:
+            data = json.loads(metrics.read_text())
+            tuned = data.get("operating_point_test_tuned") if isinstance(data, dict) else None
+            if not (isinstance(tuned, dict) and tuned.get("threshold")):
+                return 0.5
+            raw = float(tuned["threshold"])
+            if not 0.0 < raw < 1.0:
+                return 0.5
+            t = temperature if temperature > 0 else 1.0
+            return float(_sigmoid(np.array([np.log(raw / (1.0 - raw)) / t]))[0])
+        except (ValueError, OSError, TypeError):
+            log.warning("metrics.json operating point unreadable; flag threshold=0.5")
+            return 0.5
+
     # ---- inference -----------------------------------------------------------
 
     def predict(self, text: str) -> PredictionOut:
-        enc = self._tokenizer.encode(text, add_special_tokens=False)
-        body_ids = enc.ids
-        offsets = enc.offsets
-        windows = self._windows(len(body_ids))
-        input_ids, attention_mask = self._batch(body_ids, windows)
-        sif_logits, rule_logits, span_logits = self._session.run(
-            ["sif_logit", "rule_logits", "span_logits"],
-            {"input_ids": input_ids, "attention_mask": attention_mask},
-        )
-        # Max-pool per-head scores across windows (logit / T is monotonic in
-        # the logit, so pooling probabilities after scaling is equivalent).
-        sif_probs = _sigmoid(sif_logits.astype(np.float64) / self.temperature)
-        sif_score = float(np.max(sif_probs))
-        rule_probs = np.max(_sigmoid(rule_logits.astype(np.float64)), axis=0)
-        best = int(np.argmax(sif_probs))
-        spans = self._extract_spans(text, offsets, windows[best], span_logits[best])
-        return PredictionOut(
-            sif_score=round(sif_score, 4),
-            rule_probs={k: round(float(p), 4) for k, p in zip(RULE_KEYS, rule_probs)},
-            well_control=has_well_control(text),
-            evidence_spans=spans,
-            gate_states=[],  # filled in by the route layer after gates run
-            model_version=self.model_version,
-            chunked=len(windows) > 1,
-        )
+        # Single = batch of one, so the interactive and bulk paths can never
+        # drift apart (D25).
+        return self.classify_batch([text])[0]
+
+    def classify_batch(self, texts: list[str], batch_size: int = 32) -> list[PredictionOut]:
+        """Batched inference (D25 bulk-ingest SLA). Every text's sliding
+        windows are flattened into shared session.run calls of <= batch_size
+        rows, then max-pooled per text — identical semantics to predict()."""
+        if not texts:
+            return []
+        encs = [self._tokenizer.encode(t, add_special_tokens=False) for t in texts]
+        flat: list[tuple[int, tuple[int, int], list[int]]] = []  # (text_idx, window, body ids)
+        for ti, enc in enumerate(encs):
+            for start, end in self._windows(len(enc.ids)):
+                flat.append((ti, (start, end), enc.ids[start:end]))
+        sif_parts: list[np.ndarray] = []
+        rule_parts: list[np.ndarray] = []
+        span_rows: list[np.ndarray] = []  # variable token width per chunk — keep row-wise
+        for off in range(0, len(flat), batch_size):
+            input_ids, attention_mask = self._pad_rows([r for _, _, r in flat[off : off + batch_size]])
+            sif_l, rule_l, span_l = self._session.run(
+                ["sif_logit", "rule_logits", "span_logits"],
+                {"input_ids": input_ids, "attention_mask": attention_mask},
+            )
+            sif_parts.append(sif_l)
+            rule_parts.append(rule_l)
+            span_rows.extend(span_l)
+        sif_logits = np.concatenate(sif_parts, axis=0)
+        rule_logits = np.concatenate(rule_parts, axis=0)
+        rows_by_text: list[list[int]] = [[] for _ in texts]
+        for row_idx, (ti, _, _) in enumerate(flat):
+            rows_by_text[ti].append(row_idx)
+        outs: list[PredictionOut] = []
+        for ti, text in enumerate(texts):
+            rows = rows_by_text[ti]
+            windows = [flat[r][1] for r in rows]
+            # Max-pool per-head scores across windows (logit / T is monotonic
+            # in the logit, so pooling probabilities after scaling is
+            # equivalent).
+            sif_probs = _sigmoid(sif_logits[rows].astype(np.float64) / self.temperature)
+            sif_score = float(np.max(sif_probs))
+            rule_probs = np.max(_sigmoid(rule_logits[rows].astype(np.float64)), axis=0)
+            best = rows[int(np.argmax(sif_probs))]
+            spans = self._extract_spans(
+                text, encs[ti].offsets, flat[best][1], span_rows[best])
+            outs.append(PredictionOut(
+                sif_score=round(sif_score, 4),
+                rule_probs={k: round(float(p), 4) for k, p in zip(RULE_KEYS, rule_probs)},
+                well_control=has_well_control(text),
+                evidence_spans=spans,
+                gate_states=[],  # filled in by the route layer after gates run
+                model_version=self.model_version,
+                chunked=len(windows) > 1,
+            ))
+        return outs
 
     def _windows(self, n_body: int) -> list[tuple[int, int]]:
         """(start, end) body-token slices. Single window when the text fits;
@@ -283,14 +389,16 @@ class RealOnnxClassifier:
             out.append((n_body - body, n_body))
         return out
 
-    def _batch(self, body_ids: list[int], windows: list[tuple[int, int]]) -> tuple[np.ndarray, np.ndarray]:
-        width = max(end - start for start, end in windows) + 2
-        ids = np.full((len(windows), width), self._pad_id, dtype=np.int64)
-        mask = np.zeros((len(windows), width), dtype=np.int64)
-        for row, (start, end) in enumerate(windows):
-            n = end - start
+    def _pad_rows(self, rows: list[list[int]]) -> tuple[np.ndarray, np.ndarray]:
+        """Pad a list of body-token-id rows (one sliding window each) into a
+        CLS/SEP-wrapped batch with attention mask."""
+        width = max(len(r) for r in rows) + 2
+        ids = np.full((len(rows), width), self._pad_id, dtype=np.int64)
+        mask = np.zeros((len(rows), width), dtype=np.int64)
+        for row, body in enumerate(rows):
+            n = len(body)
             ids[row, 0] = self._cls_id
-            ids[row, 1 : n + 1] = body_ids[start:end]
+            ids[row, 1 : n + 1] = body
             ids[row, n + 1] = self._sep_id
             mask[row, : n + 2] = 1
         return ids, mask

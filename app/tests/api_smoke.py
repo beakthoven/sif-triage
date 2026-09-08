@@ -1,6 +1,7 @@
 """API smoke test — runnable script, stdlib urllib only (no pytest).
 
-Spawns uvicorn on :8177 against a throwaway DB, exercises the full flow:
+Spawns uvicorn on :8177 (override with SIF_TEST_PORT when the demo server
+owns :8177) against a throwaway DB, exercises the full flow:
 health -> classify (span validity + determinism) -> ingest 5-row CSV ->
 reports/density/rules/patterns/metrics -> review override round-trip ->
 near-dup gate. Exit code 0 = pass.
@@ -32,7 +33,7 @@ from app.schemas import (  # noqa: E402
     StoredReport,
 )
 
-PORT = 8177
+PORT = int(os.environ.get("SIF_TEST_PORT", "8177"))  # override when the demo server owns :8177
 BASE = f"http://127.0.0.1:{PORT}/api"
 
 SAMPLE_REPORT = (

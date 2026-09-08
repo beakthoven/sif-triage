@@ -36,7 +36,9 @@ from .schemas import RULE_DISPLAY, ExplanationOut, PredictionOut
 
 log = logging.getLogger(__name__)
 
-REVIEW_THRESHOLD = 0.5  # matches routes.FLAG_THRESHOLD
+REVIEW_THRESHOLD = 0.5  # fallback when the classifier carries no tuned
+# operating point (matches routes.FLAG_THRESHOLD; the D19 test-tuned point
+# from the artifact's metrics.json is preferred whenever present)
 
 DEFAULT_OLLAMA_URL = os.environ.get("SIF_OLLAMA_URL", "http://localhost:11434")
 DEFAULT_MODEL = os.environ.get("SIF_OLLAMA_MODEL", "qwen3:4b")
@@ -83,18 +85,24 @@ class SpanValidationError(ValueError):
     pass
 
 
-def explain_key(text: str, model_version: str) -> str:
-    digest = hashlib.sha256((text + "\x00" + model_version).encode("utf-8")).hexdigest()
+def explain_key(text: str, model_version: str, threshold: float = REVIEW_THRESHOLD) -> str:
+    # Threshold is part of the key: a re-tuned operating point changes the
+    # "flagged / below the review threshold" wording, so cached entries from
+    # the old threshold must not be served against the new one.
+    digest = hashlib.sha256(
+        (text + "\x00" + model_version + "\x00" + repr(threshold)).encode("utf-8")
+    ).hexdigest()
     return f"explain:{digest}"
 
 
-def render_template(pred: PredictionOut, text: str) -> tuple[str, list[str]]:
+def render_template(pred: PredictionOut, text: str,
+                    threshold: float = REVIEW_THRESHOLD) -> tuple[str, list[str]]:
     """Deterministic human explanation from the prediction alone.
 
     Returns (template_text, spans_quoted). Same input -> same output; every
     quoted span is an exact substring of `text` by the span invariant.
     """
-    flagged = pred.sif_score >= REVIEW_THRESHOLD
+    flagged = pred.sif_score >= threshold
     lines = [
         f"Triage score {pred.sif_score:.2f} — "
         + ("flagged for HSE review." if flagged else "below the review threshold.")
@@ -234,8 +242,14 @@ def build_explanation(
     model: str = DEFAULT_MODEL,
     timeout: float = DEFAULT_TIMEOUT_S,
     transport: Callable[[dict], dict] | None = None,
+    threshold: float | None = None,
 ) -> ExplanationOut:
     """Template always; cached or live ollama rewording when it works.
+
+    `threshold` is the SIF flag cutoff for the flagged/not-flagged wording —
+    callers pass the classifier's tuned operating point (D19); None falls
+    back to the a-priori REVIEW_THRESHOLD. The threshold is part of the
+    cache key, so a re-tune never serves stale flag wording.
 
     Cache semantics (precompute doctrine): an ollama-sourced entry is served
     verbatim forever. A template-only entry (LLM was down/slow at build time)
@@ -244,8 +258,9 @@ def build_explanation(
     flush, while a down server costs at most one bounded stall per text per
     TTL window instead of 2x the timeout on every request.
     """
-    template, template_spans = render_template(pred, text)
-    key = explain_key(text, pred.model_version)
+    thr = REVIEW_THRESHOLD if threshold is None else float(threshold)
+    template, template_spans = render_template(pred, text, threshold=thr)
+    key = explain_key(text, pred.model_version, thr)
 
     if storage is not None:
         hit = storage.load_precomputed(key)

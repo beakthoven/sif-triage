@@ -1,0 +1,203 @@
+{
+ "threshold_calibrated": 0.5158475945353324,
+ "threshold_raw": 0.5266705242172083,
+ "old_threshold": 0.5,
+ "flip_zone": [
+  0.5,
+  0.5158475945353324
+ ],
+ "cards": [
+  {
+   "demo_id": "contrast-red",
+   "score": 0.9553,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "contrast-green",
+   "score": 0.0139,
+   "score_band": "LOW",
+   "gray_gates": [],
+   "effective_band": "LOW",
+   "expected_band": "LOW",
+   "band_ok": true,
+   "flag@0.5": false,
+   "flag@tuned": false,
+   "expected_flag": false,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "gray-negation",
+   "score": 0.8334,
+   "score_band": "HIGH",
+   "gray_gates": [
+    "negation"
+   ],
+   "effective_band": "GRAY",
+   "expected_band": "GRAY",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": null,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "gray-drill",
+   "score": 0.0093,
+   "score_band": "LOW",
+   "gray_gates": [
+    "drill"
+   ],
+   "effective_band": "GRAY",
+   "expected_band": "GRAY",
+   "band_ok": true,
+   "flag@0.5": false,
+   "flag@tuned": false,
+   "expected_flag": false,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "wc-baghjan-1",
+   "score": 0.9048,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "wc-baghjan-2",
+   "score": 0.9911,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "wc-baghjan-3",
+   "score": 0.9574,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "hinglish",
+   "score": 0.1401,
+   "score_band": "LOW",
+   "gray_gates": [
+    "language"
+   ],
+   "effective_band": "GRAY",
+   "expected_band": "GRAY",
+   "band_ok": true,
+   "flag@0.5": false,
+   "flag@tuned": false,
+   "expected_flag": null,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "verbatim-osha",
+   "score": 0.992,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH-with-banner",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "long-report",
+   "score": 0.6913,
+   "score_band": "MODERATE",
+   "gray_gates": [
+    "negation"
+   ],
+   "effective_band": "GRAY",
+   "expected_band": "HIGH",
+   "band_ok": false,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": false,
+   "pre_existing": "pre-existing: negation gate 'no'~'damage' (demo-pack selfcheck RED pre-tune)"
+  },
+  {
+   "demo_id": "mega-report",
+   "score": 0.9771,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "HIGH",
+   "band_ok": true,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": true,
+   "expectation_match": true,
+   "pre_existing": ""
+  },
+  {
+   "demo_id": "codes-only",
+   "score": 0.115,
+   "score_band": "LOW",
+   "gray_gates": [],
+   "effective_band": "LOW",
+   "expected_band": "GRAY",
+   "band_ok": false,
+   "flag@0.5": false,
+   "flag@tuned": false,
+   "expected_flag": null,
+   "expectation_match": false,
+   "pre_existing": "pre-existing: mock-era gray-band annotation vs real score 0.115 < 0.40"
+  },
+  {
+   "demo_id": "first-aid-green",
+   "score": 0.9638,
+   "score_band": "HIGH",
+   "gray_gates": [],
+   "effective_band": "HIGH",
+   "expected_band": "LOW",
+   "band_ok": false,
+   "flag@0.5": true,
+   "flag@tuned": true,
+   "expected_flag": false,
+   "expectation_match": false,
+   "pre_existing": "D21: high first-aid score is model behavior, masked-v2 retrain in flight"
+  }
+ ],
+ "threshold_flips": [],
+ "undocumented_mismatches": []
+}

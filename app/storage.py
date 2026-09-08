@@ -87,6 +87,8 @@ class Storage(Protocol):
     def add_override(self, ov: OverrideIn) -> int: ...
     def list_overrides(self, report_id: int | None = None) -> list[StoredOverride]: ...
     def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int | str, float]]: ...
+    def nearest_base_batch(self, vecs: np.ndarray) -> list[tuple[int | str, float] | None]: ...
+    def nearest_session(self, vec: np.ndarray) -> tuple[int, float] | None: ...
     def save_precomputed(self, key: str, payload: dict) -> None: ...
     def load_precomputed(self, key: str) -> dict | None: ...
     def count_reports(self) -> int: ...
@@ -113,12 +115,21 @@ class SQLiteStorage:
         # (ARCHITECTURE runtime; demo red-teamer attack (d)).
         self._base_ids: list[str] = []
         self._base_mat: np.ndarray | None = None
+        # Session-row near-dup tier: preallocated fp32 buffer warmed once from
+        # the embeddings table, then appended in place on add_embedding. The
+        # old _index() full-scanned + np.stacked the whole table per query —
+        # O(n^2) over a 5k-row bulk seed (D25).
+        self._sess_loaded = False
+        self._sess_ids: list[int] = []
+        self._sess_mat: np.ndarray | None = None
+        self._sess_n = 0
         if corpus_index_dir is not None:
             self._load_corpus_index(Path(corpus_index_dir))
 
     def _load_corpus_index(self, index_dir: Path) -> None:
         """Load corpus_embeddings_fp16.npy + corpus_ids.jsonl at startup.
-        fp16 memmap is upcast to fp32 in RAM once (70,404 x 384 = ~108 MB):
+        fp16 memmap is upcast to fp32 in RAM once (70,398 x 384 = ~108 MB,
+        post-D24: training corpus minus the live-demo cards):
         fp16 matmul has no fast CPU path, so the fp32 copy is the query-side
         win. Absent files degrade silently to session-rows-only indexing."""
         npy, ids_file = index_dir / CORPUS_NPY, index_dir / CORPUS_IDS
@@ -171,6 +182,31 @@ class SQLiteStorage:
                 "INSERT OR REPLACE INTO embeddings (report_id, vector) VALUES (?, ?)",
                 (report_id, arr.tobytes()),
             )
+            if self._sess_loaded:
+                self._session_append(report_id, arr)
+
+    def _session_append(self, report_id: int, arr: np.ndarray) -> None:
+        # caller holds self._lock
+        if self._sess_mat is None:
+            self._sess_mat = np.zeros((4096, arr.shape[0]), dtype=np.float32)
+        if self._sess_n == len(self._sess_mat):
+            self._sess_mat = np.concatenate([self._sess_mat, np.zeros_like(self._sess_mat)])
+        self._sess_mat[self._sess_n] = arr
+        self._sess_ids.append(report_id)
+        self._sess_n += 1
+
+    def _session_index(self) -> tuple[list[int], np.ndarray]:
+        # caller holds self._lock; warms the cache from the table once so a
+        # restarted server still covers previously ingested rows.
+        if not self._sess_loaded:
+            rows = self._conn.execute(
+                "SELECT report_id, vector FROM embeddings ORDER BY report_id"
+            ).fetchall()
+            for r in rows:
+                self._session_append(int(r["report_id"]), np.frombuffer(r["vector"], dtype=np.float32))
+            self._sess_loaded = True
+        return self._sess_ids, (self._sess_mat[: self._sess_n] if self._sess_mat is not None
+                                else np.zeros((0, 0), dtype=np.float32))
 
     def add_override(self, ov: OverrideIn) -> int:
         with self._lock, self._conn:
@@ -239,17 +275,28 @@ class SQLiteStorage:
     # -- near-dup index ----------------------------------------------------
     # The query fans out over two tiers: the precomputed corpus index (fp32,
     # in RAM — one 70k x 384 matmul, ~10-25 ms) and session-ingested rows
-    # (full table scan + rebuild per query; ponytail: fine at demo-scale
-    # n<=~10k, upgrade path is an invalidate-on-write cache).
-    def _index(self) -> tuple[list[int], np.ndarray]:
-        rows = self._conn.execute(
-            "SELECT report_id, vector FROM embeddings ORDER BY report_id"
-        ).fetchall()
-        if not rows:
-            return [], np.zeros((0, 0), dtype=np.float32)
-        ids = [r["report_id"] for r in rows]
-        mat = np.stack([np.frombuffer(r["vector"], dtype=np.float32) for r in rows])
-        return ids, mat
+    # (preallocated buffer warmed once from the table; O(1) amortized append).
+    def nearest_base_batch(self, vecs: np.ndarray) -> list[tuple[int | str, float] | None]:
+        """Top-1 corpus-tier hit per row for a (n, 384) batch — one matmul
+        for the whole ingest chunk instead of one matvec per row (D25).
+        None per row when no corpus index is loaded."""
+        if self._base_mat is None:
+            return [None] * len(vecs)
+        mat = np.ascontiguousarray(np.asarray(vecs, dtype=np.float32))
+        sims = self._base_mat @ mat.T  # L2-normalized both sides -> cosine
+        top = np.argmax(sims, axis=0)
+        return [(self._base_ids[int(i)], float(sims[int(i), j])) for j, i in enumerate(top)]
+
+    def nearest_session(self, vec: np.ndarray) -> tuple[int, float] | None:
+        """Top-1 session-tier hit for one vector (None when no session rows)."""
+        v = np.asarray(vec, dtype=np.float32).ravel()
+        with self._lock:
+            ids, mat = self._session_index()
+        if not ids:
+            return None
+        sims = mat @ v
+        i = int(np.argmax(sims))
+        return ids[i], float(sims[i])
 
     def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int | str, float]]:
         """Top-k cosine over corpus index (str corpus ids) + session rows (int
@@ -262,7 +309,8 @@ class SQLiteStorage:
             take = min(len(sims), max(k, 8))
             top = np.argpartition(-sims, take - 1)[:take]
             scored.extend((self._base_ids[int(i)], float(sims[int(i)])) for i in top)
-        ids, mat = self._index()
+        with self._lock:
+            ids, mat = self._session_index()
         if ids:
             sims = mat @ v
             scored.extend((ids[int(i)], float(sims[int(i)])) for i in np.argsort(-sims))
