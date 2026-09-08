@@ -1,8 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LangToggle } from "@/components/lang-toggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { REPORTS } from "@/lib/mock";
+import { getHealth, getOverrides, getReports, postReview } from "@/lib/api";
+import { OVERRIDES, REPORTS } from "@/lib/mock";
 import { t, type Lang } from "@/lib/phrasebook";
+import type { HealthOut, OverrideOut, Report } from "@/lib/types";
 import { DensityView } from "@/views/density";
 import { FeedView } from "@/views/feed";
 import { PatternsView } from "@/views/patterns";
@@ -10,17 +12,71 @@ import { ReviewView } from "@/views/review";
 
 export default function App() {
   const [lang, setLang] = useState<Lang>("en");
-  const [overrides, setOverrides] = useState<
-    { reportId: string; decision: "confirm" | "not_sif" }[]
-  >([]);
+  // Mock data renders instantly; the live API swap lands when health + data
+  // return (offline-demo doctrine: the UI never hard-fails).
+  const [reports, setReports] = useState<Report[]>(REPORTS);
+  const [overrides, setOverrides] = useState<OverrideOut[]>(OVERRIDES);
+  const [health, setHealth] = useState<HealthOut | null>(null);
+  const [sessionOverrides, setSessionOverrides] = useState(0);
+
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const [h, reps, ovs] = await Promise.all([
+        getHealth(),
+        getReports(),
+        getOverrides(),
+      ]);
+      if (cancel) return;
+      setHealth(h);
+      setReports(reps);
+      setOverrides(ovs);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, []);
 
   const onOverride = useCallback(
-    (reportId: string, decision: "confirm" | "not_sif") =>
-      setOverrides((cur) => [...cur, { reportId, decision }]),
-    [],
+    (reportId: number, decision: "confirm" | "not_sif") => {
+      const newValue =
+        decision === "confirm" ? "sif_potential" : "not_sif_potential";
+      const current = reports.find((r) => r.id === reportId);
+      setSessionOverrides((n) => n + 1);
+      void (async () => {
+        try {
+          // Model proposes, HSE disposes — the POST is the real write.
+          await postReview({
+            report_id: reportId,
+            field: "sif_label",
+            old_value: current ? current.prediction.band : null,
+            new_value: newValue,
+          });
+          setOverrides(await getOverrides());
+        } catch {
+          // Offline: record the decision locally so the queue still moves.
+          setOverrides((cur) => [
+            ...cur,
+            {
+              id: -(cur.length + 1),
+              report_id: reportId,
+              field: "sif_label",
+              old_value: current ? current.prediction.band : null,
+              new_value: newValue,
+              labeler: "hse_reviewer",
+              source: "override",
+              ts: new Date().toISOString(),
+            },
+          ]);
+        }
+      })();
+    },
+    [reports],
   );
 
-  const gated = REPORTS.filter((r) => r.prediction.gates.length > 0);
+  const gated = reports.filter((r) =>
+    r.prediction.gate_states.some((g) => g.triggered),
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,7 +89,18 @@ export default function App() {
             </h1>
             <p className="font-mono text-xs text-muted-foreground">{t(lang, "appSub")}</p>
           </div>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <span
+              className={
+                health
+                  ? "rounded-sm border border-primary/60 bg-primary/10 px-2 py-1 font-mono text-xs font-semibold text-primary"
+                  : "rounded-sm border border-border px-2 py-1 font-mono text-xs text-muted-foreground"
+              }
+            >
+              {health
+                ? `LIVE · ${health.model_version} · ${health.n_reports} reports`
+                : "OFFLINE DEMO"}
+            </span>
             <LangToggle lang={lang} onChange={setLang} />
           </div>
         </div>
@@ -53,16 +120,16 @@ export default function App() {
             </TabsTrigger>
             <TabsTrigger value="review" className="min-h-11 px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               {t(lang, "tabReview")}
-              {overrides.length > 0 && (
+              {sessionOverrides > 0 && (
                 <span className="ml-2 rounded-full bg-primary px-1.5 font-mono text-xs text-primary-foreground">
-                  {overrides.length}
+                  {sessionOverrides}
                 </span>
               )}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="feed">
-            <FeedView reports={REPORTS} lang={lang} onOverride={onOverride} />
+            <FeedView reports={reports} lang={lang} onOverride={onOverride} />
           </TabsContent>
           <TabsContent value="density">
             <DensityView lang={lang} />
@@ -71,7 +138,7 @@ export default function App() {
             <PatternsView />
           </TabsContent>
           <TabsContent value="review">
-            <ReviewView gatedReports={gated} lang={lang} />
+            <ReviewView gatedReports={gated} overrides={overrides} lang={lang} />
           </TabsContent>
         </Tabs>
       </main>

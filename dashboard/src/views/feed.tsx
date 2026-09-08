@@ -8,8 +8,8 @@ import { t, type Lang } from "@/lib/phrasebook";
 import type { Report } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-/** Feed: report queue + triage card with evidence highlights, or a Sentinel
- *  gray-state card when a gate fired. */
+/** Feed: report queue + triage card with evidence highlights, or Sentinel
+ *  gray-state cards when one or more input gates fired. */
 export function FeedView({
   reports,
   lang,
@@ -17,10 +17,27 @@ export function FeedView({
 }: {
   reports: Report[];
   lang: Lang;
-  onOverride: (reportId: string, decision: "confirm" | "not_sif") => void;
+  onOverride: (reportId: number, decision: "confirm" | "not_sif") => void;
 }) {
-  const [selectedId, setSelectedId] = useState(reports[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const selected = reports.find((r) => r.id === selectedId) ?? reports[0];
+
+  if (!selected) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-border">
+          <CardContent className="px-5 py-8 text-center text-muted-foreground">
+            No reports yet. Ingest via{" "}
+            <code className="font-mono text-foreground">POST /api/ingest</code>{" "}
+            and the queue will populate here.
+          </CardContent>
+        </Card>
+        <SentinelGateLegend />
+      </div>
+    );
+  }
+
+  const triggered = selected.prediction.gate_states.filter((g) => g.triggered);
 
   return (
     <div className="space-y-6">
@@ -34,7 +51,7 @@ export function FeedView({
             <Separator />
             <ul>
               {reports.map((r) => {
-                const gated = r.prediction.gates.length > 0;
+                const gated = r.prediction.gate_states.some((g) => g.triggered);
                 const active = r.id === selected.id;
                 return (
                   <li key={r.id}>
@@ -52,7 +69,7 @@ export function FeedView({
                           {r.site}
                         </span>
                         <span className="block font-mono text-xs text-muted-foreground">
-                          {r.id} · {r.reported_at}
+                          #{r.id} · {r.reported_at}
                         </span>
                       </span>
                       {gated ? (
@@ -73,9 +90,9 @@ export function FeedView({
 
         {/* Selected report: triage card, or gray-state card(s) if gated */}
         <div className="space-y-4">
-          {selected.prediction.gates.length > 0 ? (
-            selected.prediction.gates.map((g) => (
-              <GrayStateCard key={g} report={selected} gate={g} />
+          {triggered.length > 0 ? (
+            triggered.map((g) => (
+              <GrayStateCard key={g.name} report={selected} gate={g} />
             ))
           ) : (
             <TriageCard report={selected} lang={lang} onOverride={onOverride} />

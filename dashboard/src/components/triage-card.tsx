@@ -19,7 +19,7 @@ export function TriageCard({
 }: {
   report: Report;
   lang: Lang;
-  onOverride?: (reportId: string, decision: "confirm" | "not_sif") => void;
+  onOverride?: (reportId: number, decision: "confirm" | "not_sif") => void;
 }) {
   const p = report.prediction;
   const inScope = p.rules.filter((r) => r.in_scope);
@@ -44,9 +44,9 @@ export function TriageCard({
           </span>
           <span aria-label={t(lang, "triageScore")}>
             {t(lang, "triageScore")}{" "}
-            <span className="font-semibold text-foreground">{p.triage_score.toFixed(2)}</span>
+            <span className="font-semibold text-foreground">{p.sif_score.toFixed(2)}</span>
           </span>
-          <span>{p.latency_ms}ms</span>
+          {p.latency_ms > 0 && <span>{p.latency_ms}ms</span>}
           <span className="ml-auto">
             {report.site} · {report.activity}
           </span>
@@ -64,7 +64,7 @@ export function TriageCard({
                 (2nd: {second.name} {second.prob.toFixed(2)})
               </span>
             )}
-            {p.well_control_tag && (
+            {p.well_control && (
               <span className="rounded-sm border border-primary/60 bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
                 WELL-CONTROL / BARRIER TAG
               </span>
@@ -77,7 +77,7 @@ export function TriageCard({
           </p>
         )}
 
-        <HighlightedText text={report.text} spans={p.spans} />
+        <HighlightedText text={report.text} spans={p.evidence_spans} />
 
         {p.explanation && (
           <p className="text-sm text-muted-foreground">{p.explanation}</p>

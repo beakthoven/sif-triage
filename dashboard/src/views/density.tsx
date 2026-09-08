@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,11 +10,56 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getDensity, getHealth, ingest } from "@/lib/api";
 import { DENSITY_AFTER, DENSITY_BEFORE } from "@/lib/mock";
 import { t, type Lang } from "@/lib/phrasebook";
 import type { DensityRow } from "@/lib/types";
 import { useFlip } from "@/lib/use-flip";
 import { cn } from "@/lib/utils";
+
+/* The demo ingest batch: Baghjan-class well-servicing precursors. In live mode
+ * these go through POST /api/ingest (real classification + storage) and the
+ * density table is re-fetched — the re-rank beat is real, not scripted. */
+const DEMO_INGEST_RECORDS: Record<string, unknown>[] = [
+  {
+    text: "While pulling the BOP on Well BGN-11 before the cement had fully set, pit gain was noticed and gas showed at the shale shakers. The well was shut in and mud weight raised the same shift.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    contractor: "DeepWell Services",
+    date: "2026-09-07",
+  },
+  {
+    text: "During night shift at Baghjan EPS the workover window was cut from 48 h to 12 h and the crew kept tripping in hole with returns climbing at the flowline. No senior officer on site at the time.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    date: "2026-09-07",
+  },
+  {
+    text: "Kick tolerance margin nearly exceeded while tripping at Well BGN-14. Flow check was skipped once because the mud engineer was at another well.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    date: "2026-09-07",
+  },
+  {
+    text: "Gas detector at the shale shakers alarmed twice during connections on Well BGN-09; alarm was silenced and work continued. Logged for follow-up by the shift saheb.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    date: "2026-09-07",
+  },
+  {
+    text: "Annular preventer element found past its inspection date during BOP function test at Baghjan EPS. Test was postponed twice this month due to rig-up work.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    contractor: "DeepWell Services",
+    date: "2026-09-07",
+  },
+  {
+    text: "Mud weight found 0.2 ppg below program at the start of the evening tour at Well BGN-11. Pit level alarm was also not responding during the drill floor check.",
+    site: "Baghjan EPS",
+    activity: "Well servicing",
+    date: "2026-09-07",
+  },
+];
 
 function RankDelta({ delta }: { delta: number }) {
   if (delta === 0)
@@ -37,32 +82,75 @@ function RankDelta({ delta }: { delta: number }) {
   );
 }
 
-/** Density: ranked site × activity table. The demo beat — ingest progress
- *  (~2s shell stand-in for the ~10s live beat), then rows visibly re-sort
- *  with FLIP: "Baghjan EPS just climbed to #1." */
+/** Density: ranked site table (GET /api/density). The demo beat — ingest a
+ *  Baghjan-class batch, then rows visibly re-sort with FLIP. Offline: the
+ *  scripted mock snapshots stand in (UI never hard-fails). */
 export function DensityView({ lang }: { lang: Lang }) {
   const [rows, setRows] = useState<DensityRow[]>(DENSITY_BEFORE);
+  const [live, setLive] = useState(false);
   const [ingesting, setIngesting] = useState(false);
   const [progress, setProgress] = useState(0);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const setRowRef = useFlip(rows);
 
-  const reranked = rows !== DENSITY_BEFORE;
+  useEffect(() => {
+    let cancel = false;
+    (async () => {
+      const [health, density] = await Promise.all([getHealth(), getDensity("site")]);
+      if (cancel) return;
+      setLive(health !== null);
+      setRows(density);
+    })();
+    return () => {
+      cancel = true;
+    };
+  }, []);
 
-  function simulateIngest() {
+  const topClimber = rows.find((r) => r.rank === 1 && r.prev_rank !== 1);
+
+  function startProgress() {
+    const start = Date.now();
+    timer.current = setInterval(() => {
+      setProgress(Math.min(100, ((Date.now() - start) / 2000) * 100));
+    }, 50);
+  }
+
+  function stopProgress() {
+    if (timer.current) clearInterval(timer.current);
+    setProgress(100);
+  }
+
+  async function runIngest() {
     if (ingesting) return;
     setIngesting(true);
     setProgress(0);
-    const start = Date.now();
-    timer.current = setInterval(() => {
-      const pct = Math.min(100, ((Date.now() - start) / 2000) * 100);
-      setProgress(pct);
-      if (pct >= 100) {
-        if (timer.current) clearInterval(timer.current);
-        setIngesting(false);
+    if (live) {
+      // Live beat: real ingest, then re-fetch — ranks derived from the
+      // pre-ingest snapshot drive the FLIP re-sort.
+      startProgress();
+      try {
+        await ingest(DEMO_INGEST_RECORDS);
+        setRows(await getDensity("site", rows));
+      } catch {
+        setLive(false);
         setRows((cur) => (cur === DENSITY_BEFORE ? DENSITY_AFTER : DENSITY_BEFORE));
+      } finally {
+        stopProgress();
+        setIngesting(false);
       }
-    }, 50);
+    } else {
+      // Offline fallback: scripted 2s stand-in for the live beat.
+      const start = Date.now();
+      timer.current = setInterval(() => {
+        const pct = Math.min(100, ((Date.now() - start) / 2000) * 100);
+        setProgress(pct);
+        if (pct >= 100) {
+          if (timer.current) clearInterval(timer.current);
+          setIngesting(false);
+          setRows((cur) => (cur === DENSITY_BEFORE ? DENSITY_AFTER : DENSITY_BEFORE));
+        }
+      }, 50);
+    }
   }
 
   return (
@@ -70,7 +158,7 @@ export function DensityView({ lang }: { lang: Lang }) {
       <div className="flex flex-wrap items-center gap-4">
         <Button
           size="lg"
-          onClick={simulateIngest}
+          onClick={runIngest}
           disabled={ingesting}
           className="min-h-11 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
         >
@@ -90,9 +178,9 @@ export function DensityView({ lang }: { lang: Lang }) {
             />
           </div>
         )}
-        {reranked && !ingesting && (
+        {topClimber && !ingesting && (
           <p className="font-mono text-sm text-primary">
-            Baghjan EPS · Well servicing just climbed to #1.
+            {topClimber.key} just climbed to #1.
           </p>
         )}
       </div>
@@ -103,10 +191,11 @@ export function DensityView({ lang }: { lang: Lang }) {
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
                 <TableHead className="w-16 text-muted-foreground">Rank</TableHead>
-                <TableHead className="text-muted-foreground">Site × Activity</TableHead>
+                <TableHead className="text-muted-foreground">Site</TableHead>
                 <TableHead className="text-right text-muted-foreground">Reports</TableHead>
                 <TableHead className="text-right text-muted-foreground">Flagged</TableHead>
-                <TableHead className="text-right text-muted-foreground">Flag rate</TableHead>
+                <TableHead className="text-right text-muted-foreground">SIF rate</TableHead>
+                <TableHead className="text-right text-muted-foreground">Mean score</TableHead>
                 <TableHead className="w-24 text-right text-muted-foreground">Δ rank</TableHead>
               </TableRow>
             </TableHeader>
@@ -124,8 +213,11 @@ export function DensityView({ lang }: { lang: Lang }) {
                   <TableCell className="text-right font-mono">{r.n_reports}</TableCell>
                   <TableCell className="text-right font-mono">{r.n_flagged}</TableCell>
                   <TableCell className="text-right font-mono">
-                    {(r.flag_rate * 100).toFixed(1)}
+                    {(r.sif_rate * 100).toFixed(1)}
                     <span className="ml-1 text-muted-foreground">per 100</span>
+                  </TableCell>
+                  <TableCell className="text-right font-mono">
+                    {r.mean_score.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-right">
                     <RankDelta delta={r.prev_rank - r.rank} />

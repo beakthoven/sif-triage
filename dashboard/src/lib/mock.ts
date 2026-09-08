@@ -1,13 +1,19 @@
 import type {
   DensityRow,
   EvidenceSpan,
+  GateKind,
+  GateState,
   OverrideOut,
   PatternOut,
   Report,
   RuleScore,
 } from "./types";
 
-/* Span offsets are computed by construction (indexOf) and validated below —
+/* Offline-demo fallback data (the "UI never hard-fails" doctrine). Shapes
+ * match the reconciled API contract in types.ts — api.ts falls back to this
+ * module whenever the API is unreachable.
+ *
+ * Span offsets are computed by construction (indexOf) and validated below —
  * the UI only slices, never computes offsets (server contract). */
 
 function spanify(text: string, needles: string[]): EvidenceSpan[] {
@@ -40,6 +46,23 @@ const PTW_BYPASS_OOS: string[] = [
   "Work Authorisation (Permit to Work)",
   "Bypassing Safety Controls",
 ];
+
+const ALL_GATES: GateKind[] = [
+  "min_length",
+  "negation",
+  "language",
+  "confidence",
+  "drill",
+  "near_dup",
+];
+
+function gateStates(...triggered: GateKind[]): GateState[] {
+  return ALL_GATES.map((name) => ({
+    name,
+    triggered: triggered.includes(name),
+    detail: triggered.includes(name) ? "offline demo fixture" : "",
+  }));
+}
 
 const R1_TEXT =
   "During pulling operations on Well DJS-142, the derrickhand dropped a spanner " +
@@ -82,180 +105,188 @@ const G4_TEXT =
 
 export const REPORTS: Report[] = [
   {
-    id: "RPT-2614",
+    id: 2614,
     text: R1_TEXT,
     site: "Duliajan — Workover Rig #7",
     activity: "Workover operations",
     contractor: "DeepWell Services",
     reported_at: "2026-09-06",
     prediction: {
-      triage_score: 0.87,
+      sif_score: 0.87,
       band: "HIGH",
       latency_ms: 38,
       rules: rules(
         [
-          ["LoF", "Line of Fire", 0.91],
-          ["WaH", "Working at Height", 0.64],
+          ["line_of_fire", "Line of Fire", 0.91],
+          ["working_at_height", "Working at Height", 0.64],
         ],
         ...PTW_BYPASS_OOS,
       ),
-      well_control_tag: false,
-      spans: spanify(R1_TEXT, [
+      well_control: false,
+      evidence_spans: spanify(R1_TEXT, [
         "above the occupied drill floor",
         "1 m from the floorman",
         "No barricade or dropped-object netting",
       ]),
-      gates: [],
+      gate_states: gateStates(),
+      model_version: "mock-0.1.0",
       explanation:
         "Dropped object from the derrick into an occupied area with no exclusion " +
         "zone below — classic Line-of-Fire exposure on a workover rig.",
     },
   },
   {
-    id: "RPT-2601",
+    id: 2601,
     text: R2_TEXT,
     site: "Baghjan EPS",
     activity: "Well servicing",
     contractor: null,
     reported_at: "2026-09-04",
     prediction: {
-      triage_score: 0.74,
+      sif_score: 0.74,
       band: "HIGH",
       latency_ms: 41,
       rules: rules(
         [
-          ["EI", "Energy Isolation", 0.55],
-          ["LoF", "Line of Fire", 0.41],
+          ["energy_isolation", "Energy Isolation", 0.55],
+          ["line_of_fire", "Line of Fire", 0.41],
         ],
         ...PTW_BYPASS_OOS,
       ),
-      well_control_tag: true,
-      spans: spanify(R2_TEXT, [
+      well_control: true,
+      evidence_spans: spanify(R2_TEXT, [
         "pulling the BOP before cement had fully set",
         "gas was detected at the shale shakers",
         "reduced from 48 h to 12 h",
       ]),
-      gates: [],
+      gate_states: gateStates(),
+      model_version: "mock-0.1.0",
       explanation:
         "Well-control barrier stack degraded: BOP pulled before cement set, gas at " +
         "shakers, compressed workover window. Baghjan-class precursor signature.",
     },
   },
   {
-    id: "RPT-2597",
+    id: 2597,
     text: R3_TEXT,
     site: "GGS-2, Duliajan",
     activity: "Flowline patrol",
     contractor: "Pipeline O&M Crew",
     reported_at: "2026-09-03",
     prediction: {
-      triage_score: 0.62,
+      sif_score: 0.62,
       band: "MODERATE",
       latency_ms: 35,
       rules: rules(
         [
-          ["EI", "Energy Isolation", 0.58],
-          ["CS", "Confined Space", 0.22],
+          ["energy_isolation", "Energy Isolation", 0.58],
+          ["confined_space", "Confined Space", 0.22],
         ],
         ...PTW_BYPASS_OOS,
       ),
-      well_control_tag: false,
-      spans: spanify(R3_TEXT, ["pinhole leak weeping crude", "not barricaded"]),
-      gates: [],
+      well_control: false,
+      evidence_spans: spanify(R3_TEXT, ["pinhole leak weeping crude", "not barricaded"]),
+      gate_states: gateStates(),
+      model_version: "mock-0.1.0",
       explanation:
         "Loss of containment on a live flowline with missing secondary controls " +
         "(barricade, spill kit).",
     },
   },
   {
-    id: "RPT-2588",
+    id: 2588,
     text: R4_TEXT,
     site: "Naharkatia Warehouse",
     activity: "Material handling",
     contractor: null,
     reported_at: "2026-09-02",
     prediction: {
-      triage_score: 0.18,
+      sif_score: 0.18,
       band: "LOW",
       latency_ms: 31,
-      rules: rules([["SML", "Safe Mechanical Lifting", 0.12]], ...PTW_BYPASS_OOS),
-      well_control_tag: false,
-      spans: [],
-      gates: [],
+      rules: rules([["safe_mechanical_lifting", "Safe Mechanical Lifting", 0.12]], ...PTW_BYPASS_OOS),
+      well_control: false,
+      evidence_spans: [],
+      gate_states: gateStates(),
+      model_version: "mock-0.1.0",
       explanation:
         "Low-energy slip event, same-level, caught by the worker. Routine " +
         "housekeeping precursor.",
     },
   },
   {
-    id: "RPT-2616",
+    id: 2616,
     text: G1_TEXT,
     site: "GGS-2, Duliajan",
     activity: "Flowline patrol",
     contractor: null,
     reported_at: "2026-09-06",
     prediction: {
-      triage_score: 0.41,
+      sif_score: 0.41,
       band: "MODERATE",
       latency_ms: 33,
-      rules: rules([["LoF", "Line of Fire", 0.38]], ...PTW_BYPASS_OOS),
-      well_control_tag: false,
-      spans: [],
-      gates: ["low_confidence"],
+      rules: rules([["line_of_fire", "Line of Fire", 0.38]], ...PTW_BYPASS_OOS),
+      well_control: false,
+      evidence_spans: [],
+      gate_states: gateStates("confidence"),
+      model_version: "mock-0.1.0",
       explanation: "",
     },
   },
   {
-    id: "RPT-2610",
+    id: 2610,
     text: G2_TEXT,
     site: "Tengakhat — Rig #3 pipe yard",
     activity: "Lifting operations",
     contractor: "DeepWell Services",
     reported_at: "2026-09-05",
     prediction: {
-      triage_score: 0.66,
+      sif_score: 0.66,
       band: "MODERATE",
       latency_ms: 36,
-      rules: rules([["SML", "Safe Mechanical Lifting", 0.72]], ...PTW_BYPASS_OOS),
-      well_control_tag: false,
-      spans: spanify(G2_TEXT, ["sling slipped while lifting a casing"]),
-      gates: ["negation"],
+      rules: rules([["safe_mechanical_lifting", "Safe Mechanical Lifting", 0.72]], ...PTW_BYPASS_OOS),
+      well_control: false,
+      evidence_spans: spanify(G2_TEXT, ["sling slipped while lifting a casing"]),
+      gate_states: gateStates("negation"),
+      model_version: "mock-0.1.0",
       explanation: "",
     },
   },
   {
-    id: "RPT-2609",
+    id: 2609,
     text: G3_TEXT,
     site: "GGS-2, Duliajan",
     activity: "Flowline patrol",
     contractor: null,
     reported_at: "2026-09-05",
     prediction: {
-      triage_score: 0.6,
+      sif_score: 0.6,
       band: "MODERATE",
       latency_ms: 44,
-      rules: rules([["EI", "Energy Isolation", 0.52]], ...PTW_BYPASS_OOS),
-      well_control_tag: false,
-      spans: [],
-      gates: ["language"],
+      rules: rules([["energy_isolation", "Energy Isolation", 0.52]], ...PTW_BYPASS_OOS),
+      well_control: false,
+      evidence_spans: [],
+      gate_states: gateStates("language"),
+      model_version: "mock-0.1.0",
       explanation: "",
     },
   },
   {
-    id: "RPT-2615",
+    id: 2615,
     text: G4_TEXT,
     site: "Duliajan — Workover Rig #7",
     activity: "Workover operations",
     contractor: "DeepWell Services",
     reported_at: "2026-09-06",
     prediction: {
-      triage_score: 0.85,
+      sif_score: 0.85,
       band: "HIGH",
       latency_ms: 37,
-      rules: rules([["LoF", "Line of Fire", 0.9]], ...PTW_BYPASS_OOS),
-      well_control_tag: false,
-      spans: spanify(G4_TEXT, ["above the occupied drill floor"]),
-      gates: ["near_dup"],
+      rules: rules([["line_of_fire", "Line of Fire", 0.9]], ...PTW_BYPASS_OOS),
+      well_control: false,
+      evidence_spans: spanify(G4_TEXT, ["above the occupied drill floor"]),
+      gate_states: gateStates("near_dup"),
+      model_version: "mock-0.1.0",
       explanation: "",
     },
   },
@@ -265,7 +296,7 @@ export const REPORTS: Report[] = [
  * Runs at module load; also runnable standalone: node src/lib/mock.ts */
 function validateMock(): void {
   for (const r of REPORTS) {
-    for (const s of r.prediction.spans) {
+    for (const s of r.prediction.evidence_spans) {
       if (r.text.slice(s.start, s.end) !== s.text) {
         throw new Error(
           `span offset mismatch in ${r.id}: [${s.start}:${s.end}]`,
@@ -276,81 +307,43 @@ function validateMock(): void {
 }
 validateMock();
 
-/** GET /rankings/density — two snapshots: prev (pre-ingest) and current
- *  (post-ingest re-rank). The demo beat: Baghjan EPS climbs to #1. */
+/** Offline fallback for GET /api/density — two snapshots: prev (pre-ingest)
+ *  and current (post-ingest re-rank). The demo beat: Baghjan EPS climbs to #1. */
 export const DENSITY_BEFORE: DensityRow[] = [
-  { key: "Duliajan · Workover ops", n_reports: 128, n_flagged: 34, flag_rate: 0.266, rank: 1, prev_rank: 1 },
-  { key: "GGS-2 · Flowline patrol", n_reports: 96, n_flagged: 22, flag_rate: 0.229, rank: 2, prev_rank: 2 },
-  { key: "Baghjan EPS · Well servicing", n_reports: 74, n_flagged: 16, flag_rate: 0.216, rank: 3, prev_rank: 3 },
-  { key: "Moran GGS-1 · Hot work", n_reports: 61, n_flagged: 11, flag_rate: 0.18, rank: 4, prev_rank: 4 },
-  { key: "Naharkatia · Material handling", n_reports: 88, n_flagged: 12, flag_rate: 0.136, rank: 5, prev_rank: 5 },
-  { key: "Tengakhat · Lifting ops", n_reports: 53, n_flagged: 7, flag_rate: 0.132, rank: 6, prev_rank: 6 },
+  { key: "Duliajan — Workover Rig #7", n_reports: 128, n_flagged: 34, sif_rate: 0.266, mean_score: 0.312, rank: 1, prev_rank: 1 },
+  { key: "GGS-2, Duliajan", n_reports: 96, n_flagged: 22, sif_rate: 0.229, mean_score: 0.287, rank: 2, prev_rank: 2 },
+  { key: "Baghjan EPS", n_reports: 74, n_flagged: 16, sif_rate: 0.216, mean_score: 0.271, rank: 3, prev_rank: 3 },
+  { key: "Moran GGS-1", n_reports: 61, n_flagged: 11, sif_rate: 0.18, mean_score: 0.244, rank: 4, prev_rank: 4 },
+  { key: "Naharkatia Warehouse", n_reports: 88, n_flagged: 12, sif_rate: 0.136, mean_score: 0.208, rank: 5, prev_rank: 5 },
+  { key: "Tengakhat — Rig #3 pipe yard", n_reports: 53, n_flagged: 7, sif_rate: 0.132, mean_score: 0.197, rank: 6, prev_rank: 6 },
 ];
 
 export const DENSITY_AFTER: DensityRow[] = [
-  { key: "Baghjan EPS · Well servicing", n_reports: 98, n_flagged: 32, flag_rate: 0.327, rank: 1, prev_rank: 3 },
-  { key: "Duliajan · Workover ops", n_reports: 141, n_flagged: 39, flag_rate: 0.277, rank: 2, prev_rank: 1 },
-  { key: "GGS-2 · Flowline patrol", n_reports: 108, n_flagged: 25, flag_rate: 0.231, rank: 3, prev_rank: 2 },
-  { key: "Moran GGS-1 · Hot work", n_reports: 66, n_flagged: 12, flag_rate: 0.182, rank: 4, prev_rank: 4 },
-  { key: "Tengakhat · Lifting ops", n_reports: 71, n_flagged: 11, flag_rate: 0.155, rank: 5, prev_rank: 6 },
-  { key: "Naharkatia · Material handling", n_reports: 93, n_flagged: 12, flag_rate: 0.129, rank: 6, prev_rank: 5 },
+  { key: "Baghjan EPS", n_reports: 98, n_flagged: 32, sif_rate: 0.327, mean_score: 0.371, rank: 1, prev_rank: 3 },
+  { key: "Duliajan — Workover Rig #7", n_reports: 141, n_flagged: 39, sif_rate: 0.277, mean_score: 0.322, rank: 2, prev_rank: 1 },
+  { key: "GGS-2, Duliajan", n_reports: 108, n_flagged: 25, sif_rate: 0.231, mean_score: 0.289, rank: 3, prev_rank: 2 },
+  { key: "Moran GGS-1", n_reports: 66, n_flagged: 12, sif_rate: 0.182, mean_score: 0.247, rank: 4, prev_rank: 4 },
+  { key: "Tengakhat — Rig #3 pipe yard", n_reports: 71, n_flagged: 11, sif_rate: 0.155, mean_score: 0.221, rank: 5, prev_rank: 6 },
+  { key: "Naharkatia Warehouse", n_reports: 93, n_flagged: 12, sif_rate: 0.129, mean_score: 0.203, rank: 6, prev_rank: 5 },
 ];
 
-/** GET /patterns — lift-ranked activity×location×barrier co-occurrence,
- *  n + Wilson CI. One plain sentence, one count. */
+/** Offline fallback for GET /api/patterns — lift-ranked activity × site
+ *  co-occurrence with n + Wilson CI. */
 export const PATTERNS: PatternOut[] = [
-  {
-    id: "PAT-1",
-    sentence: "LINE OF FIRE × drill floor × missing barricade",
-    n: 14,
-    lift: 3.2,
-    ci_low: 0.31,
-    ci_high: 0.58,
-    window_days: 30,
-  },
-  {
-    id: "PAT-2",
-    sentence: "Dropped object × workover rig × no exclusion zone",
-    n: 11,
-    lift: 2.8,
-    ci_low: 0.24,
-    ci_high: 0.49,
-    window_days: 30,
-  },
-  {
-    id: "PAT-3",
-    sentence: "Flowline leak × GGS manifold × barricade missing",
-    n: 9,
-    lift: 2.4,
-    ci_low: 0.18,
-    ci_high: 0.41,
-    window_days: 30,
-  },
-  {
-    id: "PAT-4",
-    sentence: "Lifting ops × casing yard × uncertified sling",
-    n: 7,
-    lift: 2.1,
-    ci_low: 0.12,
-    ci_high: 0.33,
-    window_days: 30,
-  },
-  {
-    id: "PAT-5",
-    sentence: "Hot work × tank farm × gas test not recorded",
-    n: 5,
-    lift: 1.9,
-    ci_low: 0.08,
-    ci_high: 0.29,
-    window_days: 30,
-  },
+  { id: "PAT-1", activity: "Workover operations", site: "Duliajan — Workover Rig #7", n: 14, sif_rate: 0.43, lift: 3.2, ci_low: 0.31, ci_high: 0.58 },
+  { id: "PAT-2", activity: "Well servicing", site: "Baghjan EPS", n: 11, sif_rate: 0.38, lift: 2.8, ci_low: 0.24, ci_high: 0.49 },
+  { id: "PAT-3", activity: "Flowline patrol", site: "GGS-2, Duliajan", n: 9, sif_rate: 0.32, lift: 2.4, ci_low: 0.18, ci_high: 0.41 },
+  { id: "PAT-4", activity: "Lifting operations", site: "Tengakhat — Rig #3 pipe yard", n: 7, sif_rate: 0.27, lift: 2.1, ci_low: 0.12, ci_high: 0.33 },
+  { id: "PAT-5", activity: "Hot work", site: "Moran GGS-1", n: 5, sif_rate: 0.24, lift: 1.9, ci_low: 0.08, ci_high: 0.29 },
 ];
 
-/** Review queue: overrides already logged (→ future gold labels). */
+/** Offline fallback for GET /api/review — overrides already logged
+ *  (→ future gold labels). */
 export const OVERRIDES: OverrideOut[] = [
   {
-    report_id: "RPT-2410",
-    field: "label",
+    id: 1,
+    report_id: 2410,
+    field: "sif_label",
     old_value: "not_sif_potential",
     new_value: "sif_potential",
     labeler: "hse.kgohain",
@@ -358,8 +351,9 @@ export const OVERRIDES: OverrideOut[] = [
     ts: "2026-09-05T14:22:10+05:30",
   },
   {
-    report_id: "RPT-2566",
-    field: "band",
+    id: 2,
+    report_id: 2566,
+    field: "sif_label",
     old_value: "MODERATE",
     new_value: "HIGH",
     labeler: "hse.rbora",
@@ -367,8 +361,9 @@ export const OVERRIDES: OverrideOut[] = [
     ts: "2026-09-06T09:41:03+05:30",
   },
   {
-    report_id: "RPT-2579",
-    field: "rule",
+    id: 3,
+    report_id: 2579,
+    field: "line_of_fire",
     old_value: "Safe Mechanical Lifting",
     new_value: "Line of Fire",
     labeler: "hse.kgohain",
