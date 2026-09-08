@@ -103,3 +103,14 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **Demo corpus**: 13 cards + bulk_ingest_5k.csv (5,050 rows; Kathalguri re-rank beat: #2 n=31 → #1 n=96; holds only if model flags all 96 target-cell rows — verify with real ONNX Day 3).
 - **Well-control register conflict**: "kill line/kill mud/killed the well" hits the frozen outcome stem 'kill' — synthetic WC register uses bullhead/choke/weighted mud instead.
 - **train_final_v3.jsonl = 70,565 rows** (vocab gate 24/24 PASS; synthetic pool 9,187).
+
+## 10. Integration-phase facts (added 2026-09-08 ~18:00 IST)
+
+- **Ship config: masked-v1, int8, single-text path.** Val: AUC 0.9966, macro-rule-F1 0.9672, span tok-F1 0.9948, T 1.684. Derived TEST (n=17,731): AUC 0.8629 — the val↔test gap is v2-era label-map degradation + val saturation, NOT a bug (val control reproduces torch exactly).
+- **Ship operating point (D19+D27): raw 0.821855 / calibrated 0.712581 → P 0.8001 / R 0.9736 / F1 0.8770 on full derived test, single-text path.** The val-frozen 6.58e-5 is vacuous (val prevalence 79.4% ≈ precision floor → flags everything). Recall@P0.85 = 0.844, @P0.90 = 0.515. Gold applies the same per-row path.
+- **Training report's "ship fp32" recommendation is SUPERSEDED by D20**: its int8-RED was measured on Kaggle hardware (ΔAUC 0.0916); on the demo machine int8 full-val AUC 0.9937 vs torch 0.9966 (Δ0.0029 PASS) and decisions are int8≡fp32 on all probed cards. Quantization is provider-sensitive — documented.
+- **int8 batch-composition shift (D27)**: dynamic quantization computes scales per tensor per batch — batchmates shift each other's logits (mean |Δp| 0.031). Batch-32 int8 classification is ILLEGAL in production; the app classifies per-row everywhere. fp32 is batch-invariant (Δ=0.0).
+- **McNemar at ship threshold (n=1500 shared sample, Holm-corrected)**: finetune F1 0.8803 > tfidf 0.8721 (p 0.080 n.s.) > zeroshot 0.8538 (finetune significantly better, p 8.7e-4) >> regex 0.4747 (p 2.2e-67). "Beats an 8B zero-shot LLM at 1/1083rd per-classification latency" is now a measured claim.
+- **Latency (ship config, this machine)**: p50 11.9 / p95 19.7 / p99 40.2 ms single-text; bulk ingest 33.73 reports/s (SLA ≥30/s PASS; 5,050 rows in 149.7s under load).
+- **Ablation read**: masked ≈ unmasked on val (ΔAUC +0.0001); masking neither helps nor hurts at saturation — final word on the gold set.
+- **Demo cards**: 13 cards verified vs real model; 3 behavioral deviations (first-aid FP → D21 retrain; long-report negation gate → fixed suite expectation; codes-only stale mock annotation). Kathalguri beat: 96/96 flagged, #1 confirmed. Rule-attribution drift on 7 cards → narrate probability bar (D22).
