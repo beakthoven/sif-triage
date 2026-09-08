@@ -20,15 +20,12 @@ import type {
  * Every getter falls back to the mock module when the API is unreachable —
  * the offline-demo doctrine: the UI never hard-fails.
  *
- * Base URL: import.meta.env.VITE_API_BASE, defaulting to http://localhost:8177.
- * Set VITE_API_BASE to an empty string at build time for same-origin requests
- * (the vite dev/preview proxy forwards /api → the API, which has no CORS
- * middleware — same-origin is the path that works from a browser). */
+ * Base URL: import.meta.env.VITE_API_BASE, defaulting to "" (same-origin —
+ * the FastAPI process serves this dist at /, so relative /api requests are
+ * the path that works from a browser; the API has no CORS middleware).
+ * The vite dev/preview proxy forwards /api → the API. */
 
-const BASE = (import.meta.env.VITE_API_BASE ?? "http://localhost:8177").replace(
-  /\/+$/,
-  "",
-);
+const BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
 const TIMEOUT_MS = 3500;
 
 /* ---- Raw wire shapes (app/schemas.py — these names win) ---- */

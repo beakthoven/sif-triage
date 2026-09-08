@@ -1,0 +1,44 @@
+# Kernel session log excerpt — beakthoven/sif26165-train-masked-v4 (kernel_id 133553919, v1)
+# Captured via list_notebook_session_output after session end (status ERROR = train.py exit 2
+# on export_gate fail; training + export + artifacts all completed). Times are seconds from
+# kernel start.
+
+GPU: Tesla T4 capability sm_75 torch 2.10.0+cu128
+fetched ok corpus/train.jsonl (92533325 B, sha256 verified)      # v4, 71,065 rows
+fetched ok corpus/val.jsonl (4997827 B, sha256 verified)
+fetched ok corpus/test.jsonl (13769714 B, sha256 verified)
+fetched ok train.py (38962 B, sha256 verified)                   # 62fa606b, all 5 day-1 fixes
+fetched ok model.py (2108 B, sha256 verified)                    # 6027f410 frozen
+fetched ok label_spec.yaml (11557 B, sha256 verified)            # 96114b09
+
+DRY RUN OK — [train] rows=71065 sif_pos=44849 (63.1%); [val] rows=6820 sif_pos=5417 (79.4%);
+[test] rows=17731 sif_pos=11389 (64.2%)  (test featurizer stats only; never evaluated)
+plan: ~6663 optimizer steps; ckpt-ep1..3.pt; metrics.json/epoch; export fp32+int8 ONNX + parity
+
+[train] 71065 rows featurized in 30.6s; span drops: no_anchor=31554 misaligned=26
+[val] 6820 rows featurized in 2.1s; span drops: no_anchor=3778 misaligned=1
+rule pos_weight (cap 10.0): {'line_of_fire': 1.62, 'working_at_height': 5.52, 'driving': 10.0,
+ 'energy_isolation': 10.0, 'hot_work': 10.0, 'safe_mechanical_lifting': 10.0, 'confined_space': 10.0}
+
+[ep1] sif_auc=0.9968 op(r@p>=0.8)={'threshold': 7.818e-04, 'recall': 1.0, 'precision': 0.80003,
+ 'floor_unreachable': False} macroF1=0.9510 spanF1=0.9642 T=1.021
+  checkpoint: /kaggle/working/ckpt-ep1.pt
+[ep2] sif_auc=0.9972 op(r@p>=0.8)={'threshold': 1.875e-04, 'recall': 1.0, 'precision': 0.80003,
+ 'floor_unreachable': False} macroF1=0.9623 spanF1=0.9694 T=1.339
+  checkpoint: /kaggle/working/ckpt-ep2.pt
+[ep3] sif_auc=0.9969 op(r@p>=0.8)={'threshold': 6.854e-05, 'recall': 1.0, 'precision': 0.80003,
+ 'floor_unreachable': False} macroF1=0.9645 spanF1=0.9709 T=1.648
+  checkpoint: /kaggle/working/ckpt-ep3.pt
+
+exported fp32 ONNX (dynamo, opset 18): /kaggle/working/sif_multitask_fp32.onnx
+fp32 parity: {'sif_logit': {'max_abs_dlogit': 3.46e-05, 'pass': True},
+ 'rule_logits': {'max_abs_dlogit': 2.97e-05, 'pass': True},
+ 'span_logits': {'max_abs_dlogit': 9.73e-05, 'pass': True}}
+quantized int8: /kaggle/working/sif_multitask_int8.onnx
+int8 parity: {'agreement': 0.99296, 'auc_drop': 0.13055, 'recall_at_op_drop': 0.0, 'pass': False}
+latency: {'fp32/AzureExecutionProvider/batch1': 188.31, 'fp32/AzureExecutionProvider/batch32': 6238.94,
+ 'int8/CPUExecutionProvider/batch1': 150.46, 'int8/CPUExecutionProvider/batch32': 4863.58}
+manifest: /kaggle/working/manifest.json (15 files, export_gate_pass=False)
+train.py exit=2 (65.6 min)
+tokenizer saved to /kaggle/working/tokenizer
+kernel total 66.3 min

@@ -4,19 +4,22 @@ All endpoints live under /api except /api/health (registered in main.py).
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import os
 from pathlib import Path
 
+import numpy as np
 from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import PlainTextResponse
 
 from .classifier import Classifier, flag_threshold, validate_spans
 from .config import REPO_ROOT, Settings
 from .embedder import embed_texts
 from .explain import build_explanation
 from .gates import run_gates
-from .ingest import parse_records, validate_rows
+from .ingest import parse_records, text_hash, validate_rows
 from .schemas import (
     RULE_DISPLAY,
     DensityRow,
@@ -24,7 +27,7 @@ from .schemas import (
     IngestRequest,
     IngestResult,
     MetricsSummary,
-    OverrideIn,
+    OverrideWrite,
     PatternRow,
     PredictionOut,
     ReportIn,
@@ -100,48 +103,95 @@ def classify(
     return pred
 
 
+def _payload_hash(body: IngestRequest) -> str:
+    """Canonical hash of the ingest payload for cross-request idempotency
+    (SEV2-2): an identical re-POST replays the stored result instead of
+    double-ingesting. Key order inside individual records still matters —
+    'identical' means byte-canonical, which is exactly the retry case."""
+    canon = json.dumps(
+        {"records": body.records, "csv": body.csv,
+         "column_mapping": body.column_mapping, "source": body.source},
+        sort_keys=True, separators=(",", ":"), ensure_ascii=True,
+    )
+    return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+
 @router.post("/ingest", response_model=IngestResult)
 def ingest(body: IngestRequest, req: Request) -> IngestResult:
     cfg, storage, clf = _cfg(req), _storage(req), _classifier(req)
+    # Idempotent replay: byte-identical re-POST of an already-ingested payload
+    # returns the original result untouched (no double count — SEV2-2).
+    payload_hash = _payload_hash(body)
+    replay = storage.get_ingest_replay(payload_hash)
+    if replay is not None:
+        return IngestResult(**{**replay, "idempotent_replay": True})
     try:
         raw_rows = parse_records(body.records, body.csv)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     reports, errors = validate_rows(raw_rows, source=body.source, column_mapping=body.column_mapping)
-    ids: list[int] = []
-    # D25 bulk path (inline single-everything measured 5.33/s vs the >=30/s
-    # SLA): classify is batched only when the loaded quant is batch-exact
-    # (int8's per-tensor dynamic quantization shifts logits by batchmate —
-    # measured Δ≈1-2 — so per-row keeps stored scores identical to the
-    # interactive path); embeddings are batch-computed once per chunk and
-    # reused for the near-dup gate AND storage; the corpus-tier nearest is
-    # one matmul per chunk. Gates still run per row and rows are still
-    # stored in request order, so gate outcomes (incl. near-dup against
-    # earlier rows of the same request) and stored rows are unchanged.
-    for off in range(0, len(reports), INGEST_BATCH):
-        chunk = reports[off : off + INGEST_BATCH]
-        texts = [r.text for r in chunk]
+    # Within-batch dedup on the normalized-text content hash (keep the first
+    # occurrence); cross-request row dedup happens at write time in storage.
+    seen: set[str] = set()
+    unique: list[tuple[ReportIn, str]] = []
+    skipped_duplicates = 0
+    for r in reports:
+        th = text_hash(r.text)
+        if th in seen:
+            skipped_duplicates += 1
+            continue
+        seen.add(th)
+        unique.append((r, th))
+    # Phase 1 — classify + embed + gates, NO writes (D25 bulk path: inline
+    # single-everything measured 5.33/s vs the >=30/s SLA; classify is batched
+    # only when the loaded quant is batch-exact — int8's per-tensor dynamic
+    # quantization shifts logits by batchmate, so per-row keeps stored scores
+    # identical to the interactive path; embeddings are batch-computed once
+    # per chunk and reused for the near-dup gate AND storage; the corpus-tier
+    # nearest is one matmul per chunk).
+    # Behavior note (SEV2-3 fix): the old flow interleaved writes per row so
+    # the near-dup gate also saw earlier rows of the SAME request. Phase-1
+    # gates now see committed rows only; exact duplicates within the batch
+    # are skipped above instead of bannered. Rows stay in request order.
+    prepared: list[tuple[ReportIn, PredictionOut, np.ndarray, str]] = []
+    for off in range(0, len(unique), INGEST_BATCH):
+        chunk = unique[off : off + INGEST_BATCH]
+        texts = [r.text for r, _ in chunk]
         if getattr(clf, "supports_exact_batch", False):
             preds = clf.classify_batch(texts, batch_size=INGEST_BATCH)
         else:
             preds = [clf.predict(t) for t in texts]
         vecs = embed_texts(texts)
         base_hits = storage.nearest_base_batch(vecs)
-        for report, pred, vec, base_hit in zip(chunk, preds, vecs, base_hits):
+        for (report, th), pred, vec, base_hit in zip(chunk, preds, vecs, base_hits):
             pred.evidence_spans = validate_spans(report.text, pred.evidence_spans)
             pred.gate_states = run_gates(report.text, pred.sif_score, storage, cfg,
                                          vec=vec, base_hit=base_hit)
-            rid = storage.add_report(report)
-            storage.add_prediction(rid, pred)
-            storage.add_embedding(rid, vec)
-            ids.append(rid)
-    return IngestResult(
+            prepared.append((report, pred, vec, th))
+    # Phase 2 — ONE transaction: every row lands or none do. A failure here
+    # rolls the whole batch back and the client gets an honest error instead
+    # of a silent partial commit it cannot distinguish from "nothing stored".
+    try:
+        ids, skipped_duplicates_db = storage.add_ingest_batch(prepared)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"ingest failed and was rolled back; nothing stored: "
+            f"{type(exc).__name__}: {exc}",
+        ) from exc
+    skipped_duplicates += skipped_duplicates_db
+    result = IngestResult(
         received=len(raw_rows),
         accepted=len(ids),
         rejected=len(errors),
         report_ids=ids,
         errors=errors,
+        skipped_duplicates=skipped_duplicates,
     )
+    # Record the replay entry only after success (a failed ingest leaves no
+    # entry, so a retry re-runs cleanly; per-row dedup covers the gap).
+    storage.record_ingest_payload(payload_hash, result.model_dump())
+    return result
 
 
 @router.get("/reports", response_model=list[StoredReport])
@@ -185,26 +235,12 @@ def density(
     req: Request,
     by: str = Query(default="site", pattern="^(site|activity|contractor)$"),
 ) -> list[DensityRow]:
-    """Precursor-density ranking by structured facet — the PS-core view."""
+    """Precursor-density ranking by structured facet — the PS-core view.
+    Computed as a single SQL GROUP BY (SEV3-1: the old path materialized
+    every row + one extra query per row, ~170ms at 5k rows and silently
+    capped at the latest 100k)."""
     thr = flag_threshold(_classifier(req))
-    groups: dict[str, list[float]] = {}
-    for stored in _storage(req).list_reports(limit=100_000):
-        key = getattr(stored.report, by) or "(unspecified)"
-        groups.setdefault(key, []).append(
-            stored.prediction.sif_score if stored.prediction else 0.0
-        )
-    rows = [
-        DensityRow(
-            key=k,
-            n_reports=len(scores),
-            n_flagged=sum(1 for s in scores if s >= thr),
-            sif_rate=round(sum(1 for s in scores if s >= thr) / len(scores), 4),
-            mean_score=round(sum(scores) / len(scores), 4),
-        )
-        for k, scores in groups.items()
-    ]
-    rows.sort(key=lambda r: (-r.sif_rate, -r.n_reports))
-    return rows
+    return [DensityRow(**row) for row in _storage(req).density_aggregate(by, thr)]
 
 
 @router.get("/rules", response_model=list[RuleInfo])
@@ -293,8 +329,11 @@ def patterns(
 
 
 @router.post("/review", response_model=StoredOverride, status_code=201)
-def create_override(body: OverrideIn, req: Request) -> StoredOverride:
-    """HSE override -> stored as future gold. 'Model proposes, HSE disposes.'"""
+def create_override(body: OverrideWrite, req: Request) -> StoredOverride:
+    """HSE override -> stored as future gold. 'Model proposes, HSE disposes.'
+    Field + value vocabulary are validated (OverrideWrite, SEV2-3); history is
+    append-only — GET /review/export collapses to latest-wins per
+    (report_id, field) for the gold lineage."""
     storage = _storage(req)
     if storage.get_report(body.report_id) is None:
         raise HTTPException(status_code=404, detail=f"report {body.report_id} not found")
@@ -309,25 +348,25 @@ def list_overrides(req: Request, report_id: int | None = Query(default=None)) ->
     return _storage(req).list_overrides(report_id)
 
 
+@router.get("/review/export")
+def export_overrides(req: Request) -> PlainTextResponse:
+    """Future-gold export, one JSON object per line (application/x-ndjson).
+    Latest-wins per (report_id, field) with exact-duplicate collapse; line
+    schema is documented on storage.export_overrides (SEV2-3)."""
+    rows = _storage(req).export_overrides()
+    body = "".join(json.dumps(r, ensure_ascii=True) + "\n" for r in rows)
+    return PlainTextResponse(body, media_type="application/x-ndjson")
+
+
 @router.get("/metrics/summary", response_model=MetricsSummary)
 def metrics_summary(req: Request) -> MetricsSummary:
     storage, clf = _storage(req), _classifier(req)
-    stored = storage.list_reports(limit=100_000)
-    scores = [s.prediction.sif_score for s in stored if s.prediction]
-    gate_counts: dict[str, int] = {}
-    for s in stored:
-        if s.prediction:
-            for g in s.prediction.gate_states:
-                if g.triggered:
-                    gate_counts[g.name] = gate_counts.get(g.name, 0) + 1
-    n_flagged = sum(1 for sc in scores if sc >= flag_threshold(clf))
+    # SQL/cached aggregate over ALL rows (SEV3-1: the old path materialized
+    # 100k StoredReport objects per call and silently dropped rows beyond it).
+    agg = storage.metrics_aggregate(flag_threshold(clf))
     return MetricsSummary(
-        n_reports=len(stored),
-        n_flagged=n_flagged,
-        flag_rate=round(n_flagged / len(scores), 4) if scores else 0.0,
-        mean_score=round(sum(scores) / len(scores), 4) if scores else 0.0,
+        **agg,
         n_overrides=storage.count_overrides(),
-        gate_trigger_counts=gate_counts,
         model_version=clf.model_version,
         classifier=type(clf).__name__,
     )

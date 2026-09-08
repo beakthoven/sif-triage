@@ -20,3 +20,9 @@
 - Sep 9 20:00 (T-19h cron): GOLD LABELING STARTS (human, 6-8 person-h; tool: gold/labeler_app.py ports 8001-8004).
 - Sep 10 09:00 (T-6h cron): final gate — metrics, adversarial suite, packaging.
 - Sep 10 13:00 (T-2h cron): rehearsal gate — feature freeze, offline rehearsal.
+| Sep 8 15:15 | Integration verdicts: latency p95 19.7ms PASS; ingest 33.7/s PASS; op-point vacuous → D19 re-tune; first-aid FP → D21 retrain queued. |
+| Sep 8 17:45 | D19/D27: ship threshold raw 0.821855/cal 0.712581 (P0.8001/R0.9736 single-text on full test). McNemar: ft > zeroshot significant (p=8.7e-4). |
+| Sep 8 18:10 | v4 corpus (71,065 rows) → masked-v2 retrain launched (background, ~2.5h). D28 CSV scrubbed (only intentional verbatim-osha remains). |
+| Sep 8 20:15 | Review swarm found 6 SEV1s (rule-logit ORDER SCRAMBLE — true cause of D22 drift; positional dead zone; sqlite concurrency corruption; explain 500s; dashboard span duplication; VITE base). masked-v2 retrain done (val AUC 0.9969). |
+| Sep 8 21:30 | All SEV1s fixed + probed. SHIP DECISION: masked-v2 (first-aid FP fixed 0.996→0.153, 0/20 unseen paraphrases; op-point raw 0.7464 → P0.80003/R0.9748; AUC edge +0.013). Gold pipeline pre-scored with v2. |
+| Sep 8 23:10 | Demo final state: stack on masked-v2, 5,048 reports seeded, money beats verified, screenshots, tarball rebuilt. Day-1 complete. |

@@ -1,0 +1,49 @@
+{
+ "files": {
+  "export_gate.json": {
+   "sha256": "8ed5c388a6d9f4684eed4ec142b39529f8c1e97ccb3faf57b6f0c88b70945a4c",
+   "bytes": 637
+  },
+  "label_spec.yaml": {
+   "sha256": "96114b0961bc4365d7bb48c217654bc37904411fee12732839694641861b409a",
+   "bytes": 11557
+  },
+  "metrics-ep1.json": {
+   "sha256": "d9033ef612912f3feef552de1e672f811f496d9978a0edf0fc59c9e253460eca",
+   "bytes": 1532
+  },
+  "metrics-ep2.json": {
+   "sha256": "ebf107ac72fea2d46e0ab0a9ed7d7653660bfd5bc8e83bd19d914715806bc617",
+   "bytes": 1533
+  },
+  "metrics-ep3.json": {
+   "sha256": "d824e13f360d6a976f7a85c618de2173a4c46621eea6750bc3bf9a01506e3e0a",
+   "bytes": 1532
+  },
+  "metrics.json": {
+   "sha256": "d824e13f360d6a976f7a85c618de2173a4c46621eea6750bc3bf9a01506e3e0a",
+   "bytes": 1532
+  },
+  "model.py": {
+   "sha256": "6027f4109436e1d58277bfa1fffc358c3c85278c65b3b6868f7b899d061312e3",
+   "bytes": 2108
+  },
+  "sif_multitask_fp32.onnx": {
+   "sha256": "f6f8d4ca064d066bd9e050ef4c6dc94c16138dd08547be80c2c325012a5c56a6",
+   "bytes": 2950082
+  },
+  "sif_multitask_int8.onnx": {
+   "sha256": "1d46ccadcba34ed25cf6ca7b7fb2c4a85d2ebc10a4db0c61ec3ae8f5092aa646",
+   "bytes": 151989330
+  },
+  "thresholds.json": {
+   "sha256": "1047fb12b65c0c959eea54e9df6dfc830137ac34756592f8644aa149ffebf45a",
+   "bytes": 798
+  },
+  "train.py": {
+   "sha256": "62fa606b03f0fb104acb128a5f3d0d7eb2b11a7c971a5470351740f6fc6da3b6",
+   "bytes": 38962
+  }
+ },
+ "export_gate_pass": false
+}

@@ -8,6 +8,7 @@ Run: .venv/bin/python app/tests/onnx_classifier_check.py
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -17,7 +18,12 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
-from app.classifier import MockClassifier, RealOnnxClassifier, build_classifier  # noqa: E402
+from app.classifier import (  # noqa: E402
+    RULE_HEAD_ORDER,
+    MockClassifier,
+    RealOnnxClassifier,
+    build_classifier,
+)
 from app.schemas import RULE_KEYS, PredictionOut  # noqa: E402
 
 MODEL_DIR = REPO_ROOT / "artifacts" / "models" / "masked-v1"  # the ship artifact
@@ -77,6 +83,17 @@ def main() -> int:
         # int8 per-tensor dynamic quantization shifts logits by batchmate
         # (measured Δ≈1-2, D25) — contract checked, score equality not asserted.
         print("      note: int8 quant — batch scores drift by batchmate (D25); equality not asserted")
+
+    print("[3c] rule-head order == training order (post-review SEV1-1)")
+    m = re.search(r"^RULES = \(([^)]*)\)", (MODEL_DIR / "train.py").read_text(), re.MULTILINE)
+    train_rules = tuple(re.findall(r'"([^"]+)"', m.group(1)))
+    check(RULE_HEAD_ORDER == train_rules,
+          f"RULE_HEAD_ORDER == train.py RULES verbatim {train_rules}")
+    weld = clf.predict("Worker was grinding and welding near the diesel drum "
+                       "storage, sparks flying everywhere, no fire watch posted.")
+    top = max(weld.rule_probs, key=weld.rule_probs.get)
+    check(top == "hot_work",
+          f"welding text -> hot_work leads (got {top}; pre-fix showed line_of_fire)")
 
     print("[4] chunked path — 1,500-word input (crash safety)")
     words = ("worker was grinding near the flange without face shield during lifting "

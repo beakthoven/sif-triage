@@ -112,8 +112,10 @@ export function DensityView({
   const [rows, setRows] = useState<DensityRow[]>(DENSITY_BEFORE);
   const [live, setLive] = useState(false);
   const [ingesting, setIngesting] = useState(false);
+  const [ingestedOnce, setIngestedOnce] = useState(false);
   const [progress, setProgress] = useState(0);
   const [ingestNote, setIngestNote] = useState<string | null>(null);
+  const [ingestError, setIngestError] = useState<string | null>(null);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const setRowRef = useFlip(rows);
 
@@ -145,9 +147,11 @@ export function DensityView({
   }
 
   async function runIngest() {
-    if (ingesting) return;
+    if (ingesting || ingestedOnce) return;
+    if (live && !window.confirm(t(lang, "ingestConfirm"))) return;
     setIngesting(true);
     setProgress(0);
+    setIngestError(null);
     if (live) {
       // Live beat: CSV upload through the bulk-ingest path, then re-fetch —
       // ranks derived from the pre-ingest snapshot drive the FLIP re-sort.
@@ -156,12 +160,14 @@ export function DensityView({
         const result = await ingestCsv(toCsv(DEMO_INGEST_RECORDS));
         setIngestNote(`accepted ${result.accepted}/${result.received}`);
         setRows(await getDensity("site", rows));
+        setIngestedOnce(true);
         // The ingest changed server state — header count + feed queue refetch.
         onIngested?.();
       } catch {
-        setLive(false);
+        // Honest failure: keep the live rows under the LIVE badge, never
+        // swap in fabricated mock numbers (review SEV2-1).
         setIngestNote(null);
-        setRows((cur) => (cur === DENSITY_BEFORE ? DENSITY_AFTER : DENSITY_BEFORE));
+        setIngestError(t(lang, "ingestFailed"));
       } finally {
         stopProgress();
         setIngesting(false);
@@ -187,10 +193,14 @@ export function DensityView({
         <Button
           size="lg"
           onClick={runIngest}
-          disabled={ingesting}
+          disabled={ingesting || (live && ingestedOnce)}
           className="min-h-11 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
         >
-          {ingesting ? t(lang, "ingesting") : t(lang, "rerank")}
+          {ingesting
+            ? t(lang, "ingesting")
+            : live && ingestedOnce
+              ? t(lang, "ingestedDone")
+              : t(lang, "rerank")}
         </Button>
         {(ingesting || progress > 0) && (
           <div
@@ -208,6 +218,11 @@ export function DensityView({
         )}
         {ingestNote && !ingesting && (
           <p className="font-mono text-xs text-muted-foreground">{ingestNote}</p>
+        )}
+        {ingestError && !ingesting && (
+          <p role="alert" className="font-mono text-xs text-primary">
+            {ingestError}
+          </p>
         )}
         {topClimber && !ingesting && (
           <p className="font-mono text-sm text-primary">

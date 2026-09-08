@@ -7,6 +7,7 @@ optional, NULL when absent. No arbitrary-mapping UI.
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json as jsonlib
 from typing import Any
@@ -51,6 +52,18 @@ def map_columns(row: dict[str, Any], override: dict[str, str] | None = None) -> 
 def parse_csv(content: str) -> list[dict[str, Any]]:
     reader = csv.DictReader(io.StringIO(content))
     return [dict(r) for r in reader]
+
+
+def normalize_text(text: str) -> str:
+    """Canonical form for duplicate detection: all whitespace runs collapse
+    to single spaces and the ends are trimmed (a re-exported CSV with
+    different line wrapping still hashes equal)."""
+    return " ".join(text.split())
+
+
+def text_hash(text: str) -> str:
+    """Content hash used for within-batch and cross-request dedup (SEV2-2)."""
+    return hashlib.sha256(normalize_text(text).encode("utf-8")).hexdigest()
 
 
 def parse_records(records: list[dict[str, Any]] | None = None, csv_text: str | None = None) -> list[dict[str, Any]]:

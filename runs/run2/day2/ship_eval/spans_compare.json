@@ -1,0 +1,986 @@
+[
+ {
+  "id": "osha-2025087798",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.957241952419281,
+   "spans": [
+    {
+     "text": " ch",
+     "p": 0.009,
+     "start": 211,
+     "end": 214
+    },
+    {
+     "text": " struck",
+     "p": 0.005,
+     "start": 108,
+     "end": 115
+    },
+    {
+     "text": "ipped",
+     "p": 0.002,
+     "start": 214,
+     "end": 219
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9836621880531311,
+   "spans": [
+    {
+     "text": " ch",
+     "p": 0.035,
+     "start": 211,
+     "end": 214
+    },
+    {
+     "text": "ipped",
+     "p": 0.01,
+     "start": 214,
+     "end": 219
+    },
+    {
+     "text": " off",
+     "p": 0.003,
+     "start": 91,
+     "end": 95
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025088416",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9968639612197876,
+   "spans": [
+    {
+     "text": " finger",
+     "p": 0.0,
+     "start": 86,
+     "end": 93
+    },
+    {
+     "text": " by",
+     "p": 0.0,
+     "start": 129,
+     "end": 132
+    },
+    {
+     "text": " down",
+     "p": 0.0,
+     "start": 32,
+     "end": 37
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9982478618621826,
+   "spans": [
+    {
+     "text": " by",
+     "p": 0.0,
+     "start": 129,
+     "end": 132
+    },
+    {
+     "text": " finger",
+     "p": 0.0,
+     "start": 86,
+     "end": 93
+    },
+    {
+     "text": " hold",
+     "p": 0.0,
+     "start": 27,
+     "end": 32
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025087774",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9951229691505432,
+   "spans": [
+    {
+     "text": " struck",
+     "p": 0.0,
+     "start": 90,
+     "end": 97
+    },
+    {
+     "text": " and",
+     "p": 0.0,
+     "start": 86,
+     "end": 90
+    },
+    {
+     "text": " in",
+     "p": 0.0,
+     "start": 110,
+     "end": 113
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.995793342590332,
+   "spans": [
+    {
+     "text": " struck",
+     "p": 0.001,
+     "start": 90,
+     "end": 97
+    },
+    {
+     "text": " in",
+     "p": 0.0,
+     "start": 110,
+     "end": 113
+    },
+    {
+     "text": "ed",
+     "p": 0.0,
+     "start": 84,
+     "end": 86
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-20251010308",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.8929736614227295,
+   "spans": [
+    {
+     "text": "]",
+     "p": 0.321,
+     "start": 180,
+     "end": 181
+    },
+    {
+     "text": " ladder",
+     "p": 0.003,
+     "start": 52,
+     "end": 59
+    },
+    {
+     "text": "iling",
+     "p": 0.002,
+     "start": 88,
+     "end": 93
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9630319476127625,
+   "spans": [
+    {
+     "text": " the",
+     "p": 0.366,
+     "start": 48,
+     "end": 52
+    },
+    {
+     "text": " backward",
+     "p": 0.002,
+     "start": 105,
+     "end": 114
+    },
+    {
+     "text": " ra",
+     "p": 0.001,
+     "start": 85,
+     "end": 88
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024098227",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.04343888536095619,
+   "spans": [
+    {
+     "text": " break",
+     "p": 0.002,
+     "start": 125,
+     "end": 131
+    },
+    {
+     "text": " in",
+     "p": 0.001,
+     "start": 118,
+     "end": 121
+    },
+    {
+     "text": " tri",
+     "p": 0.001,
+     "start": 82,
+     "end": 86
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.021632496267557144,
+   "spans": [
+    {
+     "text": ",",
+     "p": 0.325,
+     "start": 39,
+     "end": 40
+    },
+    {
+     "text": " their",
+     "p": 0.005,
+     "start": 144,
+     "end": 150
+    },
+    {
+     "text": " hit",
+     "p": 0.003,
+     "start": 140,
+     "end": 144
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024087999",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9958945512771606,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.204,
+     "start": 61,
+     "end": 62
+    },
+    {
+     "text": " vertebra",
+     "p": 0.003,
+     "start": 314,
+     "end": 323
+    },
+    {
+     "text": " hang",
+     "p": 0.003,
+     "start": 141,
+     "end": 146
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9903648495674133,
+   "spans": [
+    {
+     "text": " feet",
+     "p": 0.003,
+     "start": 221,
+     "end": 226
+    },
+    {
+     "text": " below",
+     "p": 0.003,
+     "start": 240,
+     "end": 246
+    },
+    {
+     "text": " fell",
+     "p": 0.002,
+     "start": 213,
+     "end": 218
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-20251010487",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9975271821022034,
+   "spans": [
+    {
+     "text": " caught",
+     "p": 0.001,
+     "start": 75,
+     "end": 82
+    },
+    {
+     "text": " 21",
+     "p": 0.0,
+     "start": 10,
+     "end": 13
+    },
+    {
+     "text": " finger",
+     "p": 0.0,
+     "start": 101,
+     "end": 108
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9983397722244263,
+   "spans": [
+    {
+     "text": " caught",
+     "p": 0.006,
+     "start": 75,
+     "end": 82
+    },
+    {
+     "text": " 21",
+     "p": 0.001,
+     "start": 10,
+     "end": 13
+    },
+    {
+     "text": " middle",
+     "p": 0.0,
+     "start": 94,
+     "end": 101
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025098861",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9964801669120789,
+   "spans": [
+    {
+     "text": " kn",
+     "p": 0.0,
+     "start": 196,
+     "end": 199
+    },
+    {
+     "text": " above",
+     "p": 0.0,
+     "start": 180,
+     "end": 186
+    },
+    {
+     "text": " into",
+     "p": 0.0,
+     "start": 94,
+     "end": 99
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.997859537601471,
+   "spans": [
+    {
+     "text": " into",
+     "p": 0.0,
+     "start": 94,
+     "end": 99
+    },
+    {
+     "text": " finger",
+     "p": 0.0,
+     "start": 173,
+     "end": 180
+    },
+    {
+     "text": " above",
+     "p": 0.0,
+     "start": 180,
+     "end": 186
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024088066",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9841222763061523,
+   "spans": [
+    {
+     "text": "volt",
+     "p": 0.02,
+     "start": 175,
+     "end": 179
+    },
+    {
+     "text": " shock",
+     "p": 0.008,
+     "start": 190,
+     "end": 196
+    },
+    {
+     "text": "er",
+     "p": 0.008,
+     "start": 84,
+     "end": 86
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9899712800979614,
+   "spans": [
+    {
+     "text": " electrical",
+     "p": 0.047,
+     "start": 179,
+     "end": 190
+    },
+    {
+     "text": " shock",
+     "p": 0.022,
+     "start": 190,
+     "end": 196
+    },
+    {
+     "text": "volt",
+     "p": 0.012,
+     "start": 175,
+     "end": 179
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024054078",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.997988224029541,
+   "spans": [
+    {
+     "text": " crushed",
+     "p": 0.996,
+     "start": 166,
+     "end": 174
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9984354376792908,
+   "spans": [
+    {
+     "text": " crushed",
+     "p": 0.855,
+     "start": 166,
+     "end": 174
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025077539",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9973425269126892,
+   "spans": [
+    {
+     "text": " onto",
+     "p": 0.006,
+     "start": 94,
+     "end": 99
+    },
+    {
+     "text": " fell",
+     "p": 0.002,
+     "start": 89,
+     "end": 94
+    },
+    {
+     "text": " rot",
+     "p": 0.0,
+     "start": 76,
+     "end": 80
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9972630739212036,
+   "spans": [
+    {
+     "text": " onto",
+     "p": 0.013,
+     "start": 94,
+     "end": 99
+    },
+    {
+     "text": " fell",
+     "p": 0.004,
+     "start": 89,
+     "end": 94
+    },
+    {
+     "text": " landing",
+     "p": 0.0,
+     "start": 57,
+     "end": 65
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025021210",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.023595988750457764,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.284,
+     "start": 91,
+     "end": 92
+    },
+    {
+     "text": " fell",
+     "p": 0.001,
+     "start": 67,
+     "end": 72
+    },
+    {
+     "text": " femur",
+     "p": 0.001,
+     "start": 142,
+     "end": 148
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.05283593386411667,
+   "spans": [
+    {
+     "text": " the",
+     "p": 0.377,
+     "start": 80,
+     "end": 84
+    },
+    {
+     "text": " fell",
+     "p": 0.004,
+     "start": 67,
+     "end": 72
+    },
+    {
+     "text": " ground",
+     "p": 0.003,
+     "start": 84,
+     "end": 91
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024076119",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9983217120170593,
+   "spans": [
+    {
+     "text": " caught between",
+     "p": 0.954,
+     "start": 123,
+     "end": 138
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9982863068580627,
+   "spans": [
+    {
+     "text": " caught between",
+     "p": 0.92,
+     "start": 123,
+     "end": 138
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024053930",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9973384737968445,
+   "spans": [
+    {
+     "text": " crushed",
+     "p": 0.999,
+     "start": 130,
+     "end": 138
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9984874725341797,
+   "spans": [
+    {
+     "text": " crushed",
+     "p": 0.999,
+     "start": 130,
+     "end": 138
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-20251111671",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9980015158653259,
+   "spans": [
+    {
+     "text": " caught between",
+     "p": 0.991,
+     "start": 117,
+     "end": 132
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9990025162696838,
+   "spans": [
+    {
+     "text": " caught between",
+     "p": 0.997,
+     "start": 117,
+     "end": 132
+    }
+   ],
+   "fallback": false,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024021782",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9879390001296997,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.301,
+     "start": 61,
+     "end": 62
+    },
+    {
+     "text": " fell",
+     "p": 0.001,
+     "start": 126,
+     "end": 131
+    },
+    {
+     "text": " to",
+     "p": 0.001,
+     "start": 131,
+     "end": 134
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9928154945373535,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.299,
+     "start": 61,
+     "end": 62
+    },
+    {
+     "text": " trailer",
+     "p": 0.005,
+     "start": 97,
+     "end": 105
+    },
+    {
+     "text": " trailer",
+     "p": 0.005,
+     "start": 53,
+     "end": 61
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025065288",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9985519051551819,
+   "spans": [
+    {
+     "text": " stuck",
+     "p": 0.0,
+     "start": 82,
+     "end": 88
+    },
+    {
+     "text": " ch",
+     "p": 0.0,
+     "start": 28,
+     "end": 31
+    },
+    {
+     "text": " fingert",
+     "p": 0.0,
+     "start": 108,
+     "end": 116
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.998153030872345,
+   "spans": [
+    {
+     "text": "ute",
+     "p": 0.001,
+     "start": 31,
+     "end": 34
+    },
+    {
+     "text": " ch",
+     "p": 0.001,
+     "start": 28,
+     "end": 31
+    },
+    {
+     "text": "ip",
+     "p": 0.0,
+     "start": 116,
+     "end": 118
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2025087825",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.008332854136824608,
+   "spans": [
+    {
+     "text": " fell",
+     "p": 0.006,
+     "start": 92,
+     "end": 97
+    },
+    {
+     "text": "pped",
+     "p": 0.004,
+     "start": 47,
+     "end": 51
+    },
+    {
+     "text": " broken",
+     "p": 0.003,
+     "start": 113,
+     "end": 120
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.0073264120146632195,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.169,
+     "start": 166,
+     "end": 167
+    },
+    {
+     "text": " leaving",
+     "p": 0.012,
+     "start": 15,
+     "end": 23
+    },
+    {
+     "text": " tri",
+     "p": 0.008,
+     "start": 43,
+     "end": 47
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024076810",
+  "sif_label": 1,
+  "masked-v1": {
+   "p_cal": 0.9985621571540833,
+   "spans": [
+    {
+     "text": " under",
+     "p": 0.011,
+     "start": 52,
+     "end": 58
+    },
+    {
+     "text": " reached",
+     "p": 0.0,
+     "start": 44,
+     "end": 52
+    },
+    {
+     "text": " into",
+     "p": 0.0,
+     "start": 134,
+     "end": 139
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.9988665580749512,
+   "spans": [
+    {
+     "text": " finger",
+     "p": 0.0,
+     "start": 127,
+     "end": 134
+    },
+    {
+     "text": " under",
+     "p": 0.0,
+     "start": 52,
+     "end": 58
+    },
+    {
+     "text": " into",
+     "p": 0.0,
+     "start": 134,
+     "end": 139
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ },
+ {
+  "id": "osha-2024010634",
+  "sif_label": 0,
+  "masked-v1": {
+   "p_cal": 0.9589036703109741,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.18,
+     "start": 39,
+     "end": 40
+    },
+    {
+     "text": " pit",
+     "p": 0.008,
+     "start": 174,
+     "end": 178
+    },
+    {
+     "text": " into",
+     "p": 0.008,
+     "start": 165,
+     "end": 170
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  },
+  "masked-v2": {
+   "p_cal": 0.851172685623169,
+   "spans": [
+    {
+     "text": ".",
+     "p": 0.336,
+     "start": 39,
+     "end": 40
+    },
+    {
+     "text": " descended",
+     "p": 0.002,
+     "start": 155,
+     "end": 165
+    },
+    {
+     "text": " into",
+     "p": 0.002,
+     "start": 165,
+     "end": 170
+    }
+   ],
+   "fallback": true,
+   "n_windows": 1
+  }
+ }
+]

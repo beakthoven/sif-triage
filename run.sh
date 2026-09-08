@@ -83,7 +83,8 @@ fi
 
 # --- model artifact: hard requirement unless --allow-mock ------------------
 # Resolution order mirrors app/classifier.py: explicit env, then int8/fp32
-# under artifacts/models/*, then the app/artifacts default.
+# under artifacts/models/*, then the app/artifacts default. masked-v2 is the
+# ship model (runs/run2/day2/ship_decision.md) and wins the glob.
 MODEL_ONNX=""
 if [ -n "${SIF_MODEL_PATH:-}" ]; then
     if [ -f "$SIF_MODEL_PATH" ]; then
@@ -93,7 +94,8 @@ if [ -n "${SIF_MODEL_PATH:-}" ]; then
     fi
     [ -n "$MODEL_ONNX" ] || die "SIF_MODEL_PATH=$SIF_MODEL_PATH holds no .onnx artifact"
 else
-    for pat in "artifacts/models/*/sif_multitask_int8.onnx" \
+    for pat in "artifacts/models/masked-v2/sif_multitask_int8.onnx" \
+               "artifacts/models/*/sif_multitask_int8.onnx" \
                "artifacts/models/*/model_int8.onnx" \
                "artifacts/models/*/sif_multitask_fp32.onnx" \
                "artifacts/models/*/model_fp32.onnx" \

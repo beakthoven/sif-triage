@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { BandBadge } from "@/components/band-badge";
 import { GrayStateCard, SentinelGateLegend } from "@/components/gray-state-card";
 import { PasteClassify } from "@/components/paste-classify";
@@ -35,20 +35,29 @@ export function FeedView({
   const [pasteText, setPasteText] = useState("");
   const [classifying, setClassifying] = useState(false);
   const [offlineNote, setOfflineNote] = useState(false);
+  // busyRef closes the same-task race the state flag can't (5 fast clicks
+  // dispatch before a re-render flips `classifying`) — review SEV2-3.
+  const busyRef = useRef(false);
+  // Optimistic-row ids come from a counter, never re-derived from the queue —
+  // raced rows must never share one id (duplicate keys, shared selection).
+  const nextLocalId = useRef(-1);
   const selected = reports.find((r) => r.id === selectedId) ?? reports[0];
 
   async function submitPaste() {
     const value = pasteText.trim();
-    if (!value || classifying) return;
+    if (!value || busyRef.current) return;
+    busyRef.current = true;
     setClassifying(true);
     setOfflineNote(false);
     try {
       const prediction = await classify(value, { explain: true });
       setOfflineNote(prediction.model_version === "offline");
+      const id = Math.min(nextLocalId.current, 0, ...reports.map((r) => r.id)) - 1;
+      nextLocalId.current = id;
       const report: Report = {
         // Negative ids mark optimistic session rows (same convention as
         // offline overrides) — they never collide with server ids.
-        id: Math.min(0, ...reports.map((r) => r.id)) - 1,
+        id,
         text: value,
         site: "(live paste)",
         activity: "ad-hoc classify",
@@ -59,6 +68,7 @@ export function FeedView({
       onClassified(report);
       setSelectedId(report.id);
     } finally {
+      busyRef.current = false;
       setClassifying(false);
     }
   }

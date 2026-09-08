@@ -1,0 +1,29 @@
+{
+  "run": "masked-v2 retrain on corpus v4 (71,065 rows = v3 + 500 first-aid negatives)",
+  "date": "2026-09-08",
+  "target_artifact_dir": "artifacts/models/masked-v2/",
+  "stages": {
+    "1_stage": {
+      "status": "done",
+      "train_v4_catbox_upload": "done: https://files.catbox.moe/8e982r.jsonl (range-probe 206)",
+      "reused_day1_urls_live": {
+        "val.jsonl": "https://files.catbox.moe/huo0bw.jsonl (206 OK)",
+        "test.jsonl": "https://files.catbox.moe/fwsohf.jsonl (206 OK)",
+        "train.py": "https://files.catbox.moe/71ci5r.py (206 OK, sha 62fa606b = repo, all 5 bugfixes)",
+        "model.py": "https://files.catbox.moe/0auh5g.py (206 OK, sha 6027f410 = repo)",
+        "label_spec.yaml": "https://files.catbox.moe/y8df0c.yaml (206 OK, sha 96114b09 = repo)"
+      }
+    },
+    "2_kernel_launch": {"status": "done", "kernel_slug": "beakthoven/sif26165-train-masked-v4", "kernel_id": 133553919, "version": 1},
+    "3_epoch_metrics_insurance": {"status": "done", "ep1": true, "ep2": true, "ep3": true, "note": "mid-session output listing stayed empty (files only appear after session end); insurance copies in insurance/ taken post-completion"},
+    "4_export_gate": {"status": "done", "fp32": "GREEN (sif 3.46e-05, rules 2.97e-05, span 9.73e-05 all <=1e-4)", "int8": "RED (agreement 0.99296, AUC drop 0.1305 > 0.005, recall drop 0.0)", "note": "session status ERROR = train.py exit 2 on gate fail; artifacts complete"},
+    "5_retrieval": {"status": "done", "files_verified": 12, "files_total": 12, "note": "12/12 non-ckpt manifest files sha256-verified into artifacts/models/masked-v2/ + tokenizer (3, byte-identical to day-1) + manifest.json; ckpt-ep{1,2,3}.pt deferred to kernel bundle"},
+    "6_report": {"status": "done", "path": "runs/run2/day2/retrain_report.md"}
+  },
+  "quota": {"before_s": 15727.347, "after_s": 19714.323, "consumed_s": 3986.976, "consumed_gpu_h": 1.107, "remaining_h": 24.52},
+  "notes": [
+    "repo training/train.py sha 62fa606b ALREADY has all 5 day-1 bugfixes (sif_label schema etc.) - no local patch needed",
+    "v4 train sha256: 62aac55c2962e7a13f0a937fc8d34c418a3d476449b629811b831580071094d4 (71,065 rows)",
+    "resume rule: never re-run a completed stage; read this file + STAGING.md on resume"
+  ]
+}

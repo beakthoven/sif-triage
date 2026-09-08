@@ -1,0 +1,72 @@
+{
+ "model": "masked-v2",
+ "frozen_val_threshold": 6.853989393593857e-05,
+ "temperature": 1.6484147310256958,
+ "batch32_same_composition": {
+  "max_abs_dlogit_200": 6.6831,
+  "max_abs_dlogit_2000": 10.6152,
+  "rows_200_seed123": {
+   "n": 200,
+   "agreement": 0.99,
+   "n_flips": 2,
+   "auc_fp32": 0.91165,
+   "auc_int8": 0.917279,
+   "auc_drop": -0.00563,
+   "recall_at_op_fp32": 1.0,
+   "recall_at_op_int8": 1.0,
+   "recall_at_op_drop": 0.0,
+   "pass_d13": false
+  },
+  "rows_2000_seed42": {
+   "n": 2000,
+   "agreement": 0.9925,
+   "n_flips": 15,
+   "auc_fp32": 0.865764,
+   "auc_int8": 0.849263,
+   "auc_drop": 0.016502,
+   "recall_at_op_fp32": 1.0,
+   "recall_at_op_int8": 1.0,
+   "recall_at_op_drop": 0.0,
+   "pass_d13": false
+  },
+  "seconds": {
+   "int8": 62.2,
+   "fp32": 109.3
+  }
+ },
+ "single_text_ship_path": {
+  "n": 2000,
+  "agreement": 0.9925,
+  "n_flips": 15,
+  "auc_fp32": 0.865764,
+  "auc_int8": 0.8623,
+  "auc_drop": 0.003464,
+  "recall_at_op_fp32": 1.0,
+  "recall_at_op_int8": 1.0,
+  "recall_at_op_drop": 0.0,
+  "pass_d13": false,
+  "max_abs_dlogit": 8.5082,
+  "mean_abs_dlogit": 0.9974,
+  "seconds": {
+   "int8": 26.3,
+   "fp32": 51.3
+  }
+ },
+ "val_control": {
+  "int8_full_val": {
+   "n": 6820,
+   "auc": 0.993411,
+   "delta_vs_torch_0.9969": 0.003487,
+   "seconds": 167.3
+  },
+  "fp32_subset_seed5": {
+   "n": 1000,
+   "auc_fp32": 0.997408,
+   "auc_int8_same_rows": 0.993233,
+   "auc_drop": 0.004175,
+   "seconds": 44.2
+  },
+  "torch_val_auc_reference": 0.9968976523973326,
+  "note": "D13 int8 AUC-drop gate is decision-relevant on the fp32-vs-int8 drop; torch-vs-local-fp32 delta measures export fidelity."
+ }
+}

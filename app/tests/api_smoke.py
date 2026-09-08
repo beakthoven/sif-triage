@@ -130,6 +130,13 @@ def main() -> int:
         check(ing.received == 5 and ing.accepted == 5 and ing.rejected == 0, "5/5 rows accepted")
         check(len(ing.report_ids) == 5, "5 report ids returned")
 
+        print("[4b] identical re-POST replays instead of double-ingesting")
+        status, replay_raw = req("POST", "/ingest", {"csv": CSV_5_ROWS, "source": "smoke"})
+        replay = IngestResult(**replay_raw)
+        check(replay.idempotent_replay and replay.accepted == 5
+              and replay.report_ids == ing.report_ids,
+              "idempotent replay returns the original result")
+
         print("[5] stored views")
         _, reports_raw = req("GET", "/reports?limit=10")
         reports = [StoredReport(**r) for r in reports_raw]
@@ -163,10 +170,11 @@ def main() -> int:
         print("[7] review override round-trip (-> future gold)")
         rid = ing.report_ids[0]
         stored_before = StoredReport(**req("GET", f"/reports/{rid}")[1])
-        old = "1" if stored_before.prediction.sif_score >= 0.5 else "0"
+        old = "sif_potential" if stored_before.prediction.sif_score >= 0.5 else "not_sif_potential"
         status, ov_raw = req("POST", "/review", {
             "report_id": rid, "field": "sif_label",
-            "old_value": old, "new_value": "0" if old == "1" else "1",
+            "old_value": old,
+            "new_value": "not_sif_potential" if old == "sif_potential" else "sif_potential",
             "labeler": "smoke_test", "rationale": "round-trip check",
         })
         check(status == 201, "override stored (201)")
@@ -175,8 +183,16 @@ def main() -> int:
         queue = [StoredOverride(**o) for o in queue_raw]
         check(len(queue) == 1 and queue[0].id == ov.id and queue[0].source == "override",
               "override readable via GET /review")
-        status, _ = req("POST", "/review", {"report_id": 99999, "field": "sif_label", "new_value": "0"})
+        status, _ = req("POST", "/review", {"report_id": 99999, "field": "sif_label",
+                                            "new_value": "not_sif_potential"})
         check(status == 404, "override on missing report -> 404")
+        status, _ = req("POST", "/review", {"report_id": rid, "field": "garbage_field",
+                                            "new_value": "x"})
+        check(status == 422, "garbage override field rejected (422)")
+        with urllib.request.urlopen(BASE + "/review/export", timeout=10) as resp:
+            export_lines = resp.read().decode().strip().splitlines()
+        check(len(export_lines) == 1 and json.loads(export_lines[0])["value"] == ov.new_value,
+              "export emits latest-wins JSONL")
 
         print("\nSMOKE PASS")
         return 0

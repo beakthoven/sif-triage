@@ -22,6 +22,7 @@ sha256(text + model_version) so the demo never depends on a live LLM call.
 from __future__ import annotations
 
 import hashlib
+import http.client
 import json
 import logging
 import os
@@ -164,17 +165,24 @@ _META_RE = re.compile(
 
 def _validate(content: str, text: str, score_str: str) -> RewordOut:
     out = RewordOut(**json.loads(content))
-    if score_str not in out.explanation:
+    # Post-review SEV2: a bare substring check let mutated scores through
+    # ("10.83" and "0.833" both contain "0.83"; a rule prob formatting to the
+    # same 2-decimal string masked a missing triage score). Digit-boundary
+    # anchored: preceded by no digit/dot, followed by no digit — a trailing
+    # sentence period after the score stays legal, "10.83"/"0.833" do not.
+    if not re.search(rf"(?<![\d.]){re.escape(score_str)}(?!\d)", out.explanation):
         raise SpanValidationError(f"triage score {score_str} missing from the rewording")
     if _META_RE.search(out.explanation[:300]):
         raise SpanValidationError("reasoning/meta language in the explanation field")
     bad = [s for s in out.spans_quoted if not s or s not in text]
     if bad:
         raise SpanValidationError(f"spans not verbatim substrings of the report: {bad!r}")
-    # Anything the paragraph puts in double quotes must be a verbatim report
-    # substring too — observed live: an in-prose quoted date got mutated
-    # ("22.05.2:2025") while spans_quoted stayed clean.
-    bad_quotes = [q for q in re.findall(r'"([^"]+)"', out.explanation) if q not in text]
+    # Anything the paragraph puts in double quotes (straight or curly) must
+    # be a verbatim report substring too — observed live: an in-prose quoted
+    # date got mutated ("22.05.2:2025") while spans_quoted stayed clean.
+    quoted = re.findall(r'"([^"]+)"', out.explanation)
+    quoted += re.findall(r"“([^”]+)”", out.explanation)
+    bad_quotes = [q for q in quoted if q not in text]
     if bad_quotes:
         raise SpanValidationError(f"quoted phrases not verbatim in the report: {bad_quotes!r}")
     return out
@@ -217,7 +225,12 @@ def ollama_reword(
             content = resp["message"]["content"]
             return _validate(content, text, score_str)
         except (ValidationError, SpanValidationError, json.JSONDecodeError,
-                KeyError, TypeError, OSError) as exc:
+                KeyError, TypeError, OSError, ValueError,
+                http.client.HTTPException) as exc:
+            # Post-review SEV1: ValueError (e.g. SIF_EXPLAIN_TIMEOUT=-1 ->
+            # urlopen "Timeout value out of range") and HTTPException (a
+            # non-HTTP port squatter -> BadStatusLine) escaped this tuple and
+            # 500'd ?explain=1 instead of falling back to the template.
             err = f"{type(exc).__name__}: {exc}"
             log.info("reword attempt %d failed (%s)", attempt + 1, err)
             messages = messages + [

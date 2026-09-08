@@ -14,6 +14,10 @@ import type { ExplanationOut, Report } from "@/lib/types";
  * per D14 / UX SEV1-1. Equal-weight Confirm / Not-SIF override buttons;
  * footer: "model proposes, HSE disposes".
  *
+ * D22: the top-3 in-scope rule probabilities render as bars — never a
+ * single asserted rule. The header chip says "Flagged for HSE review" on
+ * HIGH/MODERATE and "no action needed" on LOW (review SEV2-4/SEV2-5).
+ *
  * Badge gates annotate here instead of routing to the gray queue:
  * near_dup -> amber-striped "memory, not generalization" banner;
  * chunked / long_input -> CHUNKED badge. The explanation expander fetches
@@ -33,8 +37,6 @@ export function TriageCard({
   const p = report.prediction;
   const inScope = p.rules.filter((r) => r.in_scope);
   const oos = p.rules.filter((r) => !r.in_scope);
-  const top = inScope[0];
-  const second = inScope[1];
   const nearDup = p.gate_states.find((g) => g.name === "near_dup" && g.triggered);
   const longInput = p.gate_states.find((g) => g.name === "long_input" && g.triggered);
   const chunked = p.chunked || longInput !== undefined;
@@ -45,7 +47,7 @@ export function TriageCard({
       <div className="hazard-stripe flex items-center justify-between gap-3 px-4 py-2.5">
         <BandBadge band={p.band} className="shadow-sm" />
         <span className="rounded-sm bg-background/90 px-2 py-1 font-mono text-sm font-medium text-primary">
-          {t(lang, "flaggedFor")}
+          {p.band === "LOW" ? t(lang, "noAction") : t(lang, "flaggedFor")}
         </span>
       </div>
 
@@ -87,20 +89,30 @@ export function TriageCard({
           </span>
         </div>
 
-        {top && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="inline-flex items-center gap-1.5 font-medium text-foreground">
+        {inScope.length > 0 && (
+          <div className="space-y-1.5" aria-label={t(lang, "ruleProbs")}>
+            <p className="flex items-center gap-1.5 font-mono text-xs tracking-wide text-muted-foreground uppercase">
               <Zap className="size-4 text-primary" aria-hidden />
-              Rule: {top.name}{" "}
-              <span className="font-mono text-primary">{top.prob.toFixed(2)}</span>
-            </span>
-            {second && (
-              <span className="text-sm text-muted-foreground">
-                (2nd: {second.name} {second.prob.toFixed(2)})
-              </span>
-            )}
+              {t(lang, "ruleProbs")}
+            </p>
+            {inScope.slice(0, 3).map((r) => (
+              <div key={r.code} className="flex items-center gap-3">
+                <span className="w-40 shrink-0 truncate text-sm font-medium text-foreground">
+                  {r.name}
+                </span>
+                <span className="h-2 min-w-24 flex-1 overflow-hidden rounded-full bg-muted">
+                  <span
+                    className="block h-full rounded-full bg-primary"
+                    style={{ width: `${Math.min(100, Math.max(0, r.prob * 100))}%` }}
+                  />
+                </span>
+                <span className="w-9 shrink-0 text-right font-mono text-sm text-primary">
+                  {r.prob.toFixed(2)}
+                </span>
+              </div>
+            ))}
             {p.well_control && (
-              <span className="rounded-sm border border-primary/60 bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
+              <span className="inline-block rounded-sm border border-primary/60 bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
                 WELL-CONTROL / BARRIER TAG
               </span>
             )}

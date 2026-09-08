@@ -114,3 +114,14 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **Latency (ship config, this machine)**: p50 11.9 / p95 19.7 / p99 40.2 ms single-text; bulk ingest 33.73 reports/s (SLA ≥30/s PASS; 5,050 rows in 149.7s under load).
 - **Ablation read**: masked ≈ unmasked on val (ΔAUC +0.0001); masking neither helps nor hurts at saturation — final word on the gold set.
 - **Demo cards**: 13 cards verified vs real model; 3 behavioral deviations (first-aid FP → D21 retrain; long-report negation gate → fixed suite expectation; codes-only stale mock annotation). Kathalguri beat: 96/96 flagged, #1 confirmed. Rule-attribution drift on 7 cards → narrate probability bar (D22).
+
+## 11. Post-review + ship facts (added 2026-09-08 ~23:15 IST)
+
+- **SEV1 rule-logit order scramble** (found by review swarm): ONNX rule_logits in train.py order, app zipped alphabetical — 6/7 rules mislabeled. Fixed + self-check against train.py. D22 "rule drift" was THIS bug — ruling re-opened and resolved; contrast-red now LoF-dominant as scripted.
+- **Positional dead zone**: CLS pooling discounts mid-window tokens; stride 96→64 cut decisive-safe valleys 12→2; residual = gray-band routing (honest). 10k-char input cap added (200k chars: 15.9s → 0.63-1.22s).
+- **Span head is effectively dead at runtime** (max token prob ~0.3, fires on punctuation; val token-F1 0.995 does not reproduce) → the D2 keyword-attribution fallback is the de-facto live path; spans now meaningful phrases ('welding', 'sparks', 'LOTO'). The span-F1 gold metric must be measured against THIS reality (token-F1 vs adjudicated spans may be low — headline extraction metric becomes substring-validity + keyword-anchor precision).
+- **SQLite concurrency**: single shared connection corrupted under any concurrent read; RLock everywhere → 0 failures in all probe modes; throughput cost none (8-thread useful throughput +87%).
+- **int8 batch shift + tuned-op parity**: int8 vs fp32 decision agreement at the tuned op: 97.7-98.3% (fails 99.5% leg) — acceptable because op is tuned on the int8 single-text chain itself; fp32 fallback documented as NOT decision-equivalent.
+- **Ship: masked-v2 int8.** Op-point raw 0.746401/cal 0.658108 → P 0.80003 / R 0.9748 / F1 0.8788 (full derived test, single-text). First-aid FP fixed (card 0.153; 0/20 unseen paraphrases flagged). McNemar: v2 ≈ v1 (p 0.51); both >> regex, > zeroshot (p 0.0018); tfidf vs ft-v2 n.s. (0.122) — disclosed.
+- Gold pipeline ready: score cache fingerprint-keyed (auto-rescores on model swap); 500 items pre-scored with v2.
+- Demo DB re-seeded with scrubbed CSV (5,048 rows); tarball rebuilt with v2.

@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .classifier import MAX_INPUT_CHARS
 from .config import Settings
 from .schemas import GateState
 
@@ -68,13 +69,18 @@ _OUTCOME_STEMS = (
 _SEVER_TOKENS = {"sever", "severe", "severely", "severed", "severs", "severing"}
 
 # --- Drill/simulation filter --------------------------------------------------
-# Drills are not precursors (demo red-team SEV2-1). Phrase cues only: bare
-# "drill" collides with "drill pipe" in the OIL register.
+# Drills are not precursors (demo red-team SEV2-1). Post-review SEV2-3: the
+# cues must read drill/exercise as an EVENT noun, not OIL-register usage —
+# "the drill was completed" = the well finished drilling, "exercise caution"
+# = boilerplate, "planned test of the BOP" = well-control maintenance; all
+# three must stay clean. Bare "drill" still excluded ("drill pipe").
 _DRILL_RE = re.compile(
     r"\b(mock drill|fire drill|evacuation drill|emergency drill|safety drill"
-    r"|drill(?:\s+was)?\s+(?:conducted|completed|carried out|performed)"
-    r"|tabletop|simulated|simulation|rescue practice|planned test"
-    r"|mock exercise|training exercise|training scenario|exercise)\b",
+    r"|training drill|well[- ]control drill|bop drill|trip drill"
+    r"|tabletop|simulated|simulation|rescue practice"
+    r"|mock exercise|training exercise|emergency exercise|evacuation exercise"
+    r"|training scenario"
+    r"|(?:planned|scheduled)\s+(?:drill|exercise|simulation))\b",
     re.IGNORECASE,
 )
 
@@ -250,17 +256,22 @@ def gate_near_dup(text: str, storage: "Storage", cfg: Settings,
 
 def gate_long_input(text: str, cfg: Settings) -> GateState:
     """Long-input info badge: >120 words -> 'chunked' (sliding-window max-pool
-    applies, score is length-OOD). Informational badge, never gray."""
+    applies, score is length-OOD). Informational badge, never gray. Inputs
+    over the hard char cap are scored on their truncated prefix by the
+    classifier (post-review SEV2-6) — the badge discloses the cap instead of
+    hanging 15.9s on a 200k-char paste."""
     n = len(text.split())
+    parts: list[str] = []
+    if len(text) > MAX_INPUT_CHARS:
+        parts.append(f"too long: input capped at first {MAX_INPUT_CHARS} "
+                     f"chars ({len(text)} total)")
     if n > cfg.long_input_words:
-        return GateState(
-            name="long_input",
-            triggered=True,
-            action="badge",
-            detail=f"chunked: {n} words > {cfg.long_input_words}; "
-            "sliding-window max-pool applies (length-OOD)",
-        )
-    return GateState(name="long_input", triggered=False, action="badge")
+        parts.append(f"chunked: {n} words > {cfg.long_input_words}; "
+                     "sliding-window max-pool applies (length-OOD)")
+    if not parts:
+        return GateState(name="long_input", triggered=False, action="badge")
+    return GateState(name="long_input", triggered=True, action="badge",
+                     detail="; ".join(parts))
 
 
 def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,

@@ -1,0 +1,488 @@
+{
+ "masked-v1": {
+  "op_raw": 0.821855,
+  "op_cal": 0.712581,
+  "temperature": 1.683972954750061,
+  "rows": [
+   {
+    "card": "contrast-red",
+    "p_cal": 0.9553,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.4409,
+    "rules_fired": [],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "DEVIATION",
+    "problems": [
+     "wc True != False"
+    ]
+   },
+   {
+    "card": "contrast-green",
+    "p_cal": 0.0139,
+    "flag": false,
+    "band": "LOW",
+    "top_rule": "confined_space",
+    "top_rule_p": 0.0022,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "gray-negation",
+    "p_cal": 0.8334,
+    "flag": true,
+    "band": "GRAY",
+    "top_rule": "working_at_height",
+    "top_rule_p": 0.6705,
+    "rules_fired": [
+     "working_at_height"
+    ],
+    "wc": false,
+    "chunked": false,
+    "gates": {
+     "negation": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "negated outcome language (cue~outcome within 5 tokens): 'no'~'injury'"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "gray-drill",
+    "p_cal": 0.0093,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.0029,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {
+     "drill": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "drill badge: mock drill"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-1",
+    "p_cal": 0.9048,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "confined_space",
+    "top_rule_p": 0.6851,
+    "rules_fired": [
+     "confined_space"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-2",
+    "p_cal": 0.9911,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.9437,
+    "rules_fired": [
+     "energy_isolation"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-3",
+    "p_cal": 0.9574,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "hot_work",
+    "top_rule_p": 0.9945,
+    "rules_fired": [
+     "hot_work"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "hinglish",
+    "p_cal": 0.0736,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "confined_space",
+    "top_rule_p": 0.0292,
+    "rules_fired": [],
+    "wc": true,
+    "chunked": true,
+    "gates": {
+     "language": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "language badge [devanagari]: non_ascii_ratio=0.16 (> 0.15)"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "verbatim-osha",
+    "p_cal": 0.992,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.8367,
+    "rules_fired": [
+     "line_of_fire"
+    ],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "long-report",
+    "p_cal": 0.6475,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.2517,
+    "rules_fired": [],
+    "wc": true,
+    "chunked": true,
+    "gates": {
+     "negation": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "negated outcome language (cue~outcome within 5 tokens): 'no'~'damage'"
+     },
+     "long_input": {
+      "triggered": true,
+      "action": "badge",
+      "detail": "chunked: 380 words > 120; sliding-window max-pool applies (length-OOD)"
+     }
+    },
+    "verdict": "DEVIATION",
+    "problems": [
+     "band GRAY != HIGH",
+     "flag False != True",
+     "top rule energy_isolation != expected line_of_fire",
+     "wc True != False"
+    ]
+   },
+   {
+    "card": "mega-report",
+    "p_cal": 0.9862,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "hot_work",
+    "top_rule_p": 0.8392,
+    "rules_fired": [
+     "hot_work"
+    ],
+    "wc": true,
+    "chunked": true,
+    "gates": {},
+    "verdict": "DEVIATION",
+    "problems": [
+     "only 1/7 rules fired ['confined_space', 'driving', 'energy_isolation', 'line_of_fire', 'safe_mechanical_lifting', 'working_at_height']"
+    ]
+   },
+   {
+    "card": "codes-only",
+    "p_cal": 0.115,
+    "flag": false,
+    "band": "LOW",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.0086,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "first-aid-green",
+    "p_cal": 0.9638,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.2879,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "DEVIATION",
+    "problems": [
+     "band HIGH != LOW",
+     "flag True != False"
+    ]
+   }
+  ]
+ },
+ "masked-v2": {
+  "op_raw": 0.7464005622345774,
+  "op_cal": 0.6581082996119922,
+  "temperature": 1.6484147310256958,
+  "rows": [
+   {
+    "card": "contrast-red",
+    "p_cal": 0.9338,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.8528,
+    "rules_fired": [
+     "line_of_fire"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "DEVIATION",
+    "problems": [
+     "wc True != False"
+    ]
+   },
+   {
+    "card": "contrast-green",
+    "p_cal": 0.0121,
+    "flag": false,
+    "band": "LOW",
+    "top_rule": "working_at_height",
+    "top_rule_p": 0.012,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "gray-negation",
+    "p_cal": 0.9296,
+    "flag": true,
+    "band": "GRAY",
+    "top_rule": "working_at_height",
+    "top_rule_p": 0.5546,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {
+     "negation": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "negated outcome language (cue~outcome within 5 tokens): 'no'~'injury'"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "gray-drill",
+    "p_cal": 0.0128,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.003,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {
+     "drill": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "drill badge: mock drill"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-1",
+    "p_cal": 0.8964,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "confined_space",
+    "top_rule_p": 0.9434,
+    "rules_fired": [
+     "confined_space"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-2",
+    "p_cal": 0.9949,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.9968,
+    "rules_fired": [
+     "energy_isolation"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "wc-baghjan-3",
+    "p_cal": 0.9845,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "hot_work",
+    "top_rule_p": 0.9763,
+    "rules_fired": [
+     "hot_work"
+    ],
+    "wc": true,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "hinglish",
+    "p_cal": 0.019,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "working_at_height",
+    "top_rule_p": 0.008,
+    "rules_fired": [],
+    "wc": true,
+    "chunked": true,
+    "gates": {
+     "language": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "language badge [devanagari]: non_ascii_ratio=0.16 (> 0.15)"
+     }
+    },
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "verbatim-osha",
+    "p_cal": 0.9964,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.8895,
+    "rules_fired": [
+     "line_of_fire"
+    ],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "long-report",
+    "p_cal": 0.4731,
+    "flag": false,
+    "band": "GRAY",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.185,
+    "rules_fired": [],
+    "wc": true,
+    "chunked": true,
+    "gates": {
+     "negation": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "negated outcome language (cue~outcome within 5 tokens): 'no'~'damage'"
+     },
+     "confidence": {
+      "triggered": true,
+      "action": "gray",
+      "detail": "score 0.473 in gray band [0.4, 0.6]"
+     },
+     "long_input": {
+      "triggered": true,
+      "action": "badge",
+      "detail": "chunked: 380 words > 120; sliding-window max-pool applies (length-OOD)"
+     }
+    },
+    "verdict": "DEVIATION",
+    "problems": [
+     "band GRAY != HIGH",
+     "flag False != True",
+     "top rule energy_isolation != expected line_of_fire",
+     "wc True != False"
+    ]
+   },
+   {
+    "card": "mega-report",
+    "p_cal": 0.9752,
+    "flag": true,
+    "band": "HIGH",
+    "top_rule": "energy_isolation",
+    "top_rule_p": 0.9484,
+    "rules_fired": [
+     "energy_isolation"
+    ],
+    "wc": true,
+    "chunked": true,
+    "gates": {},
+    "verdict": "DEVIATION",
+    "problems": [
+     "only 1/7 rules fired ['confined_space', 'driving', 'hot_work', 'line_of_fire', 'safe_mechanical_lifting', 'working_at_height']"
+    ]
+   },
+   {
+    "card": "codes-only",
+    "p_cal": 0.0677,
+    "flag": false,
+    "band": "LOW",
+    "top_rule": "working_at_height",
+    "top_rule_p": 0.0136,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   },
+   {
+    "card": "first-aid-green",
+    "p_cal": 0.2616,
+    "flag": false,
+    "band": "LOW",
+    "top_rule": "line_of_fire",
+    "top_rule_p": 0.1096,
+    "rules_fired": [],
+    "wc": false,
+    "chunked": false,
+    "gates": {},
+    "verdict": "PASS",
+    "problems": []
+   }
+  ]
+ }
+}

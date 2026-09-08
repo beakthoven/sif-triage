@@ -1,0 +1,12 @@
+{
+ "files": {
+  "export_gate.json": {
+   "sha256": "8ed5c388a6d9f4684eed4ec142b39529f8c1e97ccb3faf57b6f0c88b70945a4c",
+   "bytes": 637
+  },
+  "sif_multitask_fp32.onnx.data": {
+   "sha256": "290e3e3bcb54587bb4668b6a626748a97e835ffa6a21823856de7a6724cc0f9e",
+   "bytes": 596084736
+  }
+ }
+}

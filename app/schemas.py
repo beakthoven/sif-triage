@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 # IOGP Life-Saving Rules. 7 learnable (model heads); Work Authorisation (PTW)
 # and Bypassing Safety Controls are DECLARED OUT OF SCOPE (<0.1% detectable in
@@ -25,6 +25,9 @@ OUT_OF_SCOPE_RULES: tuple[str, ...] = (
 )
 
 RULE_DISPLAY: dict[str, dict[str, Any]] = {
+    # threshold = a-priori 0.5 fallback; RealOnnxClassifier overwrites the
+    # in-scope entries at load with the artifact's per-rule F1-tuned
+    # thresholds from metrics.json (post-review SEV2-5).
     "confined_space": {"display": "Confined Space", "in_scope": True, "threshold": 0.5},
     "driving": {"display": "Driving", "in_scope": True, "threshold": 0.5},
     "energy_isolation": {"display": "Energy Isolation", "in_scope": True, "threshold": 0.5},
@@ -114,6 +117,12 @@ class IngestResult(BaseModel):
     rejected: int
     report_ids: list[int]
     errors: list[IngestError]
+    # Rows dropped as exact duplicates (whitespace-normalized text hash) —
+    # within the batch itself or already stored by an earlier request (SEV2-2).
+    skipped_duplicates: int = 0
+    # True when this payload was ingested before, byte-identical, and the
+    # stored result is being replayed (nothing was re-classified or re-stored).
+    idempotent_replay: bool = False
 
 
 class IngestRequest(BaseModel):
@@ -127,12 +136,45 @@ class IngestRequest(BaseModel):
 
 class OverrideIn(BaseModel):
     report_id: int
-    field: str  # "sif_label", a rule key, or "well_control"
+    field: str  # 'sif_label', 'rules', or 'notes' (enforced on writes — see OverrideWrite)
     old_value: str | None = None
     new_value: str
     labeler: str = "hse_reviewer"
     rationale: str | None = None
     source: Literal["override", "blind_gold"] = "override"
+
+
+# Future-gold vocabulary (SEV2-3): the write endpoint validates against these
+# instead of accepting free text. sif_label values match the dashboard's
+# confirm / not-SIF decisions; rules values are comma-separated rule keys.
+OVERRIDE_FIELDS: tuple[str, ...] = ("sif_label", "rules", "notes")
+SIF_LABEL_VALUES: tuple[str, ...] = ("sif_potential", "not_sif_potential")
+
+
+class OverrideWrite(OverrideIn):
+    """Strict write contract for POST /review (SEV2-3): enumerated field +
+    per-field value vocabulary. Reads stay lenient (StoredOverride) so rows
+    written before this contract remain readable."""
+    field: Literal["sif_label", "rules", "notes"]
+
+    @model_validator(mode="after")
+    def _check_value_vocabulary(self) -> "OverrideWrite":
+        if self.field == "sif_label" and self.new_value not in SIF_LABEL_VALUES:
+            raise ValueError(
+                f"sif_label new_value must be one of {SIF_LABEL_VALUES}, got {self.new_value!r}"
+            )
+        if self.field == "rules":
+            keys = [k.strip() for k in self.new_value.split(",") if k.strip()]
+            valid = set(RULE_KEYS) | set(OUT_OF_SCOPE_RULES)
+            unknown = [k for k in keys if k not in valid]
+            if not keys or unknown:
+                raise ValueError(
+                    f"rules new_value must be comma-separated rule keys from {sorted(valid)},"
+                    f" got {self.new_value!r}"
+                )
+        if self.field == "notes" and not self.new_value.strip():
+            raise ValueError("notes new_value must be non-empty")
+        return self
 
 
 class StoredOverride(OverrideIn):

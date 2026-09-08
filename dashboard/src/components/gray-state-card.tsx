@@ -36,7 +36,7 @@ const GATE_META: Record<
     icon: Languages,
     name: "Language gate",
     sentence:
-      "Hindi detected → translated → scored, shown as a pipeline. Original text preserved. Routed to review, never auto-cleared.",
+      "Language beyond current scoring support — the original text is preserved and routed to review, never silently mis-scored. Translation available on request.",
   },
   confidence: {
     icon: Gauge,

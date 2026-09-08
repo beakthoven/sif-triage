@@ -10,9 +10,18 @@ export function HighlightedText({
   text: string;
   spans: EvidenceSpan[];
 }) {
+  // Server spans arrive unsorted (review SEV1-1): sort by start and drop any
+  // span overlapping a kept one, so the walk below never re-emits text.
+  const ordered: EvidenceSpan[] = [];
+  for (const s of [...spans].sort((a, b) => a.start - b.start || a.end - b.end)) {
+    const last = ordered[ordered.length - 1];
+    if (last && s.start < last.end) continue;
+    ordered.push(s);
+  }
+
   const parts: { key: number; node: string; hit: boolean }[] = [];
   let cursor = 0;
-  spans.forEach((s, i) => {
+  ordered.forEach((s, i) => {
     if (s.start > cursor) parts.push({ key: i * 2, node: text.slice(cursor, s.start), hit: false });
     parts.push({ key: i * 2 + 1, node: text.slice(s.start, s.end), hit: true });
     cursor = s.end;

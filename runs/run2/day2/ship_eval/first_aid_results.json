@@ -1,0 +1,749 @@
+{
+ "ops": {
+  "v1_threshold_raw": 0.821855,
+  "v2_threshold_raw": 0.7464005622345774
+ },
+ "scoring": "int8 single-text batch=1 (D27 ship path)",
+ "contamination": "train50 rows are IN masked-v2 training data (train_final_v4.jsonl) \u2014 v2-low there is exposure, not generalization; unseen20 is the honest test",
+ "rows": [
+  {
+   "group": "demo",
+   "text": "While making up flange bolts on the water injection line at GGS-2, a fitter's spanner slipped and he got a sma",
+   "v1_p_raw": 0.9960269528368111,
+   "v1_p_cal": 0.9637530837098717,
+   "v1_flag": true,
+   "v2_p_raw": 0.15311725330436066,
+   "v2_p_cal": 0.26161766076943427,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Discarded clamps piled near the grinding bay at Bordubi station were collected in the scrap bin by Store keepe",
+   "v1_p_raw": 0.00031796195657908207,
+   "v1_p_cal": 0.008307138950017532,
+   "v1_flag": false,
+   "v2_p_raw": 0.0003149416960721092,
+   "v2_p_cal": 0.007456019092443776,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Rigger Keshab was easing a hinge pin with a mallet at GGS-2 Dikom when it slipped off and grazed his index fin",
+   "v1_p_raw": 0.052982430538393625,
+   "v1_p_cal": 0.1528740618716534,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005646903316087723,
+   "v2_p_cal": 0.010593285915814935,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "One brittle zip-tie on the cable tray near Kathalguri GCS was renewed by Fitter Siba in the evening round and ",
+   "v1_p_raw": 0.08959463986906542,
+   "v1_p_cal": 0.20151382323332445,
+   "v1_flag": false,
+   "v2_p_raw": 0.00026049372914938864,
+   "v2_p_cal": 0.0066502461227595806,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Surface rust was found on the walkway kick plate at Well DBN-129 by Field assistant Lohit of M/s Assam Petro W",
+   "v1_p_raw": 0.0005378763961649954,
+   "v1_p_cal": 0.011317859950635122,
+   "v1_flag": false,
+   "v2_p_raw": 0.00029672163250453785,
+   "v2_p_cal": 0.007193110332084115,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Light rust was seen on the handrail of the stair at Naharkatiya tank farm by Store keeper Tapan. The patch was",
+   "v1_p_raw": 0.0011326914426151935,
+   "v1_p_cal": 0.017508664695560942,
+   "v1_flag": false,
+   "v2_p_raw": 0.0007751653242051564,
+   "v2_p_cal": 0.012810797031811217,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The thin drip from the union joint on the dosing skid line at Kathalguri GCS was spotted by Fitter Ajoy of M/s",
+   "v1_p_raw": 0.37083138130868726,
+   "v1_p_cal": 0.42215544219589074,
+   "v1_flag": false,
+   "v2_p_raw": 0.00041862783028900663,
+   "v2_p_cal": 0.008849203667109078,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The splintered edge of a packing crate at Naharkatiya water plant left a splinter in the thumb of Operator San",
+   "v1_p_raw": 0.001656694640254033,
+   "v1_p_cal": 0.021853637876163658,
+   "v1_flag": false,
+   "v2_p_raw": 0.00024097969569699518,
+   "v2_p_cal": 0.006345284982426564,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The skin of his knuckle got nipped between the strap buckle and the frame just once while Driver Biren worked ",
+   "v1_p_raw": 0.0005801102362023761,
+   "v1_p_cal": 0.011831610979241644,
+   "v1_flag": false,
+   "v2_p_raw": 0.00020668696766538451,
+   "v2_p_cal": 0.005784208488749083,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Coming down the small platform ladder at Well DBN-13 around 20:35 hrs on 7 May, Rigger Golap skipped the botto",
+   "v1_p_raw": 0.02356137892216761,
+   "v1_p_cal": 0.09871212942904728,
+   "v1_flag": false,
+   "v2_p_raw": 0.007931954451337674,
+   "v2_p_cal": 0.05071844236088776,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "While shifting a wooden pallet at Balimara telecom shelter in the evening round, Fire watchman Utpal of M/s As",
+   "v1_p_raw": 0.002211250694587897,
+   "v1_p_cal": 0.02584377177304527,
+   "v1_flag": false,
+   "v2_p_raw": 0.0001242823497688508,
+   "v2_p_cal": 0.004254808715017755,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The wrench of Rigger Girin came off a clamp nut at Duliajan fire station during the second half on 27 May and ",
+   "v1_p_raw": 0.005194877834315003,
+   "v1_p_cal": 0.042268656827663086,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005532601507177916,
+   "v2_p_cal": 0.010463978988298364,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A tiny scale flake flew off the apron of Gardener Bhaskar while he was dressing a tack weld at Baghjan EPS aro",
+   "v1_p_raw": 0.8013898123209278,
+   "v1_p_cal": 0.6960165424301938,
+   "v1_flag": false,
+   "v2_p_raw": 0.000724220569576773,
+   "v2_p_cal": 0.01229921781392729,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Letters of the fire point board at Balimara telecom shelter had peeled in the rain; Welder Monoj of M/s Prakas",
+   "v1_p_raw": 0.00046638770923998805,
+   "v1_p_cal": 0.010407970288310385,
+   "v1_flag": false,
+   "v2_p_raw": 0.0002805504691692955,
+   "v2_p_cal": 0.006954282116408274,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The small leak from the sight glass on the pump discharge line at Borholla field station was spotted by Operat",
+   "v1_p_raw": 0.0011994752827125359,
+   "v1_p_cal": 0.018104281869449877,
+   "v1_flag": false,
+   "v2_p_raw": 0.0003479635953547528,
+   "v2_p_cal": 0.00791741943192301,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A dark patch appeared in the drip pan below the lube oil console at Well LKW-159 during the shift round by Sca",
+   "v1_p_raw": 0.0006851749063642019,
+   "v1_p_cal": 0.013045655046291077,
+   "v1_flag": false,
+   "v2_p_raw": 0.0007970302844550628,
+   "v2_p_cal": 0.01302613928483217,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Removing a sling from a toolbox at GCS-8 Naharkatia, the sling hook brushed the glove back of Fitter Tapan. On",
+   "v1_p_raw": 0.01680209493397602,
+   "v1_p_cal": 0.08192372768702805,
+   "v1_flag": false,
+   "v2_p_raw": 0.0037680011712006058,
+   "v2_p_cal": 0.03281466201654391,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Letters of the assembly point board at Well KTK-120 had faded in the sun; Cook helper Tilak repainted them wit",
+   "v1_p_raw": 0.0002780712585412709,
+   "v1_p_cal": 0.007676176858654622,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005411928659326529,
+   "v2_p_cal": 0.010326284424007027,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Electrician Golap was easing a cotter pin with a ball-peen hammer at GGS-2 Dikom when it slipped away and graz",
+   "v1_p_raw": 0.014858901954557005,
+   "v1_p_cal": 0.07651631791230708,
+   "v1_flag": false,
+   "v2_p_raw": 0.00021517825417137376,
+   "v2_p_cal": 0.005926405872017272,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The skin of his thumb web got nipped between the lid hinge and the drum just once while Welder Monoj worked at",
+   "v1_p_raw": 0.000467998286283286,
+   "v1_p_cal": 0.010429086267573351,
+   "v1_flag": false,
+   "v2_p_raw": 0.0004416625845498552,
+   "v2_p_cal": 0.00913892986852374,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Dressing a instrument multicore at Moran GGS-5 after the lunch break on 15 September, Operator Khirod got a th",
+   "v1_p_raw": 0.10879370360408068,
+   "v1_p_cal": 0.22288972249353278,
+   "v1_flag": false,
+   "v2_p_raw": 0.00019726871007096728,
+   "v2_p_cal": 0.0056237247720289695,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The gas-cutting spatter rolled under the glove cuff of Operator Jintu of M/s Nazira Infra at GGS-3 Kathaloni a",
+   "v1_p_raw": 0.0018413249815217166,
+   "v1_p_cal": 0.023238388667905074,
+   "v1_flag": false,
+   "v2_p_raw": 0.0014562828094328666,
+   "v2_p_cal": 0.01867659534389707,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A puff of dust from a bench grinder working nearby drifted into the eye of Fire watchman Kamal at Kathalguri C",
+   "v1_p_raw": 0.0010708837112658389,
+   "v1_p_cal": 0.016943974584092667,
+   "v1_flag": false,
+   "v2_p_raw": 0.0013638474603860807,
+   "v2_p_cal": 0.017960278229407142,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Weeds grown around the plinth at Hapjan EPS was cut by Gardener Golap of M/s Brahmaputra Services late in the ",
+   "v1_p_raw": 0.0007917295661802444,
+   "v1_p_cal": 0.014199192861387535,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005912243974973085,
+   "v2_p_cal": 0.010889435260109475,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Rising after checking a pump base bolt at Kathaloni camp kitchen, Operator Khirod knocked his head on a overhe",
+   "v1_p_raw": 0.0013168449460960764,
+   "v1_p_cal": 0.01911785124810366,
+   "v1_flag": false,
+   "v2_p_raw": 0.00021802991027616687,
+   "v2_p_cal": 0.005973654532021846,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Stepping down from the shed step at GGS-1 Kathaloni around 07:30 hrs with a carton on one shoulder, Operator B",
+   "v1_p_raw": 0.007412529736411437,
+   "v1_p_cal": 0.051755136429232906,
+   "v1_flag": false,
+   "v2_p_raw": 0.00020250773365783462,
+   "v2_p_cal": 0.005713364824460866,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "An oily film appeared in the drip tray below the water injection pump at Well KTN-268 during the shift round b",
+   "v1_p_raw": 0.001029610664166929,
+   "v1_p_cal": 0.01655915956252688,
+   "v1_flag": false,
+   "v2_p_raw": 0.0014967979838664159,
+   "v2_p_cal": 0.018984611545527743,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Carrying a bamboo pole barehanded at Well LKW-43, Operator Ranjit picked up a thin splinter in his finger. The",
+   "v1_p_raw": 0.06200401454103013,
+   "v1_p_cal": 0.16614798808510828,
+   "v1_flag": false,
+   "v2_p_raw": 0.0004462083649407056,
+   "v2_p_cal": 0.009195378356774265,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A slow drip from the union joint on the pump discharge line at Duliajan fire station was picked up by Painter ",
+   "v1_p_raw": 0.0008817615517040451,
+   "v1_p_cal": 0.015123614787973826,
+   "v1_flag": false,
+   "v2_p_raw": 0.0003406035119777455,
+   "v2_p_cal": 0.007816161819922103,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Rust spots were seen on the walkway kick plate at Moran loading gantry by Fitter Bikash late in the afternoon.",
+   "v1_p_raw": 0.001213527224405193,
+   "v1_p_cal": 0.018227791048762633,
+   "v1_flag": false,
+   "v2_p_raw": 0.0002860056155279671,
+   "v2_p_cal": 0.007035450997083305,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Driver Bolin was tapping a seized cotter with a hammer at Duliajan fire station when it slipped away and graze",
+   "v1_p_raw": 0.0011497380217404185,
+   "v1_p_cal": 0.017662084869475642,
+   "v1_flag": false,
+   "v2_p_raw": 0.007225508737773678,
+   "v2_p_cal": 0.048042402601261656,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Stepping off the lease road near Well W-63, Field assistant Siba put his foot in a shallow rat hole and twiste",
+   "v1_p_raw": 0.000866391181563525,
+   "v1_p_cal": 0.014968722848962451,
+   "v1_flag": false,
+   "v2_p_raw": 0.00019173948212438663,
+   "v2_p_cal": 0.00552808044639128,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Fitter Utpal of M/s Jorhat Engineering was driving a seized cotter with a club hammer at Well W-238 in the eve",
+   "v1_p_raw": 0.0366122976152551,
+   "v1_p_cal": 0.12544157205574427,
+   "v1_flag": false,
+   "v2_p_raw": 0.0004449685003702938,
+   "v2_p_cal": 0.009180005116933905,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The small weep from the union joint on the wash-down line at Hapjan EPS was noticed by Helper Siba during the ",
+   "v1_p_raw": 0.0004616153234452899,
+   "v1_p_cal": 0.010345220833468668,
+   "v1_flag": false,
+   "v2_p_raw": 0.00028644141420399675,
+   "v2_p_cal": 0.007041908461498703,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A bit of scale flew off the boot of Welder Padum during cutting work at Naharkatiya tank farm and lodged at th",
+   "v1_p_raw": 0.0070367296435705495,
+   "v1_p_cal": 0.05024896166125707,
+   "v1_flag": false,
+   "v2_p_raw": 0.002431033120250382,
+   "v2_p_cal": 0.02532834184465409,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "While shifting a wooden pallet at Hapjan EPS, Painter Jadav got a splinter in his thumb from a broken slat. Th",
+   "v1_p_raw": 0.012271639697011649,
+   "v1_p_cal": 0.0687653089753993,
+   "v1_flag": false,
+   "v2_p_raw": 0.00013424197072953254,
+   "v2_p_cal": 0.004457629085843435,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The skin of his finger got nipped between the spanner and the guard rail briefly while Electrician Babul worke",
+   "v1_p_raw": 0.0010582659773050644,
+   "v1_p_cal": 0.01682701014437518,
+   "v1_flag": false,
+   "v2_p_raw": 0.0007748137911418957,
+   "v2_p_cal": 0.012807314790736279,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Changing a boring bit just used at Digboi store around 12:00 hrs, Field assistant Ajoy found it burning hot an",
+   "v1_p_raw": 0.008839681290642689,
+   "v1_p_cal": 0.05717990473876372,
+   "v1_flag": false,
+   "v2_p_raw": 0.0009155954607336701,
+   "v2_p_cal": 0.014154277278404891,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "While lowering a canvas bag into the bay at Hapjan gathering station around 12:50 hrs, the guy rope slid throu",
+   "v1_p_raw": 0.14139120820035672,
+   "v1_p_cal": 0.2551849903618264,
+   "v1_flag": false,
+   "v2_p_raw": 0.0004760922827406867,
+   "v2_p_cal": 0.009560846673070353,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Rust spots were seen on the tank stair stringer at GGS-4 Naharkatiya by Contract labour Ajoy in the forenoon. ",
+   "v1_p_raw": 0.00043128066867095355,
+   "v1_p_cal": 0.009939846745336243,
+   "v1_flag": false,
+   "v2_p_raw": 0.00043966392327683863,
+   "v2_p_cal": 0.00911403674148644,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A stray clamp on a grating panel near Kathaloni camp kitchen was noticed by Contract labour Mrinal during the ",
+   "v1_p_raw": 0.0002191737681402607,
+   "v1_p_cal": 0.006670929917483184,
+   "v1_flag": false,
+   "v2_p_raw": 0.00038902786909725034,
+   "v2_p_cal": 0.0084672757007679,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Packaging thermocol left by a stores issue at Well NHK-82 were cleared from the walkway by Operator Pranjal of",
+   "v1_p_raw": 0.00018318762792294595,
+   "v1_p_cal": 0.0060008779349510375,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005908137470112428,
+   "v2_p_cal": 0.010884893525635176,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "A nasty burr along a new flange face at Duliajan pipe yard gave Field assistant Girin a small cut on the left ",
+   "v1_p_raw": 0.0005798142255658892,
+   "v1_p_cal": 0.011828065826147737,
+   "v1_flag": false,
+   "v2_p_raw": 0.0006029558001717384,
+   "v2_p_cal": 0.011018647246568982,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Standing up after checking a pump base bolt at Kathalguri GCS late in the afternoon, Mechanic Keshab of M/s Br",
+   "v1_p_raw": 0.9817589247544808,
+   "v1_p_cal": 0.9142623359850935,
+   "v1_flag": true,
+   "v2_p_raw": 0.0004099870181030566,
+   "v2_p_cal": 0.008738870112429879,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Light rust was spotted on the pipe support saddle at Well M-110 by Store keeper Dimbeswar of M/s Koliapani Con",
+   "v1_p_raw": 0.0008961307894307616,
+   "v1_p_cal": 0.015267388908270842,
+   "v1_flag": false,
+   "v2_p_raw": 0.0007330661952739502,
+   "v2_p_cal": 0.012389071041287465,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The tiny rust speck flew off the overalls of Mechanic Khagen while he was grinding a rough bead at Duliajan pi",
+   "v1_p_raw": 0.002004490032934817,
+   "v1_p_cal": 0.024413062854848625,
+   "v1_flag": false,
+   "v2_p_raw": 0.00015966175170309426,
+   "v2_p_cal": 0.00494975572196693,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The skin of his thumb web got caught between the hoist hook and the drum just once while Painter Mrinal worked",
+   "v1_p_raw": 0.012521403541393644,
+   "v1_p_cal": 0.06954518328794859,
+   "v1_flag": false,
+   "v2_p_raw": 0.005012126918109025,
+   "v2_p_cal": 0.03880337567672187,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Stripping shuttering plank from a delivered consignment at Moran loading gantry in the evening round on 18 Feb",
+   "v1_p_raw": 0.007684421804288295,
+   "v1_p_cal": 0.05282323880074269,
+   "v1_flag": false,
+   "v2_p_raw": 0.00026098893517110204,
+   "v2_p_cal": 0.00665786357581619,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Straightening up after checking a low gauge at GGS Moran around 21:35 hrs, Welder Dhruba bumped his hard hat o",
+   "v1_p_raw": 0.4220576403291559,
+   "v1_p_cal": 0.4534697482216103,
+   "v1_flag": false,
+   "v2_p_raw": 0.00028826930036100735,
+   "v2_p_cal": 0.007068950384185703,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "Part of his knuckle got nipped between the shackle pin and the frame for an instant while Instrument technicia",
+   "v1_p_raw": 0.0075140155176161415,
+   "v1_p_cal": 0.052155873098604026,
+   "v1_flag": false,
+   "v2_p_raw": 0.000624093660490918,
+   "v2_p_cal": 0.011248916993821183,
+   "v2_flag": false
+  },
+  {
+   "group": "train50",
+   "text": "The peeling label on the solvent drum at Naharkatiya GCS was re-marked with paint marker by Instrument technic",
+   "v1_p_raw": 0.0002060164384244862,
+   "v1_p_cal": 0.006431634618805013,
+   "v1_flag": false,
+   "v2_p_raw": 0.00025798624530641194,
+   "v2_p_cal": 0.006611585523327394,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "While dressing panel wiring at GGS-1 Lakwa in the morning shift, Electrician Rupam felt a prick on his index f",
+   "v1_p_raw": 0.8063126420140789,
+   "v1_p_cal": 0.6999251188274401,
+   "v1_flag": false,
+   "v2_p_raw": 0.00043876521906439974,
+   "v2_p_cal": 0.009102828584046669,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "During housekeeping sweeping of the compressor house at EPS Gelakey, dust blew into the left eye of Attendant ",
+   "v1_p_raw": 0.0007398256533656228,
+   "v1_p_cal": 0.013646050499991574,
+   "v1_flag": false,
+   "v2_p_raw": 0.0002970947182284992,
+   "v2_p_cal": 0.007198557787945568,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Near the fence line of Well M-207 Tengakhat during the forenoon inspection, a wasp stung Helper Bitu on the le",
+   "v1_p_raw": 0.0003573002092410231,
+   "v1_p_cal": 0.00889785549908693,
+   "v1_flag": false,
+   "v2_p_raw": 0.0012059968163019364,
+   "v2_p_cal": 0.016688859200516354,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Checking steam traps behind the heater treater at CTF Kathalguri, Operator Niren got a light scald on the wris",
+   "v1_p_raw": 0.43942258540194307,
+   "v1_p_cal": 0.4639123698251071,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005949146838855093,
+   "v2_p_cal": 0.010930192027780356,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "While hooking a chain block at Tinsukia pipe yard, Rigger Palash pinched the skin of his right palm in the hoo",
+   "v1_p_raw": 0.48151980623377744,
+   "v1_p_cal": 0.48902259995845226,
+   "v1_flag": false,
+   "v2_p_raw": 0.00487572534090914,
+   "v2_p_cal": 0.03818082294516643,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "New safety boots gave Fitter Girish a blister on the heel during the morning rounds at Dikom EPS. The first ai",
+   "v1_p_raw": 0.00042875086305137596,
+   "v1_p_cal": 0.00990551045946156,
+   "v1_flag": false,
+   "v2_p_raw": 0.0004795426391313216,
+   "v2_p_cal": 0.009602438008408843,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Climbing the skid stairs at GGS-4 Narayanpur, Technician Madhab bumped his knee against a flange edge. An ice ",
+   "v1_p_raw": 0.013675918842000999,
+   "v1_p_cal": 0.07305864903871165,
+   "v1_flag": false,
+   "v2_p_raw": 0.00046954616102364195,
+   "v2_p_cal": 0.009481601963428536,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Handling an old flange gasket at the Duliajan workshop, Welder Tapan picked up a fine metal sliver in his fing",
+   "v1_p_raw": 0.8455213976821618,
+   "v1_p_cal": 0.7329138231291994,
+   "v1_flag": true,
+   "v2_p_raw": 0.0007916612910027621,
+   "v2_p_cal": 0.012973486988338605,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "The wrench slipped off a grease-nipple cap at Well NHK-455 and Mechanic Hemanta grazed his knuckle. The graze ",
+   "v1_p_raw": 0.0006677795336787082,
+   "v1_p_cal": 0.0128503569320648,
+   "v1_flag": false,
+   "v2_p_raw": 0.0005906088101357525,
+   "v2_p_cal": 0.010882626474736177,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "While washing the mud pump liner at rig RJ-9, coolant splashed onto the forearm of Floorman Kishore. The arm w",
+   "v1_p_raw": 0.8708352600666446,
+   "v1_p_cal": 0.7564383760241654,
+   "v1_flag": true,
+   "v2_p_raw": 0.0010287772343964357,
+   "v2_p_cal": 0.015176578209824862,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Closing a sticky valve handwheel at Moran GCS, Operator Bapan nipped the skin between thumb and finger in the ",
+   "v1_p_raw": 0.2385046339009456,
+   "v1_p_cal": 0.33417126426160854,
+   "v1_flag": false,
+   "v2_p_raw": 0.003048523316666942,
+   "v2_p_cal": 0.02895885686000215,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Preparing the pig receiver at EPS Balimara, Technician Pranjal grazed his elbow on a grating edge. The abrasio",
+   "v1_p_raw": 0.0004205980570561758,
+   "v1_p_cal": 0.00979427541385509,
+   "v1_flag": false,
+   "v2_p_raw": 0.00012279489380402213,
+   "v2_p_cal": 0.004223970435282018,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "During grinding with a full face shield and screen at Kathaloni workshop, a warm chip landed on the boot tongu",
+   "v1_p_raw": 0.0013601784804821845,
+   "v1_p_cal": 0.01948224278043272,
+   "v1_flag": false,
+   "v2_p_raw": 0.0007836045429688233,
+   "v2_p_cal": 0.01289420254471195,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Touch-up painting of the walkway rail at GGS-2 Chabua left a paint splash on the forehead of Painter Uttam. Th",
+   "v1_p_raw": 0.0026942088705679654,
+   "v1_p_cal": 0.028975392531411463,
+   "v1_flag": false,
+   "v2_p_raw": 0.00042570313566454507,
+   "v2_p_cal": 0.008938864912972569,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "After lifting a 12 kg chemical sack onto the dosing skid at CTF Duliajan, Technician Romen felt a twinge in th",
+   "v1_p_raw": 0.00083269612467076,
+   "v1_p_cal": 0.014625047619685829,
+   "v1_flag": false,
+   "v2_p_raw": 0.000923917140039405,
+   "v2_p_cal": 0.014231142628961259,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Shifting a wooden pallet at the Baghjan material yard, Store hand Pabitra took a thin splinter under a fingern",
+   "v1_p_raw": 0.0008952760650937577,
+   "v1_p_cal": 0.015258864198099709,
+   "v1_flag": false,
+   "v2_p_raw": 0.00026537675313092037,
+   "v2_p_cal": 0.006725107333726798,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Pulling instrument cable along the tray at Well G-88 Gelakey, Technician Utpal scratched his forearm on a tray",
+   "v1_p_raw": 0.006804495179595057,
+   "v1_p_cal": 0.0492998358532221,
+   "v1_flag": false,
+   "v2_p_raw": 0.000616160340042796,
+   "v2_p_cal": 0.011162870446572664,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Stacking cement bags at the rig RJ-14 go-down, dust irritated the right eye of Helper Nabajit. The eye was flu",
+   "v1_p_raw": 0.00023622498771826245,
+   "v1_p_cal": 0.006972374179572908,
+   "v1_flag": false,
+   "v2_p_raw": 0.00017487300677109926,
+   "v2_p_cal": 0.005229274674993002,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "Walking the dyke inspection line at Naharkatiya tank farm, a bee stung Operator Kamaleswar on the neck. The st",
+   "v1_p_raw": 0.0009507902316042419,
+   "v1_p_cal": 0.01580559617755742,
+   "v1_flag": false,
+   "v2_p_raw": 0.00039299184772993137,
+   "v2_p_cal": 0.008519085918245808,
+   "v2_flag": false
+  },
+  {
+   "group": "unseen20",
+   "text": "While closing a drum lid at the Duliajan lube store, Store keeper Dipankar jammed his little finger between th",
+   "v1_p_raw": 0.9063776084084342,
+   "v1_p_cal": 0.7938210131316328,
+   "v1_flag": true,
+   "v2_p_raw": 0.005187283637694181,
+   "v2_p_cal": 0.03959216210276765,
+   "v2_flag": false
+  }
+ ],
+ "summary": {
+  "demo": {
+   "n": 1,
+   "v1_flagged": 1,
+   "v2_flagged": 0,
+   "v1_p_raw_mean": 0.9960269528368111,
+   "v2_p_raw_mean": 0.15311725330436066,
+   "v1_p_raw_max": 0.9960269528368111,
+   "v2_p_raw_max": 0.15311725330436066
+  },
+  "train50": {
+   "n": 50,
+   "v1_flagged": 1,
+   "v2_flagged": 0,
+   "v1_p_raw_mean": 0.06433698414934826,
+   "v2_p_raw_mean": 0.0009610291315040851,
+   "v1_p_raw_max": 0.9817589247544808,
+   "v2_p_raw_max": 0.007931954451337674
+  },
+  "unseen20": {
+   "n": 20,
+   "v1_flagged": 3,
+   "v2_flagged": 0,
+   "v1_p_raw_mean": 0.23092789884030557,
+   "v2_p_raw_mean": 0.0011356930764296032,
+   "v1_p_raw_max": 0.9063776084084342,
+   "v2_p_raw_max": 0.005187283637694181
+  }
+ }
+}

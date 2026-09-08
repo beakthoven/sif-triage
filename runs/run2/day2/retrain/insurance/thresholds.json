@@ -1,0 +1,31 @@
+{
+ "config": "masked",
+ "spec_version": "1.0.0",
+ "spec_sha256": "db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51",
+ "sif_threshold": 6.853989393593857e-05,
+ "sif_operating_point": {
+  "threshold": 6.853989393593857e-05,
+  "recall": 1.0,
+  "precision": 0.8000295377344557,
+  "floor_unreachable": false
+ },
+ "temperature": 1.6484147310256958,
+ "rule_thresholds": {
+  "line_of_fire": 0.54,
+  "working_at_height": 0.76,
+  "driving": 0.95,
+  "energy_isolation": 0.84,
+  "hot_work": 0.83,
+  "safe_mechanical_lifting": 0.82,
+  "confined_space": 0.64
+ },
+ "rule_pos_weight": {
+  "line_of_fire": 1.6192319032876308,
+  "working_at_height": 5.520921269957791,
+  "driving": 10.0,
+  "energy_isolation": 10.0,
+  "hot_work": 10.0,
+  "safe_mechanical_lifting": 10.0,
+  "confined_space": 10.0
+ }
+}

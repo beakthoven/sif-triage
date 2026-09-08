@@ -37,7 +37,7 @@ from app.explain import (  # noqa: E402
 from app.schemas import ExplanationOut  # noqa: E402
 from app.storage import SQLiteStorage  # noqa: E402
 
-PORT = 8179
+PORT = int(os.environ.get("SIF_TEST_PORT", "8179"))  # override when :8179 is taken
 BASE = f"http://127.0.0.1:{PORT}/api"
 
 SAMPLE = (

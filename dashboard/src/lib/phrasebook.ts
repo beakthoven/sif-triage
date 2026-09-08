@@ -14,6 +14,8 @@ const STRINGS = {
   confirm: { en: "Confirm SIF-potential", hi: "SIF-क्षमता की पुष्टि करें" },
   notSif: { en: "Not SIF-potential", hi: "SIF-क्षमता नहीं" },
   flaggedFor: { en: "Flagged for HSE review", hi: "HSE समीक्षा के लिए चिह्नित" },
+  noAction: { en: "no action needed", hi: "कोई कार्रवाई आवश्यक नहीं" },
+  ruleProbs: { en: "Rule probabilities", hi: "नियम प्रायिकताएँ" },
   footer: {
     en: "Model proposes, HSE disposes. Your decision becomes a training label.",
     hi: "मॉडल प्रस्तावित करता है — HSE निपटान करता है। आपका निर्णय प्रशिक्षण लेबल बनता है।",
@@ -21,6 +23,15 @@ const STRINGS = {
   triageScore: { en: "triage score", hi: "ट्रायाज स्कोर" },
   rerank: { en: "Simulate ingest → re-rank", hi: "इनजेस्ट → पुनः रैंक" },
   ingesting: { en: "Ingesting reports…", hi: "रिपोर्ट इनजेस्ट हो रही हैं…" },
+  ingestedDone: { en: "Batch ingested — re-ranked", hi: "बैच इनजेस्ट — पुनः रैंक" },
+  ingestConfirm: {
+    en: "Ingest the 6-report Baghjan demo batch into the LIVE database? The API dedups exact repeats — this runs once per session.",
+    hi: "6-रिपोर्ट बाघजान डेमो बैच LIVE डेटाबेस में इनजेस्ट करें? API सटीक दोहराव डीडुप करता है — प्रति सत्र एक बार।",
+  },
+  ingestFailed: {
+    en: "Ingest failed — live data unchanged. Check the API and retry.",
+    hi: "इनजेस्ट विफल — लाइव डेटा अपरिवर्तित। API जाँचें, पुनः प्रयास करें।",
+  },
   awaiting: { en: "Awaiting HSE disposition", hi: "HSE निपटान की प्रतीक्षा में" },
   overrides: { en: "Logged overrides", hi: "दर्ज ओवरराइड" },
   translationAvailable: { en: "translation available", hi: "अनुवाद उपलब्ध" },
