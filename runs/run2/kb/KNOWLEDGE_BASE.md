@@ -79,3 +79,14 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 3. T4 allocation best-effort day-to-day (auto-detect cell covers).
 4. Label-spec freeze decisions pending (D2 span fallback, D15 SIF definition) — Day-1 H2.
 5. HSE data_risk score 7 (domain reviewer): no real OIL data exists — mitigated by honest eval design (D8) but never fully closable.
+
+## 8. Build-phase facts (added 2026-09-08, Day 1)
+
+- **CPU clamp RESOLVED 2026-09-08 morning** (see /CPU_CLAMP_REPORT.md): unclamped measurements — qwen3:4b 22.7/157.7 tok/s; all-core load holds 3.25/4.7 GHz. Watch item: 99°C under synthetic burn (thermal, not platform).
+- **Ollama server was found stopped** (pid 48245 gone) — restarted via `nohup ollama serve`. For demo: server autostart must be part of run.sh / boot checklist.
+- **Corpus built** (artifacts/corpus/): train 61,378 / val 6,820 (employer-group-disjoint) / test 17,731. Test prevalence 64.23% matches spec v2 64.21%. Boundary screen: 12 dropped at J≥0.5. Train/val employer overlap = 0. Zero residual outcome stems in 85,929 masked rows.
+- **ASRS Events_Anomaly** is a semicolon-separated list — anomaly screening must test EVERY element, not the first (first-element logic would under-screen).
+- **Synthetic generation**: 8,811/9,036 rows; ei_d resumed (45→270); cs_d has 76 within-file dup 8-grams + 1 leak → QA gate handles. Generator self-checks use the frozen masking._PATTERN directly.
+- **Export-gate production recipe** (GREEN on 2x T4): torch.onnx.export(dynamo=True, opset_version=18) → strip value_info → quantize_dynamic(QInt8). Legacy TorchScript exporter BANNED for ModernBERT@4.57.6 (Δlogit ~1.0). fp32 parity 1.1e-5..4.4e-5; int8 binary agreement 100%. 583 GPU-s consumed.
+- Label spec FROZEN v1.0.0, sha256 db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51.
+- **Deadline: 2026-09-10 15:00 IST** (~57h from Day-1 05:40). Cron checkpoints: T-31h (Sep 9 08:00), T-19h (Sep 9 20:00 gold gate), T-6h (Sep 10 09:00 final gate), T-2h (Sep 10 13:00 rehearsal gate).

@@ -10,7 +10,7 @@ functions. training/model.py is FROZEN — imported, never modified.
 Corpus contract (--corpus-dir must contain train/val/test.jsonl, 1 row/line):
   text field    : "masked_text" preferred when --config masked, else "text";
                   --config unmasked always reads "text". Fallbacks counted.
-  SIF label     : "sif" | "sif_potential" | "label" in {0,1}
+  SIF label     : "sif" | "sif_potential" | "sif_label" | "label" in {0,1}
   rule labels   : "rules" as (a) list of rule names (synthetic schema),
                   (b) dict {rule: 0/1}, or (c) list of 7 ints in RULES order.
                   Missing -> all-zero (counted).
@@ -167,7 +167,11 @@ def normalize_row(row, config, stats):
         text = row.get("text") or row.get("masked_text") or ""
         if "text" not in row:
             stats["unmasked_fallback_to_masked"] += 1
-    sif = row.get("sif", row.get("sif_potential", row.get("label")))
+    # BUGFIX (Day-1): final corpus schema uses "sif_label" (see
+    # artifacts/corpus/*.jsonl); added to the fallback chain so the frozen
+    # label contract accepts it. Docstring contract line updated to match.
+    sif = row.get("sif", row.get("sif_potential",
+                                 row.get("sif_label", row.get("label"))))
     if sif is None:
         raise ValueError(f"row {row.get('id', '?')}: no sif label")
     rules_raw = row.get("rules", [])
@@ -604,30 +608,26 @@ def export_and_gate(model, val_feats, collate, device, args, sif_op,
     from onnxruntime.quantization import QuantType, quantize_dynamic
 
     # --- tier 1: fp32 parity BEFORE quantize (stage order is load-bearing)
+    # BUGFIX (Day-1): collate pads span_logits to each batch's OWN max length,
+    # so per-batch arrays cannot be np.concatenate'd (crashed with 87 vs 76 on
+    # the masked run). Compare per batch and keep the running max per head.
     n_par = min(100, len(val_feats))
     par_feats = val_feats[:n_par]
     batches = [par_feats[i:i + 32] for i in range(0, n_par, 32)]
-    t_out = {"sif_logit": [], "rule_logits": [], "span_logits": []}
+    sess = ort.InferenceSession(str(fp32_path),
+                                providers=ort.get_available_providers())
+    max_d = {"sif_logit": 0.0, "rule_logits": 0.0, "span_logits": 0.0}
     with torch.no_grad():
         for fb in batches:
             b = collate(fb)
             o = model(b["input_ids"].to(device), b["attention_mask"].to(device))
-            for k in t_out:
-                t_out[k].append(o[k].float().cpu().numpy())
-    t_out = {k: np.concatenate(v) for k, v in t_out.items()}
-    o_out = {k: [] for k in t_out}
-    sess = ort.InferenceSession(str(fp32_path),
-                                providers=ort.get_available_providers())
-    for fb in batches:
-        b = collate(fb)
-        r = sess.run(None, {"input_ids": b["input_ids"].numpy(),
-                            "attention_mask": b["attention_mask"].numpy()})
-        for k, v in zip(("sif_logit", "rule_logits", "span_logits"), r):
-            o_out[k].append(v)
-    o_out = {k: np.concatenate(v) for k, v in o_out.items()}
+            r = sess.run(None, {"input_ids": b["input_ids"].numpy(),
+                                "attention_mask": b["attention_mask"].numpy()})
+            for k, v in zip(("sif_logit", "rule_logits", "span_logits"), r):
+                d = float(np.abs(o[k].float().cpu().numpy() - v).max())
+                max_d[k] = max(max_d[k], d)
     fp32_ok = True
-    for k in t_out:
-        d = float(np.abs(t_out[k] - o_out[k]).max())
+    for k, d in max_d.items():
         results["fp32_parity"][k] = {"max_abs_dlogit": d,
                                      "pass": d <= FP32_PARITY_TOL}
         fp32_ok &= d <= FP32_PARITY_TOL
@@ -799,6 +799,7 @@ def main(argv=None):
     import torch.nn.functional as F
     rule_loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 
+    metrics = sif_logits = y_sif = None
     for epoch in range(start_epoch + 1, args.epochs + 1):
         model.train()
         t0, run = time.time(), 0.0
@@ -862,6 +863,19 @@ def main(argv=None):
         print(f"  checkpoint: {out_dir}/ckpt-ep{epoch}.pt")
 
     # --- final: freeze thresholds, export, gate, manifest
+    if metrics is None:
+        # BUGFIX (Day-1): --resume with every epoch already complete (the
+        # export-retry path) used to crash on undefined metrics; recompute
+        # the val eval so thresholds/export/gate can proceed.
+        sif_logits, rule_logits, span_logits = collect_logits(
+            model, val_feats, collate, device, args.batch)
+        y_sif = [f["sif"] for f in val_feats]
+        metrics = evaluate_arrays(sif_logits, rule_logits, span_logits,
+                                  val_feats)
+        metrics["temperature"] = fit_temperature(sif_logits, y_sif)
+        metrics["epoch"] = start_epoch
+        print(f"[resume] no epochs left; recomputed val eval "
+              f"(auc={metrics['sif']['auc']:.4f})")
     sif_op = metrics["sif"]["operating_point"]
     thresholds = {
         "config": args.config, "spec_version": SPEC_VERSION,
