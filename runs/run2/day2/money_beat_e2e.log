@@ -1,0 +1,17 @@
+BEFORE (live):
+  #1 | Moran GGS-1 | 98 | 98 | 100.0per 100 | 0.95 | 0
+  #2 | Kathalguri GCS | 88 | 88 | 100.0per 100 | 0.96 | 0
+  #3 | Naharkatiya GGS-3 | 40 | 40 | 100.0per 100 | 0.97 | 0
+  #4 | Workover Rig #5 | 36 | 36 | 100.0per 100 | 0.96 | 0
+  #5 | Duliajan-Naharkatiya road | 28 | 28 | 100.0per 100 | 0.92 | 0
+DIALOG: Ingest the 500-row register extract (live_ingest_500.csv) into the LIVE database? Real classification, ~15 s. 
+POST /api/ingest -> 200 wall 12.1s
+ingest result: {"received":500,"accepted":500,"rejected":0,"errors":[],"skipped_duplicates":0,"idempotent_replay":false}
+AFTER:
+  #1 | Kathalguri GCS | 213 | 213 | 100.0per 100 | 0.96 | ▲1
+  #2 | Moran GGS-1 | 105 | 105 | 100.0per 100 | 0.95 | ▼1
+  #3 | Naharkatiya GGS-3 | 47 | 47 | 100.0per 100 | 0.97 | 0
+  #4 | Workover Rig #5 | 38 | 38 | 100.0per 100 | 0.96 | 0
+  #5 | Duliajan-Naharkatiya road | 30 | 30 | 100.0per 100 | 0.92 | 0
+BEAT WALL (click -> settled re-rank): 14.2s
+health after: {"status":"ok","api_version":"0.1.0","model_version":"onnx:masked-v2/sif_multitask_int8.onnx","classifier":"RealOnnxClassifier","n_reports":5048,"n_overrides":0}

@@ -26,7 +26,7 @@
 > (a) classifies each as SIF-potential vs non-SIF-potential,
 > (b) tags it to the relevant IOGP Life-Saving Rule (Energy Isolation, Hot Work, Confined Space, Line of Fire, etc.),
 > (c) surfaces recurring precursor patterns (activity, location, barrier failure) via a dashboard ranking sites/activities by SIF-precursor density.
-> Context: OIL triages UA/UC + near-miss reports manually, monthly/quarterly. Research (DEKRA Martin & Black 2015, EEI, VelocityEHS 2024 PSIF) shows low-severity incidents don't share causes with fatalities — leading operators flag the ~20–25% of reports with genuine fatal potential. OIL provides NO dataset (their reports are confidential).
+> Context: OIL triages UA/UC + near-miss reports manually, monthly/quarterly. Research (DEKRA Martin & Black 2015, EEI, VelocityEHS 2024 PSIF) shows low-severity incidents don't share causes with fatalities — leading operators flag the ~20–25% of reports with genuine fatal potential. [CORRECTED 2026-09-08: the sources say ~20% of *recordable injuries* (BST/Mercer ORC 2011; Martin & Black 2015) — see ARCHITECTURE.md claim boundary. Never quote the 20–25%-of-reports form.] OIL provides NO dataset (their reports are confidential).
 
 **The 9 IOGP Life-Saving Rules:** Bypassing Safety Controls, Confined Space, Driving, Energy Isolation, Hot Work, Line of Fire, Safe Mechanical Lifting, Permit to Work, Working at Height.
 

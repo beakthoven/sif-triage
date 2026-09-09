@@ -1,5 +1,5 @@
 /* UI-chrome phrasebook only (EN/हिं). Report text is NEVER machine-translated
- * live — it stays original with a "translation available" badge. Scope: ~15
+ * live — it stays original with a "translation available" badge. Scope: 33
  * strings, dev-time cloud-QA'd. */
 
 export type Lang = "en" | "hi";
@@ -25,8 +25,8 @@ const STRINGS = {
   ingesting: { en: "Ingesting reports…", hi: "रिपोर्ट इनजेस्ट हो रही हैं…" },
   ingestedDone: { en: "Batch ingested — re-ranked", hi: "बैच इनजेस्ट — पुनः रैंक" },
   ingestConfirm: {
-    en: "Ingest the 6-report Baghjan demo batch into the LIVE database? The API dedups exact repeats — this runs once per session.",
-    hi: "6-रिपोर्ट बाघजान डेमो बैच LIVE डेटाबेस में इनजेस्ट करें? API सटीक दोहराव डीडुप करता है — प्रति सत्र एक बार।",
+    en: "Ingest the 500-row register extract (live_ingest_500.csv) into the LIVE database? Real classification, ~15 s. The API dedups exact repeats — this runs once per session.",
+    hi: "500-पंक्ति रजिस्टर अंश (live_ingest_500.csv) LIVE डेटाबेस में इनजेस्ट करें? वास्तविक वर्गीकरण, ~15 s। API सटीक दोहराव डीडुप करता है — प्रति सत्र एक बार।",
   },
   ingestFailed: {
     en: "Ingest failed — live data unchanged. Check the API and retry.",

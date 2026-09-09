@@ -4,8 +4,10 @@ Covers: template correctness (deterministic, contains score/rules/spans,
 all spans exact substrings) — silent fallback when ollama is unreachable —
 span validation (hallucinated span rejected, corrective retry recovers;
 persistent garbage falls back to template) — cache round-trip through the
-storage precomputed table — endpoint wiring (GET /reports/{id}/explanation,
-POST /classify?explain=1) with the LLM disabled.
+storage precomputed table — precompute-harness gates under the _NullStorage
+stub never emit 'gate error' (final_audit F1/F3 regression) — endpoint
+wiring (GET /reports/{id}/explanation, POST /classify?explain=1) with the
+LLM disabled.
 
 Run: .venv/bin/python app/tests/explain_check.py
 """
@@ -184,6 +186,28 @@ def main() -> int:
     check(len(calls3) == 1 and out_ttl3.source == "ollama" and not out_ttl3.cached,
           "stale template fallback retried the LLM and upgraded to ollama")
     storage.close()
+
+    print("[4c] precompute harness: gates under the _NullStorage stub produce no gate errors")
+    # Regression for final_audit F1/F3: the stub lacked nearest_base_batch /
+    # nearest_session; run_gates degraded the AttributeError into a triggered
+    # 'gate error' state and the string was baked into all 63 cached
+    # explanations. The stub must now cover every Storage method gates call.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "sif_precompute", REPO_ROOT / "artifacts" / "explanations" / "precompute.py")
+    precompute = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(precompute)
+    res = precompute._gen_one({"id": "regression", "text": SAMPLE},
+                              use_llm=False, timeout=1.0)
+    check("error" not in res, f"_gen_one with stub gates did not raise (got {res.get('error')})")
+    check("gate error" not in json.dumps(res["cache_payload"]),
+          "no 'gate error' text in the precomputed payload (template path)")
+    pred43 = precompute._predict(SAMPLE, Settings(), precompute._NULL_STORAGE)
+    nd = next(g for g in pred43.gate_states if g.name == "near_dup")
+    check(not nd.triggered and "index empty" in (nd.detail or ""),
+          "near_dup gate degrades to 'index empty' under the stub, not an AttributeError")
+    check(not any("gate error" in (g.detail or "") for g in pred43.gate_states),
+          "no gate entered the error state under the stub")
 
     print("[5] endpoint wiring (uvicorn, SIF_EXPLAIN_LLM=0)")
     env = dict(os.environ, SIF_DB_PATH=str(Path(tmp.name) / "api.db"))

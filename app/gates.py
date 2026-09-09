@@ -254,6 +254,27 @@ def gate_near_dup(text: str, storage: "Storage", cfg: Settings,
     return GateState(name="near_dup", triggered=False, action="badge", detail=detail)
 
 
+def gate_well_control_watch(well_control: bool, score: float, flag_thr: float) -> GateState:
+    """Well-control watch (audit-fix wave, final_audit_qa.md probe 1): when the
+    deterministic well-control/barrier tag fires but the calibrated SIF score
+    sits BELOW the flag threshold, the neural model has missed a rare
+    high-consequence class (novel Baghjan-class narratives score ~0.03 while
+    the verbatim training cards score 0.9+). Automated screening defers:
+    gray + routed to human review, never auto-greened. Silent when the score
+    clears the threshold (the demo WC cards stay HIGH)."""
+    triggered = well_control and score < flag_thr
+    return GateState(
+        name="well_control_watch",
+        triggered=triggered,
+        action="gray",
+        detail=(
+            f"well-control watch: barrier tag fired but triage score {score:.3f} "
+            f"< flag threshold {flag_thr:.3f} — rare high-consequence domain, "
+            "automated screening defers; routed to human review"
+        ) if triggered else "",
+    )
+
+
 def gate_long_input(text: str, cfg: Settings) -> GateState:
     """Long-input info badge: >120 words -> 'chunked' (sliding-window max-pool
     applies, score is length-OOD). Informational badge, never gray. Inputs
@@ -276,11 +297,16 @@ def gate_long_input(text: str, cfg: Settings) -> GateState:
 
 def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
               vec: "np.ndarray | None" = None,
-              base_hit: "tuple[int | str, float] | None" = None) -> list[GateState]:
+              base_hit: "tuple[int | str, float] | None" = None,
+              well_control: bool = False,
+              flag_thr: float = 0.5) -> list[GateState]:
     # vec/base_hit (optional) are the bulk-ingest path's batch-computed
     # embedding + corpus-tier top-1 (D25); None = compute per row (the
-    # /classify path, unchanged).
-    # Order is load-bearing (smoke test addresses drill by index 4).
+    # /classify path, unchanged). well_control is the classifier's
+    # deterministic barrier tag; flag_thr is its calibrated flag threshold
+    # (flag_threshold(clf)) — both feed the well-control watch gate.
+    # Order is load-bearing (smoke test addresses drill by index 4);
+    # well_control_watch is appended LAST so existing positions hold.
     specs = (
         ("min_length", lambda: gate_min_length(text, cfg)),
         ("negation", lambda: gate_negation(text)),
@@ -289,6 +315,7 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
         ("drill", lambda: gate_drill(text)),
         ("near_dup", lambda: gate_near_dup(text, storage, cfg, vec=vec, base_hit=base_hit)),
         ("long_input", lambda: gate_long_input(text, cfg)),
+        ("well_control_watch", lambda: gate_well_control_watch(well_control, score, flag_thr)),
     )
     states: list[GateState] = []
     for name, fn in specs:

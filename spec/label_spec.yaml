@@ -278,4 +278,4 @@ contamination:
   contamination_graph_published: README
   label_spec_authorship: "humans citing IOGP/OISD rule text only; no LLM-drafted examples"
   runtime_near_dup_index_includes_synthetic: true
-spec_sha256: db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51
+spec_sha256: db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51  # convention (documented 2026-09-09): sha256 of this file with THIS self-referential line excluded — verify: `grep -v '^spec_sha256:' spec/label_spec.yaml | sha256sum`. The raw file-bytes hash (96114b09…) is what the Kaggle staging manifests record per-file; both reconcile, frozen CONTENT unchanged since the 2026-09-08 05:45 freeze.

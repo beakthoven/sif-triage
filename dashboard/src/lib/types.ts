@@ -13,7 +13,7 @@
  *  Derived client-side from sif_score (the API returns no band). */
 export type Band = "HIGH" | "MODERATE" | "LOW";
 
-/** The 7 Sentinel input gates (app/gates.py). action decides the UI:
+/** The 8 Sentinel input gates (app/gates.py). action decides the UI:
  *  "gray" routes to the review queue (gray-state card, never auto-cleared);
  *  "badge" annotates the triage card only (near_dup banner, chunked);
  *  "block" is reserved — no gate blocks today. */
@@ -24,7 +24,8 @@ export type GateKind =
   | "confidence"
   | "drill"
   | "near_dup"
-  | "long_input";
+  | "long_input"
+  | "well_control_watch";
 
 export type GateAction = "badge" | "gray" | "block";
 
@@ -77,6 +78,7 @@ export interface PredictionOut {
   model_version: string;
   chunked: boolean; // long input overflowed seq_len — sliding-window path ran
   explanation: ExplanationOut | null; // only via /classify?explain=1; else fetched on expand
+  report_id?: number | null; // server row id, only via /classify?persist=1 (paste flow)
 }
 
 /** API StoredReport flattened for the UI: id is the server row id (int). */

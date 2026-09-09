@@ -84,8 +84,10 @@ RUNTIME (100% local; bare-metal, no docker dependency) [CHANGED]
          never "% accuracy") [CHANGED]
        → rule probabilities (7 rules, per-rule thresholds; PTW/Bypass shown
          as declared-out-of-scope) + well-control/barrier tag [CHANGED]
-       → evidence spans (span head; CHAR offsets computed server-side against
-         canonical text, self-validated text[start:end]==span before render) [CHANGED]
+       → evidence spans (span head with keyword-attribution fallback — the
+         fallback is the de-facto live path, KB §11; CHAR offsets computed
+         server-side against canonical text, self-validated
+         text[start:end]==span before render) [CHANGED]
        → input gates: confidence · negation (NegEx-style) · language · near-dup
          banner (threshold from measured MiniLM embedding curve, not guessed)
          [NEW gates:] drill/simulation filter · short-codes path ("LOTO not
@@ -101,7 +103,7 @@ RUNTIME (100% local; bare-metal, no docker dependency) [CHANGED]
            bare think:false both verified broken); pydantic validation +
            exact-substring span check + 1 retry → template fallback [CHANGED]
        ▼
-  Hindi: ~30-string dev-time cloud-QA'd phrasebook, UI chrome only (EN/हिं
+  Hindi: 33-string dev-time cloud-QA'd phrasebook, UI chrome only (EN/हिं
   toggle); report text never machine-translated live [CHANGED]
        ▼
   React dashboard (shadcn/ui + Tailwind, navy theme, IBM Plex, amber hazard-

@@ -1,6 +1,8 @@
 """Runnable self-check for RealOnnxClassifier against the shipped trained
-artifact (artifacts/models/masked-v1 — int8 default, fp32 fallback; D19/D20).
-This checks the CONTRACT, not model quality. Exits 0 on pass.
+artifact (artifacts/models/masked-v2 — int8 default, fp32 fallback; D19/D20;
+masked-v1 remains the one-env-var fallback). Override with
+SIF_MODEL_PATH=<dir-or-file>. This checks the CONTRACT, not model quality.
+Exits 0 on pass.
 
 Run: .venv/bin/python app/tests/onnx_classifier_check.py
      SIF_MODEL_QUANT=fp32 .venv/bin/python app/tests/onnx_classifier_check.py
@@ -8,6 +10,7 @@ Run: .venv/bin/python app/tests/onnx_classifier_check.py
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import sys
@@ -26,7 +29,11 @@ from app.classifier import (  # noqa: E402
 )
 from app.schemas import RULE_KEYS, PredictionOut  # noqa: E402
 
-MODEL_DIR = REPO_ROOT / "artifacts" / "models" / "masked-v1"  # the ship artifact
+# Ship artifact (masked-v2 since the D21 retrain; masked-v1 = fallback).
+MODEL_DIR = Path(os.environ.get(
+    "SIF_MODEL_PATH", REPO_ROOT / "artifacts" / "models" / "masked-v2"))
+if not MODEL_DIR.is_absolute():
+    MODEL_DIR = REPO_ROOT / MODEL_DIR
 
 SAMPLE = (
     "During well intervention at Baghjan field, a worker was grinding without "

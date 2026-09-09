@@ -7,12 +7,13 @@ import {
   Languages,
   Ruler,
   Scissors,
+  ShieldAlert,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { GateKind, GateState, Report } from "@/lib/types";
 
 /**
- * The Sentinel gate system — one honesty UI for the 6 input gates
+ * The Sentinel gate system — one honesty UI for the 8 input gates
  * (app/gates.py). Slate (never red/error styling), icon + one plain sentence,
  * "routed to review — never auto-cleared". Gates annotate; they never block.
  */
@@ -62,6 +63,12 @@ const GATE_META: Record<
     sentence:
       "Over 120 words — scored with the sliding-window path (length out of distribution). Shown as a chunked badge.",
   },
+  well_control_watch: {
+    icon: ShieldAlert,
+    name: "Well-control watch",
+    sentence:
+      "Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.",
+  },
 };
 
 const GATE_ORDER: GateKind[] = [
@@ -72,6 +79,7 @@ const GATE_ORDER: GateKind[] = [
   "drill",
   "near_dup",
   "long_input",
+  "well_control_watch",
 ];
 
 export function GrayStateCard({ report, gate }: { report: Report; gate: GateState }) {

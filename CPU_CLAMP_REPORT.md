@@ -45,3 +45,11 @@ curl -s http://localhost:11434/api/generate -d '{"model":"qwen3:4b","prompt":"Sa
  | python3 -c "import json,sys; d=json.load(sys.stdin); print(f\"{d['eval_count']/(d['eval_duration']/1e9):.1f} tok/s\")"
 # ~20+ tok/s = healthy; ~4 tok/s = clamp is back
 ```
+
+## UPDATE (Sep 9 evening): recurrence + software fix found
+
+Clamp returned after a reboot despite AC connected + battery full (97%) + profile/EPP already `performance`. Signature: all-core 0.60-0.86 GHz at 36-40°C. **FIX (verified twice): kick the platform profile:**
+```bash
+echo low-power | sudo tee /sys/firmware/acpi/platform_profile && sleep 1 && echo performance | sudo tee /sys/firmware/acpi/platform_profile
+```
+Immediately restores 3.27/4.7 GHz all-core boost + qwen3:4b ~22 tok/s. Root cause still unknown (firmware/platform power state stuck after boot; profile re-write clears it). ADD TO DEMO MORNING CHECKLIST: run the profile kick + the tok/s one-liner after every boot.

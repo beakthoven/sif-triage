@@ -12,6 +12,7 @@ Every self._conn access below, reads included, is serialized by self._lock
 """
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import sqlite3
@@ -25,6 +26,25 @@ import numpy as np
 
 from .ingest import text_hash
 from .schemas import OverrideIn, PredictionOut, ReportIn, StoredOverride, StoredReport
+
+try:
+    from threadpoolctl import threadpool_limits as _threadpool_limits
+except ImportError:  # bare runtime envs without the dep degrade to unfixed timing
+    _threadpool_limits = None
+
+
+def _blas_single_thread():
+    """Pin BLAS to 1 thread around the near-dup matmuls.
+
+    These matmuls stream a 108 MB fp32 index — memory-bound, so threads buy
+    nothing (2.9 ms either way) — but OpenBLAS's multithreaded gemm/gemv
+    leaves its worker threads spinning, and the NEXT onnxruntime intra-op run
+    then starves (measured: predict 21 ms -> 77-97 ms after one near-dup
+    matmul; full /classify ship path 127 -> 28 ms with limits=1, identical
+    results; runs/run2/day2/latency_v2_final.md)."""
+    if _threadpool_limits is None:
+        return contextlib.nullcontext()
+    return _threadpool_limits(limits=1, user_api="blas")
 
 log = logging.getLogger(__name__)
 
@@ -105,6 +125,7 @@ class Storage(Protocol):
     ) -> tuple[list[int], int]: ...
     def get_ingest_replay(self, payload_hash: str) -> dict | None: ...
     def record_ingest_payload(self, payload_hash: str, result: dict) -> None: ...
+    def get_report_id_by_hash(self, thash: str) -> int | None: ...
     def get_report(self, report_id: int) -> StoredReport | None: ...
     def list_reports(self, limit: int = 100, offset: int = 0) -> list[StoredReport]: ...
     def add_override(self, ov: OverrideIn) -> int: ...
@@ -303,6 +324,17 @@ class SQLiteStorage:
                 " VALUES (?, ?, ?)",
                 (payload_hash, json.dumps(result), _utcnow()),
             )
+
+    def get_report_id_by_hash(self, thash: str) -> int | None:
+        """Report id for a normalized-text content hash (report_hashes), or
+        None. Used by the persist=1 classify path when the pasted text is
+        already stored — the response then points at the existing row instead
+        of writing a duplicate."""
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT report_id FROM report_hashes WHERE hash = ?", (thash,)
+            ).fetchone()
+        return int(row["report_id"]) if row else None
 
     def _session_append(self, report_id: int, arr: np.ndarray) -> None:
         # caller holds self._lock
@@ -531,8 +563,9 @@ class SQLiteStorage:
         if self._base_mat is None:
             return [None] * len(vecs)
         mat = np.ascontiguousarray(np.asarray(vecs, dtype=np.float32))
-        sims = self._base_mat @ mat.T  # L2-normalized both sides -> cosine
-        top = np.argmax(sims, axis=0)
+        with _blas_single_thread():
+            sims = self._base_mat @ mat.T  # L2-normalized both sides -> cosine
+            top = np.argmax(sims, axis=0)
         return [(self._base_ids[int(i)], float(sims[int(i), j])) for j, i in enumerate(top)]
 
     def nearest_session(self, vec: np.ndarray) -> tuple[int, float] | None:
@@ -542,8 +575,9 @@ class SQLiteStorage:
             ids, mat = self._session_index()
         if not ids:
             return None
-        sims = mat @ v
-        i = int(np.argmax(sims))
+        with _blas_single_thread():
+            sims = mat @ v
+            i = int(np.argmax(sims))
         return ids[i], float(sims[i])
 
     def nearest(self, vec: np.ndarray, k: int = 1, exclude_text: str | None = None) -> list[tuple[int | str, float]]:
@@ -552,16 +586,18 @@ class SQLiteStorage:
         rows are exactly what a verbatim training-row paste must match."""
         v = np.asarray(vec, dtype=np.float32).ravel()
         scored: list[tuple[int | str, float]] = []
-        if self._base_mat is not None:
-            sims = self._base_mat @ v  # L2-normalized both sides -> cosine
-            take = min(len(sims), max(k, 8))
-            top = np.argpartition(-sims, take - 1)[:take]
-            scored.extend((self._base_ids[int(i)], float(sims[int(i)])) for i in top)
+        with _blas_single_thread():
+            if self._base_mat is not None:
+                sims = self._base_mat @ v  # L2-normalized both sides -> cosine
+                take = min(len(sims), max(k, 8))
+                top = np.argpartition(-sims, take - 1)[:take]
+                scored.extend((self._base_ids[int(i)], float(sims[int(i)])) for i in top)
         with self._lock:
             ids, mat = self._session_index()
         if ids:
-            sims = mat @ v
-            scored.extend((ids[int(i)], float(sims[int(i)])) for i in np.argsort(-sims))
+            with _blas_single_thread():
+                sims = mat @ v
+                scored.extend((ids[int(i)], float(sims[int(i)])) for i in np.argsort(-sims))
         scored.sort(key=lambda t: -t[1])
         out: list[tuple[int | str, float]] = []
         for rid, sim in scored:

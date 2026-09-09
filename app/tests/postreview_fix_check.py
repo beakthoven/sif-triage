@@ -1,7 +1,7 @@
 """Post-review SEV1/SEV2 regression probe — runnable script, no pytest.
 
 Proves each fix from runs/run2/day1/reviews/classifier_gates.md +
-explain_embed.md against the REAL masked-v1 int8 artifact (no server, no
+explain_embed.md against the REAL masked-v2 int8 artifact (no server, no
 :8177 contact; the garbage-HTTP transport test binds 127.0.0.1:8196):
 
   1. SEV1-1 rule-head order: RULE_HEAD_ORDER == train.py RULES; welding text
@@ -28,6 +28,7 @@ from __future__ import annotations
 import http.client
 import itertools
 import json
+import os
 import re
 import socket
 import sys
@@ -51,7 +52,11 @@ from app.gates import gate_drill, gate_long_input  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.schemas import RULE_DISPLAY  # noqa: E402
 
-MODEL_DIR = REPO_ROOT / "artifacts" / "models" / "masked-v1"
+# Ship artifact (masked-v2 since the D21 retrain; masked-v1 = fallback).
+MODEL_DIR = Path(os.environ.get(
+    "SIF_MODEL_PATH", REPO_ROOT / "artifacts" / "models" / "masked-v2"))
+if not MODEL_DIR.is_absolute():
+    MODEL_DIR = REPO_ROOT / MODEL_DIR
 TRAIN_PY = MODEL_DIR / "train.py"
 
 

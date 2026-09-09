@@ -12,14 +12,16 @@ import { cn } from "@/lib/utils";
 
 /** Feed: paste-classify box + report queue + triage card with evidence
  *  highlights. Gray-action gates (min_length/negation/language/confidence/
- *  drill) swap the card for Sentinel gray-state cards; badge-action gates
- *  (near_dup, long_input) annotate the triage card itself.
+ *  drill/well_control_watch) swap the card for Sentinel gray-state cards;
+ *  badge-action gates (near_dup, long_input) annotate the triage card itself.
  *
- *  The paste box is the demo's opening beat: POST /api/classify (stateless),
- *  render the result through the same card pipeline, and prepend it to the
- *  queue as an optimistic LIVE row (negative id — never persisted, overrides
- *  fall back to the local log). API down -> classify() returns an all-gray
- *  placeholder and the box shows the offline note; the UI never crashes. */
+ *  The paste box is the demo's opening beat: POST /api/classify?persist=1
+ *  stores the report server-side and returns the real row id — the pasted
+ *  card joins the queue as a genuine feed row, so the override buttons POST
+ *  /review against a persisted report (audit F4: negative-id placeholder
+ *  rows 404'd). Offline (or an old server without persist), the row falls
+ *  back to a negative-id optimistic placeholder and overrides land in the
+ *  local log; the box shows the offline note — the UI never crashes. */
 export function FeedView({
   reports,
   lang,
@@ -40,6 +42,7 @@ export function FeedView({
   const busyRef = useRef(false);
   // Optimistic-row ids come from a counter, never re-derived from the queue —
   // raced rows must never share one id (duplicate keys, shared selection).
+  // Only used when the server did not persist the paste (offline / old API).
   const nextLocalId = useRef(-1);
   const selected = reports.find((r) => r.id === selectedId) ?? reports[0];
 
@@ -51,12 +54,15 @@ export function FeedView({
     setOfflineNote(false);
     try {
       const prediction = await classify(value, { explain: true });
-      setOfflineNote(prediction.model_version === "offline");
-      const id = Math.min(nextLocalId.current, 0, ...reports.map((r) => r.id)) - 1;
-      nextLocalId.current = id;
+      // The server persists the paste (persist=1) and returns the real row
+      // id; offline fallback keeps the negative-id optimistic convention.
+      const serverId = prediction.report_id ?? null;
+      setOfflineNote(prediction.model_version === "offline" || serverId === null);
+      const id =
+        serverId ??
+        Math.min(nextLocalId.current, 0, ...reports.map((r) => r.id)) - 1;
+      if (serverId === null) nextLocalId.current = id;
       const report: Report = {
-        // Negative ids mark optimistic session rows (same convention as
-        // offline overrides) — they never collide with server ids.
         id,
         text: value,
         site: "(live paste)",

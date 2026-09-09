@@ -1,4 +1,4 @@
-"""Adversarial suite — 17 hostile inputs vs the input gates + API contract.
+"""Adversarial suite — 18 hostile inputs vs the input gates + API contract.
 
 Runnable stdlib script (urllib only, no pytest). Spawns uvicorn on :8177
 (override with SIF_TEST_PORT when the demo server owns :8177) against a
@@ -6,7 +6,8 @@ throwaway DB, seeds the near-dup index with a training row and a
 synthetic row, then fires all 15 adversarial inputs from
 runs/run2/phase1-architecture/demo-red-teamer.md (§B.3 #1-10 + the 5 new
 attacks) plus 2 B1 regressions (2026-09-08 e2e: the negation gate grayed the
-demo hero text on 'without'~'fire' / 'could'~'fire') at /api/classify and
+demo hero text on 'without'~'fire' / 'could'~'fire') plus the final-audit
+probe (novel well-control narrative -> watch-gate gray) at /api/classify and
 asserts each produces the expected gate state / no crash / valid schema.
 Exit code 0 = pass.
 
@@ -59,6 +60,19 @@ HERO_WELD = (
     "During hot work at the well pad, a worker was grinding near live "
     "flowline without fire watch; sparks fell near the flange. Could have "
     "been a major fire."
+)
+
+# final_audit_qa.md probe 1 — a NOVEL Baghjan-class well-control precursor,
+# verbatim the auditor's text (not in any corpus). The neural model scored it
+# 0.033 LOW while the deterministic WC tag fired: a judge pasting their own
+# well-control narrative would see green next to demo cards at 0.9+. The
+# well-control watch gate routes this class to human review instead.
+WC_PROBE = (
+    "During well servicing operations at well NHK-619, the crew observed mud "
+    "gains of about three barrels at the active pit while tripping out. The "
+    "well started flowing during connections. The driller shut in the BOP and "
+    "the well was brought under control by bullheading kill-weight mud. "
+    "No injury and no spill occurred."
 )
 
 # (id, label, text, expectation fn(gates: dict[str, GateState-like], pred) -> None)
@@ -248,9 +262,25 @@ CASES: list[dict] = [
             not g["negation"].triggered,
             f"absence-of-exposure must NOT gray via negation ({g['negation'].detail})"),
     },
+    {
+        "id": 18, "src": "audit-P1", "label": "novel well-control precursor (judge's own Baghjan paste)",
+        # The neural model misses novel WC narratives (masked-v2: 0.033); the
+        # deterministic tag + watch gate are the safety net — gray review,
+        # never a confident LOW. Threshold: mock 0.5, masked-v2 0.6581 (the
+        # hardcoded tuned op, same convention as case 7).
+        "text": WC_PROBE,
+        "expect": lambda g, p: (
+            _req(p.well_control, "well-control tag fires on novel WC narrative"),
+            _req(p.sif_score < (0.5 if IS_MOCK else 0.6581),
+                 f"neural score below flag threshold as diagnosed (score={p.sif_score})"),
+            _req(g["well_control_watch"].triggered
+                 and g["well_control_watch"].action == "gray",
+                 "well-control watch routes the novel WC paste to human review (gray)"),
+        ),
+    },
 ]
 
-GATE_ORDER = ["min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input"]
+GATE_ORDER = ["min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input", "well_control_watch"]
 
 # Set from /api/health in main(). Three expectations below were tuned to the
 # mock's sha256-seeded Beta scores; the real model disposes of those inputs
@@ -389,7 +419,7 @@ def main() -> int:
         if failures:
             print(f"\nADVERSARIAL SUITE FAIL — {len(failures)} failure(s)")
             return 1
-        print("\nADVERSARIAL SUITE PASS — 17/17 routed correctly, no crashes, schema valid")
+        print(f"\nADVERSARIAL SUITE PASS — {len(CASES)}/{len(CASES)} routed correctly, no crashes, schema valid")
         return 0
     finally:
         server.terminate()

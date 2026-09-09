@@ -97,6 +97,11 @@ class PredictionOut(BaseModel):
     # Filled only by POST /classify?explain=1 (never by the classifier itself,
     # never persisted) — None on plain classify calls.
     explanation: ExplanationOut | None = None
+    # Filled only by POST /classify?persist=1 — the real stored report id, so
+    # the UI's paste row can attach overrides (POST /review) instead of
+    # 404-ing on an optimistic placeholder (audit F4). None on stateless calls
+    # and never persisted (the row id already keys the predictions table).
+    report_id: int | None = None
 
 
 class StoredReport(BaseModel):

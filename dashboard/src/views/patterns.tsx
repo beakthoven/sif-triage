@@ -10,7 +10,7 @@ const KIND_TABS: { kind: PatternKind; label: string; blurb: string }[] = [
     kind: "site_activity",
     label: "Site × Activity",
     blurb:
-      "Lift-ranked activity × site co-occurrence on structured facets. Wilson 95% CI on the SIF rate — no LLM tagging.",
+      "Lift-ranked activity × site co-occurrence on structured facets. Wilson 95% CI on the flag rate — no LLM tagging.",
   },
   {
     kind: "activity_barrier",
@@ -90,7 +90,7 @@ export function PatternsView() {
                 <span className="text-xl font-bold text-primary">{p.n}</span> reports
               </span>
               <span className="text-muted-foreground">
-                SIF rate <span className="text-foreground">{(p.sif_rate * 100).toFixed(0)}</span>
+                flagged <span className="text-foreground">{(p.sif_rate * 100).toFixed(0)}</span>
                 <span className="ml-1">per 100</span>
               </span>
               <span className="text-muted-foreground">

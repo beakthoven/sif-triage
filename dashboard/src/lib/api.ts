@@ -48,6 +48,7 @@ interface ApiPredictionOut {
   model_version: string;
   chunked?: boolean;
   explanation?: ExplanationOut | null;
+  report_id?: number | null; // set by /classify?persist=1 only
 }
 
 interface ApiStoredReport {
@@ -171,6 +172,7 @@ function adaptPrediction(p: ApiPredictionOut): PredictionOut {
     model_version: p.model_version,
     chunked: p.chunked ?? false,
     explanation: p.explanation ?? null,
+    report_id: p.report_id ?? null,
   };
 }
 
@@ -261,21 +263,24 @@ export async function getReport(id: number): Promise<Report | null> {
   }
 }
 
-/** POST /api/classify — stateless single-report triage (latency measured
- *  client-side). opts.explain bundles the deterministic explanation template
- *  (llm=0: a cold ollama reword on novel text would stall the card for
- *  seconds — the template is the demo-safe floor). Offline: an all-gray
- *  placeholder, never a fake score. */
+/** POST /api/classify?persist=1 — paste-flow triage that PERSISTS the report
+ *  (latency measured client-side) and returns the real server row id, so the
+ *  override buttons on the pasted card hit a stored report instead of 404-ing
+ *  on an optimistic placeholder (final_audit_rehearsal F4). opts.explain
+ *  bundles the deterministic explanation template (llm=0: a cold ollama
+ *  reword on novel text would stall the card for seconds — the template is
+ *  the demo-safe floor). Offline: an all-gray placeholder, never a fake
+ *  score. */
 export async function classify(
   text: string,
   opts?: { explain?: boolean },
 ): Promise<PredictionOut> {
   const t0 = performance.now();
-  const query = opts?.explain ? "?explain=1&llm=0" : "";
+  const query = opts?.explain ? "?persist=1&explain=1&llm=0" : "?persist=1";
   try {
     const p = await req<ApiPredictionOut>(`/api/classify${query}`, {
       method: "POST",
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, source: "live-paste" }),
     });
     return { ...adaptPrediction(p), latency_ms: Math.round(performance.now() - t0) };
   } catch {
@@ -297,6 +302,7 @@ export async function classify(
       model_version: "offline",
       chunked: false,
       explanation: null,
+      report_id: null,
     };
   }
 }
@@ -314,12 +320,30 @@ export async function ingest(
 
 /** POST /api/ingest with a CSV body — the bulk-upload demo path (the server
  *  maps narrative/description/report aliases onto the text column). Throws
- *  when the API is unreachable. */
+ *  when the API is unreachable. 90 s budget: the 500-row money beat takes
+ *  ~15 s server-side at the measured 37 rows/s — the default 3.5 s timeout
+ *  aborted the request client-side while the server kept ingesting. */
 export async function ingestCsv(csv: string): Promise<IngestResult> {
   return req<IngestResult>("/api/ingest", {
     method: "POST",
     body: JSON.stringify({ csv, source: "dashboard" }),
-  });
+  }, 90_000);
+}
+
+/** GET the money-beat ingest file (static asset shipped in dist/ — vite copies
+ *  dashboard/public verbatim). The density re-rank beat uploads THIS 500-row
+ *  register extract through the real bulk-ingest path (~15 s at the measured
+ *  37 rows/s); never a hardcoded batch. Throws when unreachable. */
+export async function fetchDemoIngestCsv(): Promise<string> {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
+  try {
+    const res = await fetch(`${BASE}/live_ingest_500.csv`, { signal: ctl.signal });
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText} on /live_ingest_500.csv`);
+    return await res.text();
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 /** GET /api/reports/{id}/explanation — fetched lazily when the triage-card

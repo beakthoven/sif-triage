@@ -3,7 +3,7 @@
 | Time | Checkpoint |
 |---|---|
 | Sep 8 05:37 | Day-1 start (T-57h). Planning phase complete, committed. |
-| Sep 8 05:45 | label_spec.yaml FROZEN v1.0.0 (sha256 db946283…). Cron sentinels set: T-31h/T-19h/T-6h/T-2h. |
+| Sep 8 05:45 | label_spec.yaml FROZEN v1.0.0 (spec_sha256 db946283… = sha256 of the file with the self-referential `spec_sha256:` line excluded — convention documented + re-verified 2026-09-09; raw file-bytes hash 96114b09… is the per-file hash in kernel manifests). Cron sentinels set: T-31h/T-19h/T-6h/T-2h. |
 | Sep 8 05:45 | CPU clamp RESOLVED (verified: qwen3:4b 22.7 tok/s, all-core 3.25/4.7GHz). Report: /CPU_CLAMP_REPORT.md. |
 | Sep 8 07:45 | Wave-1+2 done: corpus 86k rows; synthetic 8,811; export-gate GREEN (2xT4, parity 1e-5); API+dashboard shells. |
 | Sep 8 08:14 | Synthetic complete 9,036 rows. QA+merge launched. |
@@ -13,7 +13,7 @@
 | Sep 8 10:28 | v2 top-up merged: train_final_v2 70,404 rows; ALL quotas met; gold set 500 rows READY for labeling. |
 | Sep 8 10:02 | Masked config trained (3 epochs): val AUC 0.9961, macro-F1 0.967, span F1 0.995, recall@p0.80 = 1.0. |
 | Sep 8 11:20 | Training agent TIMED OUT mid export/retrieval (2h cap). ~42,850s quota reserved by live kernels. Recovery agent launched 11:26. |
-| Sep 8 11:10 | Midday wave done: MiniLM near-dup (threshold 0.91 measured, p95 3.8ms), run.sh+tarball verified, explanation layer (20/20 reword), phrasebook (37 strings), demo corpus 13 cards + 5,050-row bulk CSV + 90s script, WC vocab gate PASS 24/24, train_final_v3 70,565 rows. |
+| Sep 8 11:10 | Midday wave done: MiniLM near-dup (threshold 0.91 measured, p95 3.8ms), run.sh+tarball verified, explanation layer (20/20 reword), phrasebook (33 strings — the "37" first recorded here was a miscount, corrected 2026-09-09), demo corpus 13 cards + 5,050-row bulk CSV + 90s script, WC vocab gate PASS 24/24, train_final_v3 70,565 rows. |
 
 ## Ahead
 - Sep 9 08:00 (T-31h cron): training results must be local; ONNX parity on real model; baselines row complete.
@@ -26,3 +26,8 @@
 | Sep 8 20:15 | Review swarm found 6 SEV1s (rule-logit ORDER SCRAMBLE — true cause of D22 drift; positional dead zone; sqlite concurrency corruption; explain 500s; dashboard span duplication; VITE base). masked-v2 retrain done (val AUC 0.9969). |
 | Sep 8 21:30 | All SEV1s fixed + probed. SHIP DECISION: masked-v2 (first-aid FP fixed 0.996→0.153, 0/20 unseen paraphrases; op-point raw 0.7464 → P0.80003/R0.9748; AUC edge +0.013). Gold pipeline pre-scored with v2. |
 | Sep 8 23:10 | Demo final state: stack on masked-v2, 5,048 reports seeded, money beats verified, screenshots, tarball rebuilt. Day-1 complete. |
+| Sep 9 08:00→18:55 | T-31h cron fired late (machine asleep; coalesced delivery on wake). GATE PASS: (1) training complete — masked-v1 + unmasked-v1 + masked-v2 all retrieved; (2) parity adjudicated (D20/D27: local int8 PASS on single-text ship path); (3) baselines complete incl. McNemar. Labeling: 4/500 items — human task pending tonight. Services restored: labelers up (ports 8001-8004), fresh tunnels issued, demo stack restarting. NOTE: LAN IP changed on reboot → 172.18.172.226. cloudflared moved to ~/.local/bin (persistent). |
+| Sep 9 18:55 | Wake. Machine had slept through the day. T-31h gate verified PASS. Services restored (labelers + fresh tunnels + demo). LAN IP changed to 172.18.172.226. |
+| Sep 9 19:40 | Fresh-eyes validation swarm (6 auditors): PS-compliance ✓, claims ✓ (11 sentence fixes), metrics all reproduce — BUT: clamp returned post-reboot, explanation cache poisoned (63 rows), money beat unexecutable as scripted, WC-miss hazard found, override 404s on live paste. |
+| Sep 9 20:50 | CPU clamp fixed AGAIN — root procedure found: platform_profile kick (low-power→performance) restores boost instantly. Added to CPU_CLAMP_REPORT.md + demo-morning checklist. Verified 24.1 tok/s. |
+| Sep 9 21:05 | Audit fix wave: money beat REBUILT + verified live (pre-state DB, 500-row live ingest, 14.1s, Kathalguri 88→213 #1); override persistence + well-control watch gate added (18/18 adversarial); all deck/claim fixes applied; spec-hash convention repaired. Explanation cache purge + final regression running. |

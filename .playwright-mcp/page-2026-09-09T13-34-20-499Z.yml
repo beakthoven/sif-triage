@@ -1,0 +1,161 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=e8]
+        - paragraph [ref=e9]: OIL India · Triage Console
+      - generic [ref=e10]:
+        - generic [ref=e11]: OFFLINE DEMO
+        - group "UI language" [ref=e12]:
+          - button "EN" [pressed] [ref=e17]
+          - button "हिं" [ref=e18]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - tablist [ref=e21]:
+        - tab "Feed" [selected] [ref=e22]
+        - tab "Density" [ref=e23]
+        - tab "Patterns" [ref=e24]
+        - tab "Review" [ref=e25]
+      - tabpanel "Feed" [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e29]:
+            - paragraph [ref=e30]: Classify a report
+            - textbox "Classify a report" [ref=e31]:
+              - /placeholder: Paste a UA/UC or near-miss report here…
+            - generic [ref=e32]:
+              - button "Classify" [disabled]
+              - generic [ref=e33]: Ctrl+Enter to classify
+          - generic [ref=e34]:
+            - generic [ref=e36]:
+              - paragraph [ref=e37]: Report queue · 9
+              - list [ref=e38]:
+                - listitem [ref=e39]:
+                  - 'button "Duliajan — Workover Rig #7 #2614 · 2026-09-06 HIGH REVIEW PRIORITY" [ref=e40]':
+                    - generic [ref=e41]:
+                      - generic [ref=e42]: "Duliajan — Workover Rig #7"
+                      - generic [ref=e43]: "#2614 · 2026-09-06"
+                    - generic [ref=e44]:
+                      - generic [aria-hidden] [ref=e45]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e46]:
+                  - 'button "Baghjan EPS #2601 · 2026-09-04 HIGH REVIEW PRIORITY" [ref=e47]':
+                    - generic [ref=e48]:
+                      - generic [ref=e49]: Baghjan EPS
+                      - generic [ref=e50]: "#2601 · 2026-09-04"
+                    - generic [ref=e51]:
+                      - generic [aria-hidden] [ref=e52]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e53]:
+                  - 'button "GGS-2, Duliajan #2597 · 2026-09-03 MODERATE REVIEW PRIORITY" [ref=e54]':
+                    - generic [ref=e55]:
+                      - generic [ref=e56]: GGS-2, Duliajan
+                      - generic [ref=e57]: "#2597 · 2026-09-03"
+                    - generic [ref=e58]:
+                      - generic [aria-hidden] [ref=e59]: ◆
+                      - text: MODERATE REVIEW PRIORITY
+                - listitem [ref=e60]:
+                  - 'button "Naharkatia Warehouse #2588 · 2026-09-02 LOW REVIEW PRIORITY" [ref=e61]':
+                    - generic [ref=e62]:
+                      - generic [ref=e63]: Naharkatia Warehouse
+                      - generic [ref=e64]: "#2588 · 2026-09-02"
+                    - generic [ref=e65]:
+                      - generic [aria-hidden] [ref=e66]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e67]:
+                  - 'button "GGS-2, Duliajan #2616 · 2026-09-06 GATE" [ref=e68]':
+                    - generic [ref=e69]:
+                      - generic [ref=e70]: GGS-2, Duliajan
+                      - generic [ref=e71]: "#2616 · 2026-09-06"
+                    - generic [ref=e72]: GATE
+                - listitem [ref=e73]:
+                  - 'button "Tengakhat — Rig #3 pipe yard #2610 · 2026-09-05 GATE" [ref=e74]':
+                    - generic [ref=e75]:
+                      - generic [ref=e76]: "Tengakhat — Rig #3 pipe yard"
+                      - generic [ref=e77]: "#2610 · 2026-09-05"
+                    - generic [ref=e78]: GATE
+                - listitem [ref=e79]:
+                  - 'button "GGS-2, Duliajan #2609 · 2026-09-05 GATE" [ref=e80]':
+                    - generic [ref=e81]:
+                      - generic [ref=e82]: GGS-2, Duliajan
+                      - generic [ref=e83]: "#2609 · 2026-09-05"
+                    - generic [ref=e84]: GATE
+                - listitem [ref=e85]:
+                  - 'button "Duliajan — Workover Rig #7 #2615 · 2026-09-06 DUP HIGH REVIEW PRIORITY" [ref=e86]':
+                    - generic [ref=e87]:
+                      - generic [ref=e88]: "Duliajan — Workover Rig #7"
+                      - generic [ref=e89]: "#2615 · 2026-09-06"
+                    - generic [ref=e90]: DUP
+                    - generic [ref=e91]:
+                      - generic [aria-hidden] [ref=e92]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e93]:
+                  - 'button "Moran GGS-1 #2619 · 2026-09-07 MODERATE REVIEW PRIORITY" [ref=e94]':
+                    - generic [ref=e95]:
+                      - generic [ref=e96]: Moran GGS-1
+                      - generic [ref=e97]: "#2619 · 2026-09-07"
+                    - generic [ref=e98]:
+                      - generic [aria-hidden] [ref=e99]: ◆
+                      - text: MODERATE REVIEW PRIORITY
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [ref=e103]:
+                  - generic [aria-hidden] [ref=e104]: ▲
+                  - text: HIGH REVIEW PRIORITY
+                - generic [ref=e105]: Flagged for HSE review
+              - generic [ref=e106]:
+                - generic [ref=e107]:
+                  - generic [ref=e108]: Band HIGH
+                  - generic "triage score" [ref=e109]: triage score 0.87
+                  - generic [ref=e110]: 38ms
+                  - generic [ref=e111]: "Duliajan — Workover Rig #7 · Workover operations"
+                - generic "Rule probabilities" [ref=e112]:
+                  - paragraph [ref=e113]: Rule probabilities
+                  - generic [ref=e116]:
+                    - generic [ref=e117]: Line of Fire
+                    - generic [ref=e120]: "0.91"
+                  - generic [ref=e121]:
+                    - generic [ref=e122]: Working at Height
+                    - generic [ref=e125]: "0.64"
+                - paragraph [ref=e126]: "Declared out-of-scope (never scored): Work Authorisation (Permit to Work) · Bypassing Safety Controls"
+                - blockquote [ref=e127]:
+                  - text: During pulling operations on Well DJS-142, the derrickhand dropped a spanner from the monkey board, falling
+                  - mark [ref=e128]: above the occupied drill floor
+                  - text: ", landing"
+                  - mark [ref=e129]: 1 m from the floorman
+                  - text: who was making connections.
+                  - mark [ref=e130]: No barricade or dropped-object netting
+                  - text: was in place below the derrick.
+                - button "Why this score? phrased by local LLM · cached" [ref=e132]:
+                  - text: Why this score?
+                  - generic [ref=e135]: phrased by local LLM · cached
+              - generic [ref=e136]:
+                - generic [ref=e137]:
+                  - button "Confirm SIF-potential" [ref=e138]
+                  - button "Not SIF-potential" [ref=e139]
+                - paragraph [ref=e140]: Model proposes, HSE disposes. Your decision becomes a training label.
+          - region "Sentinel gate system" [ref=e141]:
+            - heading "The Sentinel gate system — routed to review, never auto-cleared" [level=2] [ref=e142]
+            - generic [ref=e143]:
+              - generic [ref=e152]:
+                - paragraph [ref=e153]: Short report
+                - paragraph [ref=e154]: Very short text with no recognized safety short code — not enough signal to score reliably. Routed to review, never auto-cleared.
+              - generic [ref=e160]:
+                - paragraph [ref=e161]: Negation guard
+                - paragraph [ref=e162]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+              - generic [ref=e169]:
+                - paragraph [ref=e170]: Language gate
+                - paragraph [ref=e171]: Language beyond current scoring support — the original text is preserved and routed to review, never silently mis-scored. Translation available on request.
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: Low confidence
+                - paragraph [ref=e179]: Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.
+              - generic [ref=e184]:
+                - paragraph [ref=e185]: Drill / simulation
+                - paragraph [ref=e186]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+              - generic [ref=e192]:
+                - paragraph [ref=e193]: Near-duplicate
+                - paragraph [ref=e194]: Matches a training record — memory, not generalization. Shown as a banner on the triage card.
+              - generic [ref=e203]:
+                - paragraph [ref=e204]: Long report (chunked)
+                - paragraph [ref=e205]: Over 120 words — scored with the sliding-window path (length out of distribution). Shown as a chunked badge.
+  - contentinfo [ref=e206]:
+    - paragraph [ref=e207]: Model proposes, HSE disposes. Your decision becomes a training label.

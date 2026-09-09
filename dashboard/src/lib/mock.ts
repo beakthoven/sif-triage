@@ -57,6 +57,7 @@ const ALL_GATES: GateKind[] = [
   "drill",
   "near_dup",
   "long_input",
+  "well_control_watch",
 ];
 
 /** Mirrors app/gates.py: near_dup + long_input are badge-only (annotate the
@@ -69,6 +70,7 @@ const GATE_ACTIONS: Record<GateKind, GateAction> = {
   drill: "gray",
   near_dup: "badge",
   long_input: "badge",
+  well_control_watch: "gray",
 };
 
 function gateStates(...triggered: GateKind[]): GateState[] {

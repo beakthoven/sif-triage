@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import math
 import os
 from pathlib import Path
@@ -37,6 +38,8 @@ from .schemas import (
 )
 from .storage import Storage
 
+log = logging.getLogger(__name__)
+
 router = APIRouter()
 
 FLAG_THRESHOLD = 0.5  # fallback only — classifier.flag_threshold (D19 tuned
@@ -63,7 +66,9 @@ def _predict_with_gates(storage: Storage, clf: Classifier, cfg: Settings, text: 
     pred = clf.predict(text)
     # Span invariant re-checked against the canonical text at the boundary.
     pred.evidence_spans = validate_spans(text, pred.evidence_spans)
-    pred.gate_states = run_gates(text, pred.sif_score, storage, cfg)
+    pred.gate_states = run_gates(text, pred.sif_score, storage, cfg,
+                                 well_control=pred.well_control,
+                                 flag_thr=flag_threshold(clf))
     return pred
 
 
@@ -82,8 +87,14 @@ def classify(
     req: Request,
     explain: bool = Query(default=False),
     llm: bool = Query(default=True),
+    persist: bool = Query(default=False),
 ) -> PredictionOut:
-    """Stateless single-report classification (no store — use /ingest to persist).
+    """Single-report classification. Stateless by default; ?persist=1 stores
+    the report + prediction (same single-transaction write path as /ingest)
+    and returns the real report id in `report_id`, so the dashboard's
+    live-paste row can attach overrides via POST /review instead of 404-ing
+    on an optimistic placeholder id (final_audit_rehearsal F4). A paste whose
+    text is already stored reuses the existing row (content-hash dedup).
     ?explain=1 attaches a human explanation: the deterministic template is
     always present; the optional ollama rewording is null whenever the LLM is
     unavailable (async-safe — every call is bounded by the 8 s timeout and
@@ -92,10 +103,22 @@ def classify(
     stall the card for up to 2x the timeout on CPU."""
     cfg = _cfg(req)
     clf = _classifier(req)
-    pred = _predict_with_gates(_storage(req), clf, cfg, body.text)
+    storage = _storage(req)
+    pred = _predict_with_gates(storage, clf, cfg, body.text)
+    if persist:
+        try:
+            vec = embed_texts([body.text])[0]
+            th = text_hash(body.text)
+            ids, _skipped = storage.add_ingest_batch([(body, pred, vec, th)])
+            pred.report_id = ids[0] if ids else storage.get_report_id_by_hash(th)
+        except Exception:
+            # Persistence must never kill the paste beat: degrade to the old
+            # stateless response (report_id stays None, the UI marks the row
+            # offline and override falls back to the local log).
+            log.exception("classify persist failed; returning stateless prediction")
     if explain:
         pred.explanation = build_explanation(
-            pred, body.text, _storage(req),
+            pred, body.text, storage,
             use_llm=cfg.explain_llm and llm, url=cfg.ollama_url,
             model=cfg.ollama_model, timeout=cfg.explain_timeout_s,
             threshold=flag_threshold(clf),
@@ -166,7 +189,9 @@ def ingest(body: IngestRequest, req: Request) -> IngestResult:
         for (report, th), pred, vec, base_hit in zip(chunk, preds, vecs, base_hits):
             pred.evidence_spans = validate_spans(report.text, pred.evidence_spans)
             pred.gate_states = run_gates(report.text, pred.sif_score, storage, cfg,
-                                         vec=vec, base_hit=base_hit)
+                                         vec=vec, base_hit=base_hit,
+                                         well_control=pred.well_control,
+                                         flag_thr=flag_threshold(clf))
             prepared.append((report, pred, vec, th))
     # Phase 2 — ONE transaction: every row lands or none do. A failure here
     # rolls the whole batch back and the client gets an honest error instead

@@ -10,71 +10,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getDensity, getHealth, ingestCsv } from "@/lib/api";
+import { fetchDemoIngestCsv, getDensity, getHealth, ingestCsv } from "@/lib/api";
 import { DENSITY_AFTER, DENSITY_BEFORE } from "@/lib/mock";
 import { t, type Lang } from "@/lib/phrasebook";
 import type { DensityRow } from "@/lib/types";
 import { useFlip } from "@/lib/use-flip";
 import { cn } from "@/lib/utils";
 
-/* The demo ingest batch: Baghjan-class well-servicing precursors. In live mode
- * these go through POST /api/ingest as a CSV body (the bulk-upload path —
- * real parse, classification + storage) and the density table is re-fetched:
- * the re-rank beat is real, not scripted. */
-const DEMO_INGEST_RECORDS: Record<string, unknown>[] = [
-  {
-    text: "While pulling the BOP on Well BGN-11 before the cement had fully set, pit gain was noticed and gas showed at the shale shakers. The well was shut in and mud weight raised the same shift. Reported to the shift supervisor.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    contractor: "DeepWell Services",
-    date: "2026-09-07",
-  },
-  {
-    text: "During night shift at Baghjan EPS the workover window was cut from 48 h to 12 h and the crew kept tripping in hole with returns climbing at the flowline. No senior officer on site at the time. Crew stood down pending review.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    date: "2026-09-07",
-  },
-  {
-    text: "Kick tolerance margin nearly exceeded while tripping at Well BGN-14. Flow check was skipped once because the mud engineer was at another well.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    date: "2026-09-07",
-  },
-  {
-    text: "Gas detector at the shale shakers alarmed twice during connections on Well BGN-09; alarm was silenced and work continued. Logged for follow-up by the shift saheb.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    date: "2026-09-07",
-  },
-  {
-    text: "Annular preventer element found past its inspection date during BOP function test at Baghjan EPS. Test was postponed twice this month due to rig-up work. Crew raised it in the safety meeting.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    contractor: "DeepWell Services",
-    date: "2026-09-07",
-  },
-  {
-    text: "Mud weight found 0.2 ppg below program at the start of the evening tour at Well BGN-11. Pit level alarm was also not responding during the drill floor check. Well was shut in as a precaution.",
-    site: "Baghjan EPS",
-    activity: "Well servicing",
-    date: "2026-09-07",
-  },
-];
-
-const CSV_COLUMNS = ["text", "site", "activity", "contractor", "date"] as const;
-
-/** Minimal CSV serializer for the demo batch (texts contain commas/quotes). */
-function toCsv(rows: Record<string, unknown>[]): string {
-  const esc = (v: unknown) => {
-    const s = v == null ? "" : String(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  return [
-    CSV_COLUMNS.join(","),
-    ...rows.map((r) => CSV_COLUMNS.map((c) => esc(r[c])).join(",")),
-  ].join("\n");
-}
+/* The demo money beat: the button uploads live_ingest_500.csv — a 500-row
+ * register extract (50 planted Kathalguri GCS x DG-exhaust rows + the 15 corpus
+ * rows of that cell + 435 sampled rows) fetched as a static asset and POSTed
+ * through the real bulk-ingest path (real parse, classification, storage,
+ * ~15 s at the measured 37 rows/s). The density table is then re-fetched and
+ * Kathalguri GCS visibly climbs #2 -> #1: the re-rank is real, not scripted.
+ * The pre-state DB (demo_pre.db) is what makes the climb possible — restore
+ * it before every run. */
 
 function RankDelta({ delta }: { delta: number }) {
   if (delta === 0)
@@ -97,11 +47,11 @@ function RankDelta({ delta }: { delta: number }) {
   );
 }
 
-/** Density: ranked site table (GET /api/density). The demo beat — ingest a
- *  Baghjan-class batch, then rows visibly re-sort with FLIP. Offline: the
- *  scripted mock snapshots stand in (UI never hard-fails). After a real
- *  ingest, onIngested lets the app refetch the header count + feed queue
- *  (they share server state with this view). */
+/** Density: ranked site table (GET /api/density). The demo beat — upload the
+ *  500-row register extract, then rows visibly re-sort with FLIP (Kathalguri
+ *  GCS climbs #2 -> #1). Offline: the scripted mock snapshots stand in (UI
+ *  never hard-fails). After a real ingest, onIngested lets the app refetch
+ *  the header count + feed queue (they share server state with this view). */
 export function DensityView({
   lang,
   onIngested,
@@ -134,10 +84,12 @@ export function DensityView({
 
   const topClimber = rows.find((r) => r.rank === 1 && r.prev_rank !== 1);
 
+  // The live 500-row ingest measures ~15 s at 37 rows/s: the bar paces to 92%
+  // over 16 s, then snaps to 100 on the real response (never a fake finish).
   function startProgress() {
     const start = Date.now();
     timer.current = setInterval(() => {
-      setProgress(Math.min(100, ((Date.now() - start) / 2000) * 100));
+      setProgress(Math.min(92, ((Date.now() - start) / 16000) * 100));
     }, 50);
   }
 
@@ -153,11 +105,12 @@ export function DensityView({
     setProgress(0);
     setIngestError(null);
     if (live) {
-      // Live beat: CSV upload through the bulk-ingest path, then re-fetch —
-      // ranks derived from the pre-ingest snapshot drive the FLIP re-sort.
+      // Live beat: fetch the 500-row register extract (static asset) and POST
+      // it through the bulk-ingest path, then re-fetch — ranks derived from
+      // the pre-ingest snapshot drive the FLIP re-sort.
       startProgress();
       try {
-        const result = await ingestCsv(toCsv(DEMO_INGEST_RECORDS));
+        const result = await ingestCsv(await fetchDemoIngestCsv());
         setIngestNote(`accepted ${result.accepted}/${result.received}`);
         setRows(await getDensity("site", rows));
         setIngestedOnce(true);
@@ -240,7 +193,7 @@ export function DensityView({
                 <TableHead className="text-muted-foreground">Site</TableHead>
                 <TableHead className="text-right text-muted-foreground">Reports</TableHead>
                 <TableHead className="text-right text-muted-foreground">Flagged</TableHead>
-                <TableHead className="text-right text-muted-foreground">SIF rate</TableHead>
+                <TableHead className="text-right text-muted-foreground">Flag rate</TableHead>
                 <TableHead className="text-right text-muted-foreground">Mean score</TableHead>
                 <TableHead className="w-24 text-right text-muted-foreground">Δ rank</TableHead>
               </TableRow>

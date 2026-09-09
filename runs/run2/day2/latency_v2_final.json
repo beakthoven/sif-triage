@@ -1,0 +1,80 @@
+{
+  "env": {
+    "governor": "performance",
+    "cpu_ghz_start": 1.513,
+    "temp_c_start": 49.5,
+    "model_dir": "artifacts/models/masked-v2",
+    "cpu_ghz_end": 3.463,
+    "temp_c_end": 100.0
+  },
+  "model": {
+    "model_version": "onnx:masked-v2/sif_multitask_int8.onnx",
+    "quant": "int8",
+    "temperature": 1.6484147310256958,
+    "sif_flag_threshold": 0.6581082996119924,
+    "seq128_body_tokens": 122
+  },
+  "A1_seq128_x200": {
+    "n": 200,
+    "p50": 21.11,
+    "p95": 24.56,
+    "p99": 27.77,
+    "mean": 21.68,
+    "min": 20.77,
+    "max": 32.56
+  },
+  "A2_realtest_x200": {
+    "n": 200,
+    "p50": 11.39,
+    "p95": 17.66,
+    "p99": 20.52,
+    "mean": 12.04,
+    "min": 6.89,
+    "max": 39.78,
+    "n_chunked_inputs": 1
+  },
+  "A3_fp32_seq128_x50": {
+    "n": 50,
+    "p50": 44.23,
+    "p95": 48.16,
+    "p99": 49.25,
+    "mean": 44.83,
+    "min": 43.7,
+    "max": 49.34
+  },
+  "live_health": {
+    "status": "ok",
+    "api_version": "0.1.0",
+    "model_version": "onnx:masked-v2/sif_multitask_int8.onnx",
+    "classifier": "RealOnnxClassifier",
+    "n_reports": 5048,
+    "n_overrides": 0
+  },
+  "B1_api_seq128_x200": {
+    "n": 200,
+    "p50": 42.54,
+    "p95": 46.92,
+    "p99": 50.01,
+    "mean": 43.15,
+    "min": 39.75,
+    "max": 51.05
+  },
+  "B2_api_realtest_x200": {
+    "n": 200,
+    "p50": 28.04,
+    "p95": 56.03,
+    "p99": 85.38,
+    "mean": 31.27,
+    "min": 17.2,
+    "max": 109.11
+  },
+  "C_bulk_ingest": {
+    "received": 5050,
+    "accepted": 5048,
+    "rejected": 0,
+    "skipped_duplicates": 2,
+    "wall_s": 235.9,
+    "reports_per_s": 21.4,
+    "sla_pass": false
+  }
+}

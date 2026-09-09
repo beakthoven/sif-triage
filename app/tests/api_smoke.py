@@ -42,6 +42,17 @@ SAMPLE_REPORT = (
     "and sparks were observed near the flange. Kick was later reported on the pit."
 )
 
+# final_audit_qa.md probe 1 — a NOVEL Baghjan-class well-control precursor
+# (not in any corpus). The neural score sits below the flag threshold while
+# the deterministic WC tag fires -> well-control watch gray, never auto-green.
+WC_PROBE = (
+    "During well servicing operations at well NHK-619, the crew observed mud "
+    "gains of about three barrels at the active pit while tripping out. The "
+    "well started flowing during connections. The driller shut in the BOP and "
+    "the well was brought under control by bullheading kill-weight mud. "
+    "No injury and no spill occurred."
+)
+
 CSV_5_ROWS = """narrative,site,activity,contractor
 "Worker at height on scaffold without harness near derrick",Baghjan,maintenance,ONGC Services
 "Confined space entry into tank without gas test or permit",Duliajan,tank cleaning,PetroServ
@@ -107,8 +118,9 @@ def main() -> int:
         check(len(pred.evidence_spans) > 0, "anchors produced spans")
         check(pred.well_control is True, "well-control tag on kick/BOP language")
         check({g.name for g in pred.gate_states} == {
-            "min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input",
-        }, "all 7 gates reported")
+            "min_length", "negation", "language", "confidence", "drill", "near_dup",
+            "long_input", "well_control_watch",
+        }, "all 8 gates reported")
         _, pred2_raw = req("POST", "/classify", {"text": SAMPLE_REPORT})
         check(pred_raw == pred2_raw, "deterministic: same text -> same prediction")
 
@@ -122,6 +134,13 @@ def main() -> int:
         _, hindi_pred = req("POST", "/classify", {"text": "कर्मचारी बिना हार्नेस के ऊंचाई पर काम कर रहा था"})
         check(any(g.name == "language" and g.triggered for g in PredictionOut(**hindi_pred).gate_states),
               "language gate fires on non-ASCII text")
+        # Well-control watch (audit probe 1 fix): WC tag fires but the score is
+        # below the flag threshold -> gray watch state, never auto-green.
+        _, wc_pred = req("POST", "/classify", {"text": WC_PROBE})
+        wc = PredictionOut(**wc_pred)
+        wcw = next(g for g in wc.gate_states if g.name == "well_control_watch")
+        check(wc.well_control and wcw.triggered and wcw.action == "gray",
+              f"well-control watch gray on novel WC text (score={wc.sif_score})")
 
         print("[4] ingest 5-row CSV (alias mapping: narrative -> text)")
         status, ing_raw = req("POST", "/ingest", {"csv": CSV_5_ROWS, "source": "smoke"})
@@ -193,6 +212,38 @@ def main() -> int:
             export_lines = resp.read().decode().strip().splitlines()
         check(len(export_lines) == 1 and json.loads(export_lines[0])["value"] == ov.new_value,
               "export emits latest-wins JSONL")
+
+        print("[8] paste-persist round-trip (F4: overrides on live-paste cards)")
+        _, health0 = req("GET", "/health")
+        n0 = health0["n_reports"]
+        status, plain = req("POST", "/classify", {"text": WC_PROBE})
+        check(status == 200 and plain.get("report_id") is None,
+              "default classify stays stateless (no report_id)")
+        _, health1 = req("GET", "/health")
+        check(health1["n_reports"] == n0, "stateless classify stores nothing")
+        paste_text = ("Paste-persist probe: derrickhand spotted a hairline crack on the "
+                      "crown sheave during morning checks at Workover Rig #7.")
+        status, pasted = req("POST", "/classify?persist=1",
+                             {"text": paste_text, "source": "live-paste"})
+        check(status == 200 and isinstance(pasted.get("report_id"), int),
+              "persist=1 returns a real server report id")
+        rid = pasted["report_id"]
+        status, stored = req("GET", f"/reports/{rid}")
+        check(status == 200 and stored["report"]["text"] == paste_text
+              and stored["report"]["source"] == "live-paste"
+              and stored["prediction"] is not None,
+              "pasted report + prediction retrievable by the returned id")
+        status, _ = req("POST", "/review", {
+            "report_id": rid, "field": "sif_label",
+            "old_value": "LOW", "new_value": "sif_potential",
+            "labeler": "smoke_test", "rationale": "paste override round-trip",
+        })
+        check(status == 201, "POST /review on a pasted report lands (201, not 404)")
+        status, again = req("POST", "/classify?persist=1", {"text": paste_text})
+        check(status == 200 and again.get("report_id") == rid,
+              "identical re-paste dedups to the same stored row")
+        _, health2 = req("GET", "/health")
+        check(health2["n_reports"] == n0 + 1, "exactly one row stored across both pastes")
 
         print("\nSMOKE PASS")
         return 0

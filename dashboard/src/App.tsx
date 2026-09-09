@@ -80,8 +80,8 @@ export default function App() {
     r.prediction.gate_states.some((g) => g.triggered && g.action !== "badge"),
   );
 
-  // Live paste-classify: the stateless result is prepended to the queue
-  // optimistically (negative id, marked LIVE) — /api/classify never persists.
+  // Live paste-classify: the persisted result (?persist=1, real server id) is
+  // prepended to the queue; offline falls back to a negative-id LIVE row.
   const onClassified = useCallback((report: Report) => {
     setReports((cur) => [report, ...cur]);
   }, []);
@@ -160,9 +160,17 @@ export default function App() {
       </main>
 
       <footer className="border-t border-border">
-        <p className="mx-auto max-w-7xl px-6 py-4 font-mono text-sm text-muted-foreground">
-          {t(lang, "footer")}
-        </p>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-6 py-4">
+          <p className="font-mono text-sm text-muted-foreground">
+            {t(lang, "footer")}
+          </p>
+          {/* Provenance disclosure (audit C6): the seeded corpus is synthetic
+              stand-in data — say so on-screen, not just in the deck. English-only
+              by design: a data label, not UI chrome (keeps the QA'd phrasebook frozen). */}
+          <span className="rounded-sm border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
+            demo data: synthetic OIL-style corpus
+          </span>
+        </div>
       </footer>
     </div>
   );

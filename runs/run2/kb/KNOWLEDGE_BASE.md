@@ -69,7 +69,7 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - Baghjan framing: "precursors existed and were buried — we make them impossible to bury" (WOC 48h→12h, BOP pulled before cement set, contractor John Energy, no officer on site).
 - Gold CI corrections: 300@20% → [0.739, 0.919]; 500@≥40% enriched → width ≤0.12; n=1000 → [0.794, 0.893]. Handoff's intervals were wrong — never quote them.
 - Span metric: substring-validity 100% + token-F1 ≥0.80 vs adjudicated spans (100-report subset). "Exact-match ≥95%" was unattainable.
-- Hindi: ~30-string cloud-QA'd phrasebook, UI chrome only.
+- Hindi: 33-string cloud-QA'd phrasebook, UI chrome only.
 - OIL vocabulary: 24-term list + 3 contractor-register example reports in `phase1-architecture/hse-domain-reviewer.md`.
 
 ## 7. Open risks after planning
@@ -88,7 +88,8 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **ASRS Events_Anomaly** is a semicolon-separated list — anomaly screening must test EVERY element, not the first (first-element logic would under-screen).
 - **Synthetic generation**: 8,811/9,036 rows; ei_d resumed (45→270); cs_d has 76 within-file dup 8-grams + 1 leak → QA gate handles. Generator self-checks use the frozen masking._PATTERN directly.
 - **Export-gate production recipe** (GREEN on 2x T4): torch.onnx.export(dynamo=True, opset_version=18) → strip value_info → quantize_dynamic(QInt8). Legacy TorchScript exporter BANNED for ModernBERT@4.57.6 (Δlogit ~1.0). fp32 parity 1.1e-5..4.4e-5; int8 binary agreement 100%. 583 GPU-s consumed.
-- Label spec FROZEN v1.0.0, sha256 db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51.
+- Label spec FROZEN v1.0.0, sha256 db94628372c076f0d37429cdfe81e3e9d301751d376b163a7fcbc399c73b2f51. **Hash convention (documented 2026-09-09, resolves the audit's db946283-vs-96114b09 mismatch):** spec_sha256 = hash of the file with the self-referential `spec_sha256:` line excluded (`grep -v '^spec_sha256:' spec/label_spec.yaml | sha256sum` → db946283…, re-verified). The raw file-bytes hash at freeze was 96114b09… — that is the per-file hash in the Kaggle staging manifests. Bookkeeping only; frozen content byte-identical to commit 106b37a.
+- **Synthetic share of train (corrected 2026-09-09):** 13.6% = 9,687/71,065, measured on `train_final_v4.jsonl` (osha 49,343 / asrs 12,035 / syn 9,687). Supersedes D16's "~10%" v3-era planning estimate — quote 13.6%.
 - **Deadline: 2026-09-10 15:00 IST** (~57h from Day-1 05:40). Cron checkpoints: T-31h (Sep 9 08:00), T-19h (Sep 9 20:00 gold gate), T-6h (Sep 10 09:00 final gate), T-2h (Sep 10 13:00 rehearsal gate).
 
 ## 9. Mid-build facts (added 2026-09-08 ~11:30 IST)
@@ -111,7 +112,7 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **Training report's "ship fp32" recommendation is SUPERSEDED by D20**: its int8-RED was measured on Kaggle hardware (ΔAUC 0.0916); on the demo machine int8 full-val AUC 0.9937 vs torch 0.9966 (Δ0.0029 PASS) and decisions are int8≡fp32 on all probed cards. Quantization is provider-sensitive — documented.
 - **int8 batch-composition shift (D27)**: dynamic quantization computes scales per tensor per batch — batchmates shift each other's logits (mean |Δp| 0.031). Batch-32 int8 classification is ILLEGAL in production; the app classifies per-row everywhere. fp32 is batch-invariant (Δ=0.0).
 - **McNemar at ship threshold (n=1500 shared sample, Holm-corrected)**: finetune F1 0.8803 > tfidf 0.8721 (p 0.080 n.s.) > zeroshot 0.8538 (finetune significantly better, p 8.7e-4) >> regex 0.4747 (p 2.2e-67). "Beats an 8B zero-shot LLM at 1/1083rd per-classification latency" is now a measured claim.
-- **Latency (ship config, this machine)**: p50 11.9 / p95 19.7 / p99 40.2 ms single-text; bulk ingest 33.73 reports/s (SLA ≥30/s PASS; 5,050 rows in 149.7s under load).
+- **Latency (masked-v1, superseded — see §12 for the v2 final)**: p50 11.9 / p95 19.7 / p99 40.2 ms single-text; bulk ingest 33.73 reports/s (SLA ≥30/s PASS; 5,050 rows in 149.7s under load).
 - **Ablation read**: masked ≈ unmasked on val (ΔAUC +0.0001); masking neither helps nor hurts at saturation — final word on the gold set.
 - **Demo cards**: 13 cards verified vs real model; 3 behavioral deviations (first-aid FP → D21 retrain; long-report negation gate → fixed suite expectation; codes-only stale mock annotation). Kathalguri beat: 96/96 flagged, #1 confirmed. Rule-attribution drift on 7 cards → narrate probability bar (D22).
 
@@ -125,3 +126,12 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **Ship: masked-v2 int8.** Op-point raw 0.746401/cal 0.658108 → P 0.80003 / R 0.9748 / F1 0.8788 (full derived test, single-text). First-aid FP fixed (card 0.153; 0/20 unseen paraphrases flagged). McNemar: v2 ≈ v1 (p 0.51); both >> regex, > zeroshot (p 0.0018); tfidf vs ft-v2 n.s. (0.122) — disclosed.
 - Gold pipeline ready: score cache fingerprint-keyed (auto-rescores on model swap); 500 items pre-scored with v2.
 - Demo DB re-seeded with scrubbed CSV (5,048 rows); tarball rebuilt with v2.
+
+## 12. Audit-wave final verification (added 2026-09-09 ~23:00 IST; full detail: runs/run2/day2/latency_v2_final.md)
+
+- **Machine unclamped verified**: 16-thread burn holds 3.44–4.76 GHz (mean 3.94). Idle scaling_cur_freq 1.3–2.4 GHz is normal amd-pstate downclock, NOT the clamp. Thermal watch: Tctl ~99–100°C under sustained all-core load — bulk-phase measurements taken heat-soaked read ~45% slow; measure in cool windows.
+- **masked-v2 final latency (int8 single-text ship path)**: model-only p50 11.4 / p95 17.7 / p99 20.5 ms (200 real test rows); seq128 p50 21.1 / p95 24.6 / p99 27.8 ms; fp32 fallback seq128 p50 44.2 ms. Live API e2e (gates + MiniLM near-dup incl.): p50 28.0 / p95 56.0 ms real rows; seq128 p50 42.5 / p95 46.9 ms. Bulk ingest **45.56/s** (5,048 accepted in 110.8s, SLA ≥30/s PASS).
+- **FIXED (SEV2 perf): OpenBLAS spin threads starve the next ORT run.** The near-dup matmuls (BLAS gemm/gemv) left spinning workers; the following classify predict went 21→77–97 ms; live /api/classify was ~150 ms. Fix: `threadpoolctl.threadpool_limits(1, "blas")` around the 3 matmul sites in app/storage.py (`_blas_single_thread`, no-op fallback if absent; dep added to requirements.txt). Full ship path 127→28 ms; live API 150→42.5 ms p50; bulk ingest 37.3→45.6/s. Takes effect on server restart (live stack restarted 22:08 IST with the fix).
+- **OPEN: masked-v2 positional dead zone worse than v1.** postreview_fix_check [2] probe: v1 min 0.251, 2/16 valleys; v2 min 0.030, 13/16 valleys — mid-window hazards in >~90-word reports can score 0.03–0.19 (silent auto-green, below gray band). v1 passes the same probe. Not fixable tonight; suggested mitigation: route chunked inputs scoring <0.40 to review. Deliberately NOT weakened in the test.
+- **Regression battery vs masked-v2 (test ports, throwaway DBs)**: api_smoke PASS (incl. 8th gate well_control_watch + persist=1), adversarial 18/18 PASS, onnx_classifier_check PASS, near_dup_embed_check PASS, explain_check PASS, pattern_mine_selfcheck PASS, demo_pack_selfcheck PASS; postreview_fix_check FAIL on the positional probe above only. Log: runs/run2/day2/regression_log.txt.
+- onnx_classifier_check.py + postreview_fix_check.py now honor SIF_MODEL_PATH (default masked-v2).

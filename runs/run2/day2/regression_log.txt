@@ -1,0 +1,503 @@
+==================== onnx_classifier_check — 22:07:49 ====================
+[1] factory resolution
+  ok: missing model dir -> MockClassifier fallback
+  ok: masked-v1 ship artifact -> RealOnnxClassifier
+[2] real load (artifacts/models/masked-v2)
+  ok: masked-v1 dir -> RealOnnxClassifier
+      quant=int8 version=onnx:masked-v2/sif_multitask_int8.onnx T=1.6484147310256958
+[3] contract on sample report
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: well-control tag on kick language
+  ok: short input not chunked
+  ok: spans non-empty (threshold or fallback)
+  ok: deterministic
+[3b] classify_batch contract (D25)
+  ok: one PredictionOut per input
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+      note: int8 quant — batch scores drift by batchmate (D25); equality not asserted
+[3c] rule-head order == training order (post-review SEV1-1)
+  ok: RULE_HEAD_ORDER == train.py RULES verbatim ('line_of_fire', 'working_at_height', 'driving', 'energy_isolation', 'hot_work', 'safe_mechanical_lifting', 'confined_space')
+  ok: welding text -> hot_work leads (got hot_work; pre-fix showed line_of_fire)
+[4] chunked path — 1,500-word input (crash safety)
+  ok: chunked flag set on long input
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+      1500-word end-to-end: 0.55s
+[5] temperature hook
+  ok: T read from metrics.json
+  ok: T>1 pulls score toward 0.5
+[6] edge inputs
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: 7 rule probs, exact keys
+  ok: rule probs in [0,1]
+  ok: sif score in [0,1]
+  ok: every span satisfies text[start:end]==span.text
+  ok: top-3 spans cap
+  ok: no invalid spans dropped (dropped=0)
+
+ONNX CLASSIFIER CHECK PASS
+---- onnx_classifier_check exit=0
+==================== postreview_fix_check — 22:07:50 ====================
+model: onnx:masked-v2/sif_multitask_int8.onnx quant=int8 supports_exact_batch=False stride=64
+[1] SEV1-1 rule-head order (zip == training order)
+  ok: RULE_HEAD_ORDER == train.py RULES verbatim ('line_of_fire', 'working_at_height', 'driving', 'energy_isolation', 'hot_work', 'safe_mechanical_lifting', 'confined_space')
+  ok: hot_work text -> app top rule hot_work p=0.993
+  ok: energy_isolation text -> app top rule energy_isolation p=0.999
+  ok: confined_space text -> app top rule confined_space p=1.000
+  ok: working_at_height text -> app top rule working_at_height p=1.000
+  ok: line_of_fire text -> app top rule line_of_fire p=0.999
+      (pre-fix probe A: 6/6 scrambled, welding showed line_of_fire 0.9994)
+[2] SEV1-2 positional scan + SEV2-6 input cap
+  ok: stride 96 -> 64
+      scan scores: ['0.79', '0.38', '0.03', '0.10', '0.06', '0.07', '0.05', '0.06', '0.79', '0.59', '0.19', '0.13', '0.11', '0.18', '0.15', '0.12']
+Traceback (most recent call last):
+  File "/home/dakkshesh/sih26-round2/app/tests/postreview_fix_check.py", line 247, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/home/dakkshesh/sih26-round2/app/tests/postreview_fix_check.py", line 127, in main
+    check(min(scores) > 0.20, f"worst-case score {min(scores):.3f} > 0.20 (was 0.13 at stride 96)")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dakkshesh/sih26-round2/app/tests/postreview_fix_check.py", line 65, in check
+    raise AssertionError(f"FAIL: {label}")
+AssertionError: FAIL: worst-case score 0.030 > 0.20 (was 0.13 at stride 96)
+---- postreview_fix_check exit=1
+==================== near_dup_embed_check — 22:07:52 ====================
+threshold: 0.91 (artifacts/embeddings/threshold_report.md)
+[1] pooling verification vs official quickstart sims
+  ok: mean-pool matches reference (worst |d|=4.5e-05)
+  ok: sampled train row is non-trivial
+  ok: corpus index loaded (70398 rows)
+[2] verbatim train row -> cosine ~1.0 -> banner
+  ok: verbatim cosine 1.0000 >= 0.999 (row asrs-987132)
+  ok: banner fired (near-dup banner: cosine=1.000 with index row asrs-987132 (>= 0.91))
+[3] one-word-changed twin -> banner
+  ok: twin cosine 0.9969 >= 0.91 -> banner (near-dup banner: cosine=0.997 with index row asrs-987132 (>= 0.91))
+[4] unrelated report -> no banner
+  ok: unrelated cosine 0.3416 < 0.91 -> no banner (max cosine=0.342)
+[5] ingest embedding round-trip through SQLite
+  ok: session row found verbatim (report #1, cosine 1.0000)
+
+NEAR-DUP CHECK PASS
+---- near_dup_embed_check exit=0
+==================== explain_check — 22:07:52 ====================
+[1] template correctness
+  ok: deterministic: same pred -> same template
+  ok: triage score present
+  ok: every span quoted in the template
+  ok: every span is an exact substring of the report
+  ok: mock anchors pushed at least one rule over threshold
+  ok: rule display names rendered (anchors pushed energy_isolation + hot_work over threshold)
+  ok: well-control line rendered
+[2] fallback when ollama is stopped (connection refused)
+  ok: silent template fallback
+  ok: fallback template identical to render_template
+  ok: fast failure (0.01s, no stall)
+[3] span validation + retry state machine
+  ok: clean output accepted on first try
+  ok: C10 contract on the wire: think:false + format schema
+  ok: hallucinated span rejected, retry recovered
+  ok: retry appended the validation error
+  ok: persistent bad spans -> None (template fallback)
+  ok: transport error -> None, never raises
+  ok: chain-of-thought leak into the field rejected
+  ok: mutated triage score rejected
+  ok: in-prose quoted phrase not in the report rejected (spans_quoted valid)
+[4] cache round-trip (storage precomputed table)
+  ok: cache empty before first build
+  ok: first build: live ollama path
+  ok: payload persisted under sha256 key
+  ok: second build: served from cache, no LLM call
+[4b] template-fallback TTL: fresh entry served, stale entry retried
+  ok: llm down -> template fallback built
+  ok: fresh template fallback served without retrying the LLM
+  ok: stale template fallback retried the LLM and upgraded to ollama
+[4c] precompute harness: gates under the _NullStorage stub produce no gate errors
+classifier: RealOnnxClassifier (onnx:masked-v2/sif_multitask_int8.onnx)
+  ok: _gen_one with stub gates did not raise (got None)
+  ok: no 'gate error' text in the precomputed payload (template path)
+  ok: near_dup gate degrades to 'index empty' under the stub, not an AttributeError
+  ok: no gate entered the error state under the stub
+[5] endpoint wiring (uvicorn, SIF_EXPLAIN_LLM=0)
+  ok: classify?explain=1 -> 200
+  ok: explanation attached: template present, reworded null (llm disabled)
+  ok: explain=1 stays fast with llm disabled (95 ms)
+  ok: plain classify untouched (explanation null)
+  ok: GET /reports/{id}/explanation -> 200
+  ok: second GET served from cache
+  ok: missing report -> 404
+
+EXPLAIN CHECK PASS
+---- explain_check exit=0
+==================== api_smoke — 22:07:54 ====================
+[1] health
+  ok: health ok
+  ok: classifier named
+[2] classify — span validity + determinism
+  ok: classify 200
+  ok: score in [0,1]
+  ok: 7 learnable rule probs present
+  ok: every span satisfies text[start:end]==span.text
+  ok: anchors produced spans
+  ok: well-control tag on kick/BOP language
+  ok: all 8 gates reported
+  ok: deterministic: same text -> same prediction
+[3] gates fire on adversarial inputs
+  ok: short-codes path saves 'LOTO not applied' from min-length
+  ok: drill filter fires
+  ok: language gate fires on non-ASCII text
+  ok: well-control watch gray on novel WC text (score=0.0331)
+[4] ingest 5-row CSV (alias mapping: narrative -> text)
+  ok: ingest 200
+  ok: 5/5 rows accepted
+  ok: 5 report ids returned
+[4b] identical re-POST replays instead of double-ingesting
+  ok: idempotent replay returns the original result
+[5] stored views
+  ok: reports stored with predictions
+  ok: stored short-code report not gated by min-length
+  ok: density covers all 5 reports
+  ok: 9 IOGP rules listed
+  ok: PTW + Bypassing declared out-of-scope
+  ok: pattern Wilson CIs bracket the rate
+  ok: metrics count
+[6] near-dup gate on re-pasted row
+  ok: near-dup banner fired (near-dup banner: cosine=0.995 with index row 1 (>= 0.91))
+[7] review override round-trip (-> future gold)
+  ok: override stored (201)
+  ok: override readable via GET /review
+  ok: override on missing report -> 404
+  ok: garbage override field rejected (422)
+  ok: export emits latest-wins JSONL
+[8] paste-persist round-trip (F4: overrides on live-paste cards)
+  ok: default classify stays stateless (no report_id)
+  ok: stateless classify stores nothing
+  ok: persist=1 returns a real server report id
+  ok: pasted report + prediction retrievable by the returned id
+  ok: POST /review on a pasted report lands (201, not 404)
+  ok: identical re-paste dedups to the same stored row
+  ok: exactly one row stored across both pastes
+
+SMOKE PASS
+---- api_smoke exit=0
+==================== adversarial_suite — 22:07:55 ====================
+classifier under test: RealOnnxClassifier (onnx:masked-v2/sif_multitask_int8.onnx)
+seeded near-dup index: 1 train-style + 1 synthetic-style row
+  [PASS] # 1 B.3-1  negated fall ('No injury occurred')
+  [PASS] # 2 B.3-2  sarcasm (score seeded into gray band)
+  [PASS] # 3 B.3-3  romanized Hinglish (known PARTIAL — no crash)
+  [PASS] # 4 B.3-4  'Forklift incident.' (18 chars)
+  [PASS] # 5 B.3-5  2000-word report (length-OOD)
+  [PASS] # 6 B.3-6  Deepwater Horizon narrative
+  [PASS] # 7 B.3-7  all-9-rules report (no gray expected)
+  [PASS] # 8 B.3-8  'Fire drill completed' (5th gate)
+  [PASS] # 9 B.3-9  verbatim training row re-paste
+  [PASS] #10 B.3-10 garbage symbols
+  [PASS] #11 new-a  Baghjan blowout narrative
+  [PASS] #12 new-b  Assamese script (unsupported language)
+  [PASS] #13 new-c  codes-only 'LOTO not applied' (16 chars)
+  [PASS] #14 new-d  synthetic training row verbatim
+  [PASS] #15 new-e  first-aid non-SIF (expected GREEN)
+  [PASS] #16 B1-fix hero weld report (absent barrier + counterfactual)
+  [PASS] #17 B1-fix absence of exposure ('no one was in the area')
+  [PASS] #18 audit-P1 novel well-control precursor (judge's own Baghjan paste)
+  [PASS] #10b B.3-10 empty text -> 422 rejection (schema-valid)
+
+=== GATE TABLE (input x gate x outcome) ===
+ # case                                         |  min_length    negation    language  confidence       drill    near_dup  long_input well_contro
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ 1 negated fall ('No injury occurred')          |           -        GRAY           -           -           -           -           -           -
+ 2 sarcasm (score seeded into gray band)        |           -           -           -           -           -           -           -           -
+ 3 romanized Hinglish (known PARTIAL — no crash |           -           -           -           -           -           -           -           -
+ 4 'Forklift incident.' (18 chars)              |        GRAY           -           -           -           -           -           -           -
+ 5 2000-word report (length-OOD)                |           -           -           -           -           -           -       BADGE           -
+ 6 Deepwater Horizon narrative                  |           -        GRAY           -           -           -           -           -           -
+ 7 all-9-rules report (no gray expected)        |           -           -           -        GRAY           -           -           -           -
+ 8 'Fire drill completed' (5th gate)            |           -           -           -           -        GRAY           -           -           -
+ 9 verbatim training row re-paste               |           -           -           -           -           -       BADGE           -           -
+10 garbage symbols                              |        GRAY           -           -           -           -           -           -           -
+11 Baghjan blowout narrative                    |           -           -           -           -           -           -           -           -
+12 Assamese script (unsupported language)       |           -           -        GRAY           -           -           -           -           -
+13 codes-only 'LOTO not applied' (16 chars)     |           -           -           -           -           -           -           -           -
+14 synthetic training row verbatim              |           -           -           -           -           -       BADGE           -           -
+15 first-aid non-SIF (expected GREEN)           |           -           -           -           -           -           -           -           -
+16 hero weld report (absent barrier + counterfa |           -           -           -           -           -           -           -           -
+17 absence of exposure ('no one was in the area |           -           -           -           -           -           -           -           -
+18 novel well-control precursor (judge's own Ba |           -        GRAY           -           -           -           -           -        GRAY
+
+ADVERSARIAL SUITE PASS — 18/18 routed correctly, no crashes, schema valid
+---- adversarial_suite exit=0
+==================== pattern_mine_selfcheck — 22:07:57 ====================
+[1] hand-verifiable example (10-row corpus, base rate 0.4)
+  ok: base rate 4/10 = 0.4
+  ok: cell support n=4, n_sif=3
+  ok: cell rate 3/4 = 0.75
+  ok: lift 0.75/0.4 = 1.875
+  ok: Wilson(0.75, 4) = [0.3006, 0.9544] (hand constants)
+  ok: wilson() matches full-precision constants
+  ok: dominant rule carried through
+[2] wilson parity: data_pipeline.pattern_mine vs app.routes
+  ok: parity p=0.00 n=1
+  ok: parity p=1.00 n=1
+  ok: parity p=0.00 n=5
+  ok: parity p=0.20 n=5
+  ok: parity p=0.40 n=5
+  ok: parity p=0.60 n=5
+  ok: parity p=0.80 n=5
+  ok: parity p=1.00 n=5
+  ok: parity p=0.00 n=10
+  ok: parity p=0.10 n=10
+  ok: parity p=0.20 n=10
+  ok: parity p=0.30 n=10
+  ok: parity p=0.40 n=10
+  ok: parity p=0.50 n=10
+  ok: parity p=0.60 n=10
+  ok: parity p=0.70 n=10
+  ok: parity p=0.80 n=10
+  ok: parity p=0.90 n=10
+  ok: parity p=1.00 n=10
+  ok: parity p=0.00 n=100
+  ok: parity p=0.01 n=100
+  ok: parity p=0.02 n=100
+  ok: parity p=0.03 n=100
+  ok: parity p=0.04 n=100
+  ok: parity p=0.05 n=100
+  ok: parity p=0.06 n=100
+  ok: parity p=0.07 n=100
+  ok: parity p=0.08 n=100
+  ok: parity p=0.09 n=100
+  ok: parity p=0.10 n=100
+  ok: parity p=0.11 n=100
+  ok: parity p=0.12 n=100
+  ok: parity p=0.13 n=100
+  ok: parity p=0.14 n=100
+  ok: parity p=0.15 n=100
+  ok: parity p=0.16 n=100
+  ok: parity p=0.17 n=100
+  ok: parity p=0.18 n=100
+  ok: parity p=0.19 n=100
+  ok: parity p=0.20 n=100
+  ok: parity p=0.21 n=100
+  ok: parity p=0.22 n=100
+  ok: parity p=0.23 n=100
+  ok: parity p=0.24 n=100
+  ok: parity p=0.25 n=100
+  ok: parity p=0.26 n=100
+  ok: parity p=0.27 n=100
+  ok: parity p=0.28 n=100
+  ok: parity p=0.29 n=100
+  ok: parity p=0.30 n=100
+  ok: parity p=0.31 n=100
+  ok: parity p=0.32 n=100
+  ok: parity p=0.33 n=100
+  ok: parity p=0.34 n=100
+  ok: parity p=0.35 n=100
+  ok: parity p=0.36 n=100
+  ok: parity p=0.37 n=100
+  ok: parity p=0.38 n=100
+  ok: parity p=0.39 n=100
+  ok: parity p=0.40 n=100
+  ok: parity p=0.41 n=100
+  ok: parity p=0.42 n=100
+  ok: parity p=0.43 n=100
+  ok: parity p=0.44 n=100
+  ok: parity p=0.45 n=100
+  ok: parity p=0.46 n=100
+  ok: parity p=0.47 n=100
+  ok: parity p=0.48 n=100
+  ok: parity p=0.49 n=100
+  ok: parity p=0.50 n=100
+  ok: parity p=0.51 n=100
+  ok: parity p=0.52 n=100
+  ok: parity p=0.53 n=100
+  ok: parity p=0.54 n=100
+  ok: parity p=0.55 n=100
+  ok: parity p=0.56 n=100
+  ok: parity p=0.57 n=100
+  ok: parity p=0.58 n=100
+  ok: parity p=0.59 n=100
+  ok: parity p=0.60 n=100
+  ok: parity p=0.61 n=100
+  ok: parity p=0.62 n=100
+  ok: parity p=0.63 n=100
+  ok: parity p=0.64 n=100
+  ok: parity p=0.65 n=100
+  ok: parity p=0.66 n=100
+  ok: parity p=0.67 n=100
+  ok: parity p=0.68 n=100
+  ok: parity p=0.69 n=100
+  ok: parity p=0.70 n=100
+  ok: parity p=0.71 n=100
+  ok: parity p=0.72 n=100
+  ok: parity p=0.73 n=100
+  ok: parity p=0.74 n=100
+  ok: parity p=0.75 n=100
+  ok: parity p=0.76 n=100
+  ok: parity p=0.77 n=100
+  ok: parity p=0.78 n=100
+  ok: parity p=0.79 n=100
+  ok: parity p=0.80 n=100
+  ok: parity p=0.81 n=100
+  ok: parity p=0.82 n=100
+  ok: parity p=0.83 n=100
+  ok: parity p=0.84 n=100
+  ok: parity p=0.85 n=100
+  ok: parity p=0.86 n=100
+  ok: parity p=0.87 n=100
+  ok: parity p=0.88 n=100
+  ok: parity p=0.89 n=100
+  ok: parity p=0.90 n=100
+  ok: parity p=0.91 n=100
+  ok: parity p=0.92 n=100
+  ok: parity p=0.93 n=100
+  ok: parity p=0.94 n=100
+  ok: parity p=0.95 n=100
+  ok: parity p=0.96 n=100
+  ok: parity p=0.97 n=100
+  ok: parity p=0.98 n=100
+  ok: parity p=0.99 n=100
+  ok: parity p=1.00 n=100
+[3] real synthetic corpus
+  ok: 9027 unique rows (clean 6684 + raw_v2 2343, no id overlap)
+  ok: base rate 6024/9027 = 0.6673
+  ok: 197 site×activity cells at min support 10
+  ok: 137 activity×barrier cells at min support 10
+  ok: top-50 barrier modes
+  ok: min support n>=10 enforced
+  ok: every CI in [0,1] and bracketing the rate
+  ok: lift == rate / base rate (within rounding)
+  ok: site×activity ranked by lift desc
+  ok: activity×barrier ranked by lift desc
+  ok: generator placeholder barrier 'none' excluded
+  ok: line-of-fire patterns present
+  ok: barrier modes ranked by n desc
+[4] artifacts on disk
+  ok: patterns.json matches in-memory counts
+  ok: density seed: 4510 site×activity rows
+  ok: density seed covers the full corpus
+  ok: density seed flagged count
+  ok: density_seed() reproduces row count
+[5] SQLite precomputed-table round-trip
+  ok: save/load round-trip identical
+  ok: missing key -> None
+[6] GET /api/patterns serves the precomputed file
+  ok: default limit 20 from file
+  ok: site_activity rows carry site + activity
+  ok: min_n=2 default filter applied
+  ok: served ranked by lift desc
+  ok: served CIs bracket the rate
+  ok: top pattern = working_at_height @ Workover Rig #7 × derrick/mast climbing (n=37)
+  ok: min_n filter works over file
+  ok: min_n=100 > max support 47 -> []
+  ok: activity_barrier kind served (limit=100)
+  ok: activity_barrier rows carry barrier, site null
+  ok: line-of-fire in served barrier patterns
+  ok: missing-barricade style pattern in served output
+[7] fallback: file absent -> live DB aggregation
+  ok: empty DB + no file -> []
+  ok: fallback ingest 200
+  ok: fallback computes site×activity from DB reports
+  ok: fallback CIs bracket the rate
+  ok: activity_barrier has no DB fallback (no barrier facet)
+
+SELF-CHECK PASS
+---- pattern_mine_selfcheck exit=0
+==================== demo_pack_selfcheck — 22:07:59 ====================
+== 1. demo_corpus.jsonl structure + ingest-schema validity ==
+[PASS] 13 demo cards — got 13
+[PASS] demo_ids unique
+[PASS] all required cards present
+[PASS] all 13 demo rows valid against ingest schema — errors=[]
+[PASS] synthetic-sourced texts byte-identical — []
+[PASS] verbatim OSHA card text == test.jsonl masked_text
+
+== 2. Contrast pair ==
+[PASS] expected SIF labels differ (green=False vs red=True)
+[PASS] corpus labels back the contrast (0 vs 1)
+[PASS] same mechanism family (dropped hand tool)
+[PASS] occupancy phrases present (cleared floor vs occupied deck)
+
+== 3. Gate spot-checks (deterministic) ==
+[PASS] negation gate fires on gray-negation card — negated outcome language (cue~outcome within 5 tokens): 'no'~'injury'
+[PASS] drill gate fires on gray-drill card — drill badge: mock drill
+[PASS] language gate fires on hinglish card — language badge [devanagari]: non_ascii_ratio=0.16 (> 0.15)
+[PASS] codes-only accepted via codes path (not eaten by min-length) — short report accepted via codes path: LOTO
+[PASS] long report >300 words + chunking badge fires — 376 words
+[PASS] negation gate stays OFF for contrast-red
+[PASS] negation gate stays OFF for contrast-green
+[PASS] negation gate stays OFF for mega-report
+[PASS] negation gate stays OFF for first-aid-green
+[PASS] negation gate stays OFF for long-report
+[PASS] drill gate stays OFF for contrast-red
+[PASS] drill gate stays OFF for contrast-green
+[PASS] drill gate stays OFF for mega-report
+[PASS] drill gate stays OFF for long-report
+[PASS] mega report stays under chunking threshold — 119 words
+[PASS] mega report touches all 7 rules + WC + both out-of-scope — {}
+[PASS] all 3 Baghjan-adjacent rows carry well_control=true in corpus
+
+== 4. bulk_ingest_5k.csv ==
+[PASS] CSV header matches mapping config — header=['text', 'date', 'site', 'activity', 'contractor', 'barrier', 'register']
+[PASS] 5,050 rows (5,000 sampled + 50 planted) — got 5050
+[PASS] every bulk row valid against ingest schema — errors=[]
+[PASS] composition 3,000 synthetic / 2,000 osha-masked / 50 planted — got 3000/2000/50
+[PASS] verbatim near-dup row present exactly once in bulk file
+[PASS] file is shuffled (first 40 rows not one class) — ssosssoossosssossossoossosossssoosssooop
+
+== 5. Kathalguri re-rank arithmetic (money beat) ==
+[PASS] pre-ingest: target cell NOT already #1 — pre rank=#2 n=31 flagged=31 | #1 is Workover Rig #7 / derrick/mast climbing (n=37)
+[PASS] recomputed pre-table matches checked-in demo_density_seed.json top row
+[PASS] post-ingest [expected]: Kathalguri GCS / DG exhaust duct inspection is #1 — n=96 flagged=96 rate=1.0 (#2: Workover Rig #7 / derrick/mast climbing n=46) [effective rows with site+activity: 3050]
+[PASS] post-ingest [all_flagged]: Kathalguri GCS / DG exhaust duct inspection is #1 — n=96 flagged=96 rate=1.0 (#2: Workover Rig #7 / derrick/mast climbing n=46) [effective rows with site+activity: 3050]
+
+  SENSITIVITY: 980 untouched rate-1.0 cells post-ingest; target cell has 46 positive corpus rows + 50 planted that the live model must all flag (rehearsal-verifiable, Day-3).
+
+  THE MATH: Kathalguri GCS / DG exhaust duct inspection
+    pre-ingest : rank #2, n=31, flagged=31, rate=1.0
+    planted    : +50 rows, all SIF near-misses (same site+activity strings)
+    post-ingest: rank #1, n=96, flagged=96, rate=1.0
+    margin over #2: 50 reports
+
+== 6. Planted-row quality ==
+[PASS] 50 unique planted texts
+[PASS] planted rows not self-duplicative — max pairwise token-Jaccard=0.81
+[PASS] planted rows distinct from existing corpus rows — max token-Jaccard vs corpus=0.28
+[PASS] all planted rows carry the exact seed cell strings + sif_potential=1
+
+SELF-CHECK PASSED: all checks green
+---- demo_pack_selfcheck exit=0
+==================== BATTERY DONE 22:08:02 ====================

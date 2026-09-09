@@ -5,6 +5,7 @@ fastapi
 uvicorn[standard]
 pydantic>=2
 numpy>=2
+threadpoolctl>=3  # BLAS thread pinning for the near-dup matmuls (ORT starvation fix, see app/storage.py)
 onnxruntime>=1.23
 tokenizers
 pandas>=2

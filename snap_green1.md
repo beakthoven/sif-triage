@@ -1,0 +1,1805 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e7]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=e8]
+        - paragraph [ref=e9]: OIL India · Triage Console
+      - generic [ref=e10]:
+        - generic [ref=e11]: LIVE · onnx:masked-v2/sif_multitask_int8.onnx · 5048 reports
+        - group "UI language" [ref=e12]:
+          - button "EN" [pressed] [ref=e17]
+          - button "हिं" [ref=e18]
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - tablist [ref=e21]:
+        - tab "Feed" [selected] [ref=e22]
+        - tab "Density" [ref=e23]
+        - tab "Patterns" [ref=e24]
+        - tab "Review" [ref=e25]
+      - tabpanel "Feed" [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e29]:
+            - paragraph [ref=e30]: Classify a report
+            - textbox "Classify a report" [ref=e31]:
+              - /placeholder: Paste a UA/UC or near-miss report here…
+              - text: One half-inch combination spanner dropped from mast platform of drilling rig RJ-18 at Jorajan during pipe handling in the morning. It fell on the rig floor matting near V-door side. No one was standing below as floor was cleared before the job. Derrickman reminded again to use wrist lanyard for hand tools kept at height.
+            - generic [ref=e32]:
+              - button "Classify" [ref=e1725]
+              - generic [ref=e33]: Ctrl+Enter to classify
+          - generic [ref=e34]:
+            - generic [ref=e36]:
+              - paragraph [ref=e37]: Report queue · 201
+              - list [ref=e38]:
+                - listitem [ref=e1726]:
+                  - button "(live paste) LIVE · 2026-09-09 LIVE LOW REVIEW PRIORITY" [ref=e1727]:
+                    - generic [ref=e1728]:
+                      - generic [ref=e1729]: (live paste)
+                      - generic [ref=e1730]: LIVE · 2026-09-09
+                    - generic [ref=e1731]: LIVE
+                    - generic [ref=e1732]:
+                      - generic [aria-hidden] [ref=e1733]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e208]:
+                  - 'button "(unspecified) #5048 · 2025-01-09 HIGH REVIEW PRIORITY" [ref=e209]':
+                    - generic [ref=e210]:
+                      - generic [ref=e211]: (unspecified)
+                      - generic [ref=e212]: "#5048 · 2025-01-09"
+                    - generic [ref=e213]:
+                      - generic [aria-hidden] [ref=e214]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e215]:
+                  - 'button "(unspecified) #5047 · 2024-05-10 HIGH REVIEW PRIORITY" [ref=e216]':
+                    - generic [ref=e217]:
+                      - generic [ref=e218]: (unspecified)
+                      - generic [ref=e219]: "#5047 · 2024-05-10"
+                    - generic [ref=e220]:
+                      - generic [aria-hidden] [ref=e221]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e222]:
+                  - 'button "(unspecified) #5046 · 2024-09-26 HIGH REVIEW PRIORITY" [ref=e223]':
+                    - generic [ref=e224]:
+                      - generic [ref=e225]: (unspecified)
+                      - generic [ref=e226]: "#5046 · 2024-09-26"
+                    - generic [ref=e227]:
+                      - generic [aria-hidden] [ref=e228]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e229]:
+                  - 'button "(unspecified) #5045 · 2024-12-16 HIGH REVIEW PRIORITY" [ref=e230]':
+                    - generic [ref=e231]:
+                      - generic [ref=e232]: (unspecified)
+                      - generic [ref=e233]: "#5045 · 2024-12-16"
+                    - generic [ref=e234]:
+                      - generic [aria-hidden] [ref=e235]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e236]:
+                  - 'button "Duliajan GGS-4 #5044 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e237]':
+                    - generic [ref=e238]:
+                      - generic [ref=e239]: Duliajan GGS-4
+                      - generic [ref=e240]: "#5044 · 2026-09-08"
+                    - generic [ref=e241]: DUP
+                    - generic [ref=e242]:
+                      - generic [aria-hidden] [ref=e243]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e244]:
+                  - 'button "(unspecified) #5043 · 2024-07-31 HIGH REVIEW PRIORITY" [ref=e245]':
+                    - generic [ref=e246]:
+                      - generic [ref=e247]: (unspecified)
+                      - generic [ref=e248]: "#5043 · 2024-07-31"
+                    - generic [ref=e249]:
+                      - generic [aria-hidden] [ref=e250]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e251]:
+                  - 'button "GGS-6 Duliajan #5042 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e252]':
+                    - generic [ref=e253]:
+                      - generic [ref=e254]: GGS-6 Duliajan
+                      - generic [ref=e255]: "#5042 · 2026-09-08"
+                    - generic [ref=e256]: DUP
+                    - generic [ref=e257]:
+                      - generic [aria-hidden] [ref=e258]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e259]:
+                  - 'button "(unspecified) #5041 · 2025-06-17 HIGH REVIEW PRIORITY" [ref=e260]':
+                    - generic [ref=e261]:
+                      - generic [ref=e262]: (unspecified)
+                      - generic [ref=e263]: "#5041 · 2025-06-17"
+                    - generic [ref=e264]:
+                      - generic [aria-hidden] [ref=e265]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e266]:
+                  - 'button "Baghjan Camp #5040 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e267]':
+                    - generic [ref=e268]:
+                      - generic [ref=e269]: Baghjan Camp
+                      - generic [ref=e270]: "#5040 · 2026-09-08"
+                    - generic [ref=e271]: DUP
+                    - generic [ref=e272]:
+                      - generic [aria-hidden] [ref=e273]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e274]:
+                  - 'button "Kathaloni #5039 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e275]':
+                    - generic [ref=e276]:
+                      - generic [ref=e277]: Kathaloni
+                      - generic [ref=e278]: "#5039 · 2026-09-08"
+                    - generic [ref=e279]: DUP
+                    - generic [ref=e280]:
+                      - generic [aria-hidden] [ref=e281]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e282]:
+                  - 'button "Workover Rig #7 #5038 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e283]':
+                    - generic [ref=e284]:
+                      - generic [ref=e285]: "Workover Rig #7"
+                      - generic [ref=e286]: "#5038 · 2026-09-08"
+                    - generic [ref=e287]: DUP
+                    - generic [ref=e288]:
+                      - generic [aria-hidden] [ref=e289]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e290]:
+                  - 'button "(unspecified) #5037 · 2025-07-24 HIGH REVIEW PRIORITY" [ref=e291]':
+                    - generic [ref=e292]:
+                      - generic [ref=e293]: (unspecified)
+                      - generic [ref=e294]: "#5037 · 2025-07-24"
+                    - generic [ref=e295]:
+                      - generic [aria-hidden] [ref=e296]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e297]:
+                  - 'button "(unspecified) #5036 · 2025-03-27 HIGH REVIEW PRIORITY" [ref=e298]':
+                    - generic [ref=e299]:
+                      - generic [ref=e300]: (unspecified)
+                      - generic [ref=e301]: "#5036 · 2025-03-27"
+                    - generic [ref=e302]:
+                      - generic [aria-hidden] [ref=e303]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e304]:
+                  - 'button "Duliajan GGS-4 #5035 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e305]':
+                    - generic [ref=e306]:
+                      - generic [ref=e307]: Duliajan GGS-4
+                      - generic [ref=e308]: "#5035 · 2026-09-08"
+                    - generic [ref=e309]: DUP
+                    - generic [ref=e310]:
+                      - generic [aria-hidden] [ref=e311]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e312]:
+                  - 'button "workover rig #7 #5034 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e313]':
+                    - generic [ref=e314]:
+                      - generic [ref=e315]: "workover rig #7"
+                      - generic [ref=e316]: "#5034 · 2026-09-08"
+                    - generic [ref=e317]: DUP
+                    - generic [ref=e318]:
+                      - generic [aria-hidden] [ref=e319]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e320]:
+                  - 'button "Naharkatiya #5033 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e321]':
+                    - generic [ref=e322]:
+                      - generic [ref=e323]: Naharkatiya
+                      - generic [ref=e324]: "#5033 · 2026-09-08"
+                    - generic [ref=e325]: DUP
+                    - generic [ref=e326]:
+                      - generic [aria-hidden] [ref=e327]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e328]:
+                  - 'button "Digboi #5032 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e329]':
+                    - generic [ref=e330]:
+                      - generic [ref=e331]: Digboi
+                      - generic [ref=e332]: "#5032 · 2026-09-08"
+                    - generic [ref=e333]: DUP
+                    - generic [ref=e334]:
+                      - generic [aria-hidden] [ref=e335]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e336]:
+                  - 'button "Baghjan EPS #5031 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e337]':
+                    - generic [ref=e338]:
+                      - generic [ref=e339]: Baghjan EPS
+                      - generic [ref=e340]: "#5031 · 2026-09-08"
+                    - generic [ref=e341]: DUP
+                    - generic [ref=e342]:
+                      - generic [aria-hidden] [ref=e343]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e344]:
+                  - 'button "Kathalguri GCS #5030 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e345]':
+                    - generic [ref=e346]:
+                      - generic [ref=e347]: Kathalguri GCS
+                      - generic [ref=e348]: "#5030 · 2026-09-08"
+                    - generic [ref=e349]: DUP
+                    - generic [ref=e350]:
+                      - generic [aria-hidden] [ref=e351]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e352]:
+                  - 'button "(unspecified) #5029 · 2025-08-04 HIGH REVIEW PRIORITY" [ref=e353]':
+                    - generic [ref=e354]:
+                      - generic [ref=e355]: (unspecified)
+                      - generic [ref=e356]: "#5029 · 2025-08-04"
+                    - generic [ref=e357]:
+                      - generic [aria-hidden] [ref=e358]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e359]:
+                  - 'button "Kathalguri #5028 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e360]':
+                    - generic [ref=e361]:
+                      - generic [ref=e362]: Kathalguri
+                      - generic [ref=e363]: "#5028 · 2026-09-08"
+                    - generic [ref=e364]: DUP
+                    - generic [ref=e365]:
+                      - generic [aria-hidden] [ref=e366]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e367]:
+                  - 'button "(unspecified) #5027 · 2025-06-12 HIGH REVIEW PRIORITY" [ref=e368]':
+                    - generic [ref=e369]:
+                      - generic [ref=e370]: (unspecified)
+                      - generic [ref=e371]: "#5027 · 2025-06-12"
+                    - generic [ref=e372]:
+                      - generic [aria-hidden] [ref=e373]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e374]:
+                  - 'button "(unspecified) #5026 · 2025-07-01 LOW REVIEW PRIORITY" [ref=e375]':
+                    - generic [ref=e376]:
+                      - generic [ref=e377]: (unspecified)
+                      - generic [ref=e378]: "#5026 · 2025-07-01"
+                    - generic [ref=e379]:
+                      - generic [aria-hidden] [ref=e380]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e381]:
+                  - 'button "GCP Makum #5025 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e382]':
+                    - generic [ref=e383]:
+                      - generic [ref=e384]: GCP Makum
+                      - generic [ref=e385]: "#5025 · 2026-09-08"
+                    - generic [ref=e386]: DUP
+                    - generic [ref=e387]:
+                      - generic [aria-hidden] [ref=e388]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e389]:
+                  - 'button "Jorajan #5024 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e390]':
+                    - generic [ref=e391]:
+                      - generic [ref=e392]: Jorajan
+                      - generic [ref=e393]: "#5024 · 2026-09-08"
+                    - generic [ref=e394]: DUP
+                    - generic [ref=e395]:
+                      - generic [aria-hidden] [ref=e396]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e397]:
+                  - 'button "GGS Balimara #5023 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e398]':
+                    - generic [ref=e399]:
+                      - generic [ref=e400]: GGS Balimara
+                      - generic [ref=e401]: "#5023 · 2026-09-08"
+                    - generic [ref=e402]: DUP
+                    - generic [ref=e403]:
+                      - generic [aria-hidden] [ref=e404]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e405]:
+                  - 'button "Naharkatiya GGS-3 #5022 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e406]':
+                    - generic [ref=e407]:
+                      - generic [ref=e408]: Naharkatiya GGS-3
+                      - generic [ref=e409]: "#5022 · 2026-09-08"
+                    - generic [ref=e410]: DUP
+                    - generic [ref=e411]:
+                      - generic [aria-hidden] [ref=e412]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e413]:
+                  - 'button "(unspecified) #5021 · 2024-08-09 HIGH REVIEW PRIORITY" [ref=e414]':
+                    - generic [ref=e415]:
+                      - generic [ref=e416]: (unspecified)
+                      - generic [ref=e417]: "#5021 · 2024-08-09"
+                    - generic [ref=e418]:
+                      - generic [aria-hidden] [ref=e419]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e420]:
+                  - 'button "(unspecified) #5020 · 2025-01-07 LOW REVIEW PRIORITY" [ref=e421]':
+                    - generic [ref=e422]:
+                      - generic [ref=e423]: (unspecified)
+                      - generic [ref=e424]: "#5020 · 2025-01-07"
+                    - generic [ref=e425]:
+                      - generic [aria-hidden] [ref=e426]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e427]:
+                  - 'button "Tinsukia-Duliajan road #5019 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e428]':
+                    - generic [ref=e429]:
+                      - generic [ref=e430]: Tinsukia-Duliajan road
+                      - generic [ref=e431]: "#5019 · 2026-09-08"
+                    - generic [ref=e432]: DUP
+                    - generic [ref=e433]:
+                      - generic [aria-hidden] [ref=e434]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e435]:
+                  - 'button "Workover Rig #5 #5018 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e436]':
+                    - generic [ref=e437]:
+                      - generic [ref=e438]: "Workover Rig #5"
+                      - generic [ref=e439]: "#5018 · 2026-09-08"
+                    - generic [ref=e440]: DUP
+                    - generic [ref=e441]:
+                      - generic [aria-hidden] [ref=e442]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e443]:
+                  - 'button "(unspecified) #5017 · 2025-10-28 LOW REVIEW PRIORITY" [ref=e444]':
+                    - generic [ref=e445]:
+                      - generic [ref=e446]: (unspecified)
+                      - generic [ref=e447]: "#5017 · 2025-10-28"
+                    - generic [ref=e448]:
+                      - generic [aria-hidden] [ref=e449]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e450]:
+                  - 'button "Kathalguri #5016 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e451]':
+                    - generic [ref=e452]:
+                      - generic [ref=e453]: Kathalguri
+                      - generic [ref=e454]: "#5016 · 2026-09-08"
+                    - generic [ref=e455]: DUP
+                    - generic [ref=e456]:
+                      - generic [aria-hidden] [ref=e457]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e458]:
+                  - 'button "(unspecified) #5015 · 2025-06-02 HIGH REVIEW PRIORITY" [ref=e459]':
+                    - generic [ref=e460]:
+                      - generic [ref=e461]: (unspecified)
+                      - generic [ref=e462]: "#5015 · 2025-06-02"
+                    - generic [ref=e463]:
+                      - generic [aria-hidden] [ref=e464]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e465]:
+                  - 'button "Baghjan EPS #5014 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e466]':
+                    - generic [ref=e467]:
+                      - generic [ref=e468]: Baghjan EPS
+                      - generic [ref=e469]: "#5014 · 2026-09-08"
+                    - generic [ref=e470]: DUP
+                    - generic [ref=e471]:
+                      - generic [aria-hidden] [ref=e472]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e473]:
+                  - 'button "Hapjan Camp #5013 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e474]':
+                    - generic [ref=e475]:
+                      - generic [ref=e476]: Hapjan Camp
+                      - generic [ref=e477]: "#5013 · 2026-09-08"
+                    - generic [ref=e478]: DUP
+                    - generic [ref=e479]:
+                      - generic [aria-hidden] [ref=e480]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e481]:
+                  - 'button "(unspecified) #5012 · 2024-04-25 LOW REVIEW PRIORITY" [ref=e482]':
+                    - generic [ref=e483]:
+                      - generic [ref=e484]: (unspecified)
+                      - generic [ref=e485]: "#5012 · 2024-04-25"
+                    - generic [ref=e486]:
+                      - generic [aria-hidden] [ref=e487]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e488]:
+                  - 'button "(unspecified) #5011 · 2025-10-30 HIGH REVIEW PRIORITY" [ref=e489]':
+                    - generic [ref=e490]:
+                      - generic [ref=e491]: (unspecified)
+                      - generic [ref=e492]: "#5011 · 2025-10-30"
+                    - generic [ref=e493]:
+                      - generic [aria-hidden] [ref=e494]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e495]:
+                  - 'button "(unspecified) #5010 · 2025-01-29 HIGH REVIEW PRIORITY" [ref=e496]':
+                    - generic [ref=e497]:
+                      - generic [ref=e498]: (unspecified)
+                      - generic [ref=e499]: "#5010 · 2025-01-29"
+                    - generic [ref=e500]:
+                      - generic [aria-hidden] [ref=e501]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e502]:
+                  - 'button "Naharkatiya #5009 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e503]':
+                    - generic [ref=e504]:
+                      - generic [ref=e505]: Naharkatiya
+                      - generic [ref=e506]: "#5009 · 2026-09-08"
+                    - generic [ref=e507]: DUP
+                    - generic [ref=e508]:
+                      - generic [aria-hidden] [ref=e509]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e510]:
+                  - 'button "Jorajan #5008 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e511]':
+                    - generic [ref=e512]:
+                      - generic [ref=e513]: Jorajan
+                      - generic [ref=e514]: "#5008 · 2026-09-08"
+                    - generic [ref=e515]: DUP
+                    - generic [ref=e516]:
+                      - generic [aria-hidden] [ref=e517]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e518]:
+                  - 'button "Charali #5007 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e519]':
+                    - generic [ref=e520]:
+                      - generic [ref=e521]: Charali
+                      - generic [ref=e522]: "#5007 · 2026-09-08"
+                    - generic [ref=e523]: DUP
+                    - generic [ref=e524]:
+                      - generic [aria-hidden] [ref=e525]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e526]:
+                  - 'button "Moran GGS-1 #5006 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e527]':
+                    - generic [ref=e528]:
+                      - generic [ref=e529]: Moran GGS-1
+                      - generic [ref=e530]: "#5006 · 2026-09-08"
+                    - generic [ref=e531]: DUP
+                    - generic [ref=e532]:
+                      - generic [aria-hidden] [ref=e533]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e534]:
+                  - 'button "(unspecified) #5005 · 2024-09-01 HIGH REVIEW PRIORITY" [ref=e535]':
+                    - generic [ref=e536]:
+                      - generic [ref=e537]: (unspecified)
+                      - generic [ref=e538]: "#5005 · 2024-09-01"
+                    - generic [ref=e539]:
+                      - generic [aria-hidden] [ref=e540]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e541]:
+                  - 'button "Baghjan EPS #5004 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e542]':
+                    - generic [ref=e543]:
+                      - generic [ref=e544]: Baghjan EPS
+                      - generic [ref=e545]: "#5004 · 2026-09-08"
+                    - generic [ref=e546]: DUP
+                    - generic [ref=e547]:
+                      - generic [aria-hidden] [ref=e548]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e549]:
+                  - 'button "(unspecified) #5003 · 2025-10-28 HIGH REVIEW PRIORITY" [ref=e550]':
+                    - generic [ref=e551]:
+                      - generic [ref=e552]: (unspecified)
+                      - generic [ref=e553]: "#5003 · 2025-10-28"
+                    - generic [ref=e554]:
+                      - generic [aria-hidden] [ref=e555]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e556]:
+                  - 'button "Digboi #5002 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e557]':
+                    - generic [ref=e558]:
+                      - generic [ref=e559]: Digboi
+                      - generic [ref=e560]: "#5002 · 2026-09-08"
+                    - generic [ref=e561]: DUP
+                    - generic [ref=e562]:
+                      - generic [aria-hidden] [ref=e563]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e564]:
+                  - 'button "Naharkatiya #5001 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e565]':
+                    - generic [ref=e566]:
+                      - generic [ref=e567]: Naharkatiya
+                      - generic [ref=e568]: "#5001 · 2026-09-08"
+                    - generic [ref=e569]: DUP
+                    - generic [ref=e570]:
+                      - generic [aria-hidden] [ref=e571]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e572]:
+                  - 'button "(unspecified) #5000 · 2024-08-14 HIGH REVIEW PRIORITY" [ref=e573]':
+                    - generic [ref=e574]:
+                      - generic [ref=e575]: (unspecified)
+                      - generic [ref=e576]: "#5000 · 2024-08-14"
+                    - generic [ref=e577]:
+                      - generic [aria-hidden] [ref=e578]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e579]:
+                  - 'button "(unspecified) #4999 · 2025-07-02 HIGH REVIEW PRIORITY" [ref=e580]':
+                    - generic [ref=e581]:
+                      - generic [ref=e582]: (unspecified)
+                      - generic [ref=e583]: "#4999 · 2025-07-02"
+                    - generic [ref=e584]:
+                      - generic [aria-hidden] [ref=e585]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e586]:
+                  - 'button "(unspecified) #4998 · 2025-04-24 HIGH REVIEW PRIORITY" [ref=e587]':
+                    - generic [ref=e588]:
+                      - generic [ref=e589]: (unspecified)
+                      - generic [ref=e590]: "#4998 · 2025-04-24"
+                    - generic [ref=e591]:
+                      - generic [aria-hidden] [ref=e592]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e593]:
+                  - 'button "(unspecified) #4997 · 2024-03-05 HIGH REVIEW PRIORITY" [ref=e594]':
+                    - generic [ref=e595]:
+                      - generic [ref=e596]: (unspecified)
+                      - generic [ref=e597]: "#4997 · 2024-03-05"
+                    - generic [ref=e598]:
+                      - generic [aria-hidden] [ref=e599]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e600]:
+                  - 'button "(unspecified) #4996 · 2025-05-30 HIGH REVIEW PRIORITY" [ref=e601]':
+                    - generic [ref=e602]:
+                      - generic [ref=e603]: (unspecified)
+                      - generic [ref=e604]: "#4996 · 2025-05-30"
+                    - generic [ref=e605]:
+                      - generic [aria-hidden] [ref=e606]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e607]:
+                  - 'button "Duliajan GGS-2 #4995 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e608]':
+                    - generic [ref=e609]:
+                      - generic [ref=e610]: Duliajan GGS-2
+                      - generic [ref=e611]: "#4995 · 2026-09-08"
+                    - generic [ref=e612]: DUP
+                    - generic [ref=e613]:
+                      - generic [aria-hidden] [ref=e614]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e615]:
+                  - 'button "(unspecified) #4994 · 2025-03-17 HIGH REVIEW PRIORITY" [ref=e616]':
+                    - generic [ref=e617]:
+                      - generic [ref=e618]: (unspecified)
+                      - generic [ref=e619]: "#4994 · 2025-03-17"
+                    - generic [ref=e620]:
+                      - generic [aria-hidden] [ref=e621]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e622]:
+                  - 'button "EPS Rudrasagar #4993 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e623]':
+                    - generic [ref=e624]:
+                      - generic [ref=e625]: EPS Rudrasagar
+                      - generic [ref=e626]: "#4993 · 2026-09-08"
+                    - generic [ref=e627]: DUP
+                    - generic [ref=e628]:
+                      - generic [aria-hidden] [ref=e629]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e630]:
+                  - 'button "Workover Rig #5 #4992 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e631]':
+                    - generic [ref=e632]:
+                      - generic [ref=e633]: "Workover Rig #5"
+                      - generic [ref=e634]: "#4992 · 2026-09-08"
+                    - generic [ref=e635]: DUP
+                    - generic [ref=e636]:
+                      - generic [aria-hidden] [ref=e637]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e638]:
+                  - 'button "(unspecified) #4991 · 2024-03-06 LOW REVIEW PRIORITY" [ref=e639]':
+                    - generic [ref=e640]:
+                      - generic [ref=e641]: (unspecified)
+                      - generic [ref=e642]: "#4991 · 2024-03-06"
+                    - generic [ref=e643]:
+                      - generic [aria-hidden] [ref=e644]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e645]:
+                  - 'button "(unspecified) #4990 · 2024-08-28 LOW REVIEW PRIORITY" [ref=e646]':
+                    - generic [ref=e647]:
+                      - generic [ref=e648]: (unspecified)
+                      - generic [ref=e649]: "#4990 · 2024-08-28"
+                    - generic [ref=e650]:
+                      - generic [aria-hidden] [ref=e651]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e652]:
+                  - 'button "(unspecified) #4989 · 2025-02-12 LOW REVIEW PRIORITY" [ref=e653]':
+                    - generic [ref=e654]:
+                      - generic [ref=e655]: (unspecified)
+                      - generic [ref=e656]: "#4989 · 2025-02-12"
+                    - generic [ref=e657]:
+                      - generic [aria-hidden] [ref=e658]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e659]:
+                  - 'button "(unspecified) #4988 · 2024-02-12 LOW REVIEW PRIORITY" [ref=e660]':
+                    - generic [ref=e661]:
+                      - generic [ref=e662]: (unspecified)
+                      - generic [ref=e663]: "#4988 · 2024-02-12"
+                    - generic [ref=e664]:
+                      - generic [aria-hidden] [ref=e665]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e666]:
+                  - 'button "(unspecified) #4987 · 2024-07-31 HIGH REVIEW PRIORITY" [ref=e667]':
+                    - generic [ref=e668]:
+                      - generic [ref=e669]: (unspecified)
+                      - generic [ref=e670]: "#4987 · 2024-07-31"
+                    - generic [ref=e671]:
+                      - generic [aria-hidden] [ref=e672]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e673]:
+                  - 'button "Moran GGS-1 #4986 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e674]':
+                    - generic [ref=e675]:
+                      - generic [ref=e676]: Moran GGS-1
+                      - generic [ref=e677]: "#4986 · 2026-09-08"
+                    - generic [ref=e678]: DUP
+                    - generic [ref=e679]:
+                      - generic [aria-hidden] [ref=e680]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e681]:
+                  - 'button "(unspecified) #4985 · 2024-09-13 HIGH REVIEW PRIORITY" [ref=e682]':
+                    - generic [ref=e683]:
+                      - generic [ref=e684]: (unspecified)
+                      - generic [ref=e685]: "#4985 · 2024-09-13"
+                    - generic [ref=e686]:
+                      - generic [aria-hidden] [ref=e687]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e688]:
+                  - 'button "Duliajan GGS-2 #4984 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e689]':
+                    - generic [ref=e690]:
+                      - generic [ref=e691]: Duliajan GGS-2
+                      - generic [ref=e692]: "#4984 · 2026-09-08"
+                    - generic [ref=e693]: DUP
+                    - generic [ref=e694]:
+                      - generic [aria-hidden] [ref=e695]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e696]:
+                  - 'button "(unspecified) #4983 · 2025-06-24 LOW REVIEW PRIORITY" [ref=e697]':
+                    - generic [ref=e698]:
+                      - generic [ref=e699]: (unspecified)
+                      - generic [ref=e700]: "#4983 · 2025-06-24"
+                    - generic [ref=e701]:
+                      - generic [aria-hidden] [ref=e702]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e703]:
+                  - 'button "Baghjan EPS #4982 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e704]':
+                    - generic [ref=e705]:
+                      - generic [ref=e706]: Baghjan EPS
+                      - generic [ref=e707]: "#4982 · 2026-09-08"
+                    - generic [ref=e708]: DUP
+                    - generic [ref=e709]:
+                      - generic [aria-hidden] [ref=e710]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e711]:
+                  - 'button "Duliajan GGS-2 #4981 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e712]':
+                    - generic [ref=e713]:
+                      - generic [ref=e714]: Duliajan GGS-2
+                      - generic [ref=e715]: "#4981 · 2026-09-08"
+                    - generic [ref=e716]: DUP
+                    - generic [ref=e717]:
+                      - generic [aria-hidden] [ref=e718]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e719]:
+                  - 'button "Dumduma #4980 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e720]':
+                    - generic [ref=e721]:
+                      - generic [ref=e722]: Dumduma
+                      - generic [ref=e723]: "#4980 · 2026-09-08"
+                    - generic [ref=e724]: DUP
+                    - generic [ref=e725]:
+                      - generic [aria-hidden] [ref=e726]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e727]:
+                  - 'button "(unspecified) #4979 · 2025-07-02 LOW REVIEW PRIORITY" [ref=e728]':
+                    - generic [ref=e729]:
+                      - generic [ref=e730]: (unspecified)
+                      - generic [ref=e731]: "#4979 · 2025-07-02"
+                    - generic [ref=e732]:
+                      - generic [aria-hidden] [ref=e733]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e734]:
+                  - 'button "(unspecified) #4978 · 2025-08-30 HIGH REVIEW PRIORITY" [ref=e735]':
+                    - generic [ref=e736]:
+                      - generic [ref=e737]: (unspecified)
+                      - generic [ref=e738]: "#4978 · 2025-08-30"
+                    - generic [ref=e739]:
+                      - generic [aria-hidden] [ref=e740]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e741]:
+                  - 'button "(unspecified) #4977 · 2024-09-12 HIGH REVIEW PRIORITY" [ref=e742]':
+                    - generic [ref=e743]:
+                      - generic [ref=e744]: (unspecified)
+                      - generic [ref=e745]: "#4977 · 2024-09-12"
+                    - generic [ref=e746]:
+                      - generic [aria-hidden] [ref=e747]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e748]:
+                  - 'button "Baghjan EPS #4976 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e749]':
+                    - generic [ref=e750]:
+                      - generic [ref=e751]: Baghjan EPS
+                      - generic [ref=e752]: "#4976 · 2026-09-08"
+                    - generic [ref=e753]: DUP
+                    - generic [ref=e754]:
+                      - generic [aria-hidden] [ref=e755]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e756]:
+                  - 'button "(unspecified) #4975 · 2025-09-29 HIGH REVIEW PRIORITY" [ref=e757]':
+                    - generic [ref=e758]:
+                      - generic [ref=e759]: (unspecified)
+                      - generic [ref=e760]: "#4975 · 2025-09-29"
+                    - generic [ref=e761]:
+                      - generic [aria-hidden] [ref=e762]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e763]:
+                  - 'button "Naharkatiya #4974 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e764]':
+                    - generic [ref=e765]:
+                      - generic [ref=e766]: Naharkatiya
+                      - generic [ref=e767]: "#4974 · 2026-09-08"
+                    - generic [ref=e768]: DUP
+                    - generic [ref=e769]:
+                      - generic [aria-hidden] [ref=e770]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e771]:
+                  - 'button "(unspecified) #4973 · 2025-11-19 HIGH REVIEW PRIORITY" [ref=e772]':
+                    - generic [ref=e773]:
+                      - generic [ref=e774]: (unspecified)
+                      - generic [ref=e775]: "#4973 · 2025-11-19"
+                    - generic [ref=e776]:
+                      - generic [aria-hidden] [ref=e777]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e778]:
+                  - 'button "Duliajan GGS-2 #4972 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e779]':
+                    - generic [ref=e780]:
+                      - generic [ref=e781]: Duliajan GGS-2
+                      - generic [ref=e782]: "#4972 · 2026-09-08"
+                    - generic [ref=e783]: DUP
+                    - generic [ref=e784]:
+                      - generic [aria-hidden] [ref=e785]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e786]:
+                  - 'button "Duliajan GGS-2 #4971 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e787]':
+                    - generic [ref=e788]:
+                      - generic [ref=e789]: Duliajan GGS-2
+                      - generic [ref=e790]: "#4971 · 2026-09-08"
+                    - generic [ref=e791]: DUP
+                    - generic [ref=e792]:
+                      - generic [aria-hidden] [ref=e793]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e794]:
+                  - 'button "EPS Jorajan #4970 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e795]':
+                    - generic [ref=e796]:
+                      - generic [ref=e797]: EPS Jorajan
+                      - generic [ref=e798]: "#4970 · 2026-09-08"
+                    - generic [ref=e799]: DUP
+                    - generic [ref=e800]:
+                      - generic [aria-hidden] [ref=e801]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e802]:
+                  - 'button "well NHK-233 #4969 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e803]':
+                    - generic [ref=e804]:
+                      - generic [ref=e805]: well NHK-233
+                      - generic [ref=e806]: "#4969 · 2026-09-08"
+                    - generic [ref=e807]: DUP
+                    - generic [ref=e808]:
+                      - generic [aria-hidden] [ref=e809]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e810]:
+                  - 'button "(unspecified) #4968 · 2025-07-17 HIGH REVIEW PRIORITY" [ref=e811]':
+                    - generic [ref=e812]:
+                      - generic [ref=e813]: (unspecified)
+                      - generic [ref=e814]: "#4968 · 2025-07-17"
+                    - generic [ref=e815]:
+                      - generic [aria-hidden] [ref=e816]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e817]:
+                  - 'button "Balimara #4967 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e818]':
+                    - generic [ref=e819]:
+                      - generic [ref=e820]: Balimara
+                      - generic [ref=e821]: "#4967 · 2026-09-08"
+                    - generic [ref=e822]: DUP
+                    - generic [ref=e823]:
+                      - generic [aria-hidden] [ref=e824]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e825]:
+                  - 'button "Moran #4966 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e826]':
+                    - generic [ref=e827]:
+                      - generic [ref=e828]: Moran
+                      - generic [ref=e829]: "#4966 · 2026-09-08"
+                    - generic [ref=e830]: DUP
+                    - generic [ref=e831]:
+                      - generic [aria-hidden] [ref=e832]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e833]:
+                  - 'button "Duliajan GGS-4 #4965 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e834]':
+                    - generic [ref=e835]:
+                      - generic [ref=e836]: Duliajan GGS-4
+                      - generic [ref=e837]: "#4965 · 2026-09-08"
+                    - generic [ref=e838]: DUP
+                    - generic [ref=e839]:
+                      - generic [aria-hidden] [ref=e840]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e841]:
+                  - 'button "Dumduma #4964 · 2026-09-08 GATE" [ref=e842]':
+                    - generic [ref=e843]:
+                      - generic [ref=e844]: Dumduma
+                      - generic [ref=e845]: "#4964 · 2026-09-08"
+                    - generic [ref=e846]: GATE
+                - listitem [ref=e847]:
+                  - 'button "(unspecified) #4963 · 2024-09-12 HIGH REVIEW PRIORITY" [ref=e848]':
+                    - generic [ref=e849]:
+                      - generic [ref=e850]: (unspecified)
+                      - generic [ref=e851]: "#4963 · 2024-09-12"
+                    - generic [ref=e852]:
+                      - generic [aria-hidden] [ref=e853]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e854]:
+                  - 'button "flowline ROW KM 9 #4962 · 2026-09-08 GATE" [ref=e855]':
+                    - generic [ref=e856]:
+                      - generic [ref=e857]: flowline ROW KM 9
+                      - generic [ref=e858]: "#4962 · 2026-09-08"
+                    - generic [ref=e859]: GATE
+                - listitem [ref=e860]:
+                  - 'button "Baghjan EPS #4961 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e861]':
+                    - generic [ref=e862]:
+                      - generic [ref=e863]: Baghjan EPS
+                      - generic [ref=e864]: "#4961 · 2026-09-08"
+                    - generic [ref=e865]: DUP
+                    - generic [ref=e866]:
+                      - generic [aria-hidden] [ref=e867]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e868]:
+                  - 'button "(unspecified) #4960 · 2025-02-21 HIGH REVIEW PRIORITY" [ref=e869]':
+                    - generic [ref=e870]:
+                      - generic [ref=e871]: (unspecified)
+                      - generic [ref=e872]: "#4960 · 2025-02-21"
+                    - generic [ref=e873]:
+                      - generic [aria-hidden] [ref=e874]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e875]:
+                  - 'button "Naharkatia #4959 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e876]':
+                    - generic [ref=e877]:
+                      - generic [ref=e878]: Naharkatia
+                      - generic [ref=e879]: "#4959 · 2026-09-08"
+                    - generic [ref=e880]: DUP
+                    - generic [ref=e881]:
+                      - generic [aria-hidden] [ref=e882]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e883]:
+                  - 'button "Kathalguri GCS #4958 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e884]':
+                    - generic [ref=e885]:
+                      - generic [ref=e886]: Kathalguri GCS
+                      - generic [ref=e887]: "#4958 · 2026-09-08"
+                    - generic [ref=e888]: DUP
+                    - generic [ref=e889]:
+                      - generic [aria-hidden] [ref=e890]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e891]:
+                  - 'button "GGS-4 #4957 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e892]':
+                    - generic [ref=e893]:
+                      - generic [ref=e894]: GGS-4
+                      - generic [ref=e895]: "#4957 · 2026-09-08"
+                    - generic [ref=e896]: DUP
+                    - generic [ref=e897]:
+                      - generic [aria-hidden] [ref=e898]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e899]:
+                  - 'button "(unspecified) #4956 · 2025-05-31 HIGH REVIEW PRIORITY" [ref=e900]':
+                    - generic [ref=e901]:
+                      - generic [ref=e902]: (unspecified)
+                      - generic [ref=e903]: "#4956 · 2025-05-31"
+                    - generic [ref=e904]:
+                      - generic [aria-hidden] [ref=e905]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e906]:
+                  - 'button "Jorajan #4955 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e907]':
+                    - generic [ref=e908]:
+                      - generic [ref=e909]: Jorajan
+                      - generic [ref=e910]: "#4955 · 2026-09-08"
+                    - generic [ref=e911]: DUP
+                    - generic [ref=e912]:
+                      - generic [aria-hidden] [ref=e913]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e914]:
+                  - 'button "(unspecified) #4954 · 2025-04-30 HIGH REVIEW PRIORITY" [ref=e915]':
+                    - generic [ref=e916]:
+                      - generic [ref=e917]: (unspecified)
+                      - generic [ref=e918]: "#4954 · 2025-04-30"
+                    - generic [ref=e919]:
+                      - generic [aria-hidden] [ref=e920]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e921]:
+                  - 'button "EPS Makum #4953 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e922]':
+                    - generic [ref=e923]:
+                      - generic [ref=e924]: EPS Makum
+                      - generic [ref=e925]: "#4953 · 2026-09-08"
+                    - generic [ref=e926]: DUP
+                    - generic [ref=e927]:
+                      - generic [aria-hidden] [ref=e928]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e929]:
+                  - 'button "Kathalguri #4952 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e930]':
+                    - generic [ref=e931]:
+                      - generic [ref=e932]: Kathalguri
+                      - generic [ref=e933]: "#4952 · 2026-09-08"
+                    - generic [ref=e934]: DUP
+                    - generic [ref=e935]:
+                      - generic [aria-hidden] [ref=e936]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e937]:
+                  - 'button "Balimara #4951 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e938]':
+                    - generic [ref=e939]:
+                      - generic [ref=e940]: Balimara
+                      - generic [ref=e941]: "#4951 · 2026-09-08"
+                    - generic [ref=e942]: DUP
+                    - generic [ref=e943]:
+                      - generic [aria-hidden] [ref=e944]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e945]:
+                  - 'button "Naharkatiya #4950 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e946]':
+                    - generic [ref=e947]:
+                      - generic [ref=e948]: Naharkatiya
+                      - generic [ref=e949]: "#4950 · 2026-09-08"
+                    - generic [ref=e950]: DUP
+                    - generic [ref=e951]:
+                      - generic [aria-hidden] [ref=e952]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e953]:
+                  - 'button "Kathalguri #4949 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e954]':
+                    - generic [ref=e955]:
+                      - generic [ref=e956]: Kathalguri
+                      - generic [ref=e957]: "#4949 · 2026-09-08"
+                    - generic [ref=e958]: DUP
+                    - generic [ref=e959]:
+                      - generic [aria-hidden] [ref=e960]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e961]:
+                  - 'button "(unspecified) #4948 · 2025-03-06 HIGH REVIEW PRIORITY" [ref=e962]':
+                    - generic [ref=e963]:
+                      - generic [ref=e964]: (unspecified)
+                      - generic [ref=e965]: "#4948 · 2025-03-06"
+                    - generic [ref=e966]:
+                      - generic [aria-hidden] [ref=e967]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e968]:
+                  - 'button "(unspecified) #4947 · 2024-03-19 HIGH REVIEW PRIORITY" [ref=e969]':
+                    - generic [ref=e970]:
+                      - generic [ref=e971]: (unspecified)
+                      - generic [ref=e972]: "#4947 · 2024-03-19"
+                    - generic [ref=e973]:
+                      - generic [aria-hidden] [ref=e974]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e975]:
+                  - 'button "EPS Tengakhat #4946 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e976]':
+                    - generic [ref=e977]:
+                      - generic [ref=e978]: EPS Tengakhat
+                      - generic [ref=e979]: "#4946 · 2026-09-08"
+                    - generic [ref=e980]: DUP
+                    - generic [ref=e981]:
+                      - generic [aria-hidden] [ref=e982]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e983]:
+                  - 'button "(unspecified) #4945 · 2025-09-27 HIGH REVIEW PRIORITY" [ref=e984]':
+                    - generic [ref=e985]:
+                      - generic [ref=e986]: (unspecified)
+                      - generic [ref=e987]: "#4945 · 2025-09-27"
+                    - generic [ref=e988]:
+                      - generic [aria-hidden] [ref=e989]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e990]:
+                  - 'button "Duarmara #4944 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e991]':
+                    - generic [ref=e992]:
+                      - generic [ref=e993]: Duarmara
+                      - generic [ref=e994]: "#4944 · 2026-09-08"
+                    - generic [ref=e995]: DUP
+                    - generic [ref=e996]:
+                      - generic [aria-hidden] [ref=e997]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e998]:
+                  - 'button "Baghjan EPS #4943 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e999]':
+                    - generic [ref=e1000]:
+                      - generic [ref=e1001]: Baghjan EPS
+                      - generic [ref=e1002]: "#4943 · 2026-09-08"
+                    - generic [ref=e1003]: DUP
+                    - generic [ref=e1004]:
+                      - generic [aria-hidden] [ref=e1005]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1006]:
+                  - 'button "(unspecified) #4942 · 2024-08-04 HIGH REVIEW PRIORITY" [ref=e1007]':
+                    - generic [ref=e1008]:
+                      - generic [ref=e1009]: (unspecified)
+                      - generic [ref=e1010]: "#4942 · 2024-08-04"
+                    - generic [ref=e1011]:
+                      - generic [aria-hidden] [ref=e1012]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1013]:
+                  - 'button "Kathalguri #4941 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1014]':
+                    - generic [ref=e1015]:
+                      - generic [ref=e1016]: Kathalguri
+                      - generic [ref=e1017]: "#4941 · 2026-09-08"
+                    - generic [ref=e1018]: DUP
+                    - generic [ref=e1019]:
+                      - generic [aria-hidden] [ref=e1020]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1021]:
+                  - 'button "Kathalguri GCS #4940 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1022]':
+                    - generic [ref=e1023]:
+                      - generic [ref=e1024]: Kathalguri GCS
+                      - generic [ref=e1025]: "#4940 · 2026-09-08"
+                    - generic [ref=e1026]: DUP
+                    - generic [ref=e1027]:
+                      - generic [aria-hidden] [ref=e1028]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1029]:
+                  - 'button "(unspecified) #4939 · 2025-03-21 HIGH REVIEW PRIORITY" [ref=e1030]':
+                    - generic [ref=e1031]:
+                      - generic [ref=e1032]: (unspecified)
+                      - generic [ref=e1033]: "#4939 · 2025-03-21"
+                    - generic [ref=e1034]:
+                      - generic [aria-hidden] [ref=e1035]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1036]:
+                  - 'button "workover rig site #4938 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1037]':
+                    - generic [ref=e1038]:
+                      - generic [ref=e1039]: workover rig site
+                      - generic [ref=e1040]: "#4938 · 2026-09-08"
+                    - generic [ref=e1041]: DUP
+                    - generic [ref=e1042]:
+                      - generic [aria-hidden] [ref=e1043]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1044]:
+                  - 'button "Workover Rig #7 #4937 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1045]':
+                    - generic [ref=e1046]:
+                      - generic [ref=e1047]: "Workover Rig #7"
+                      - generic [ref=e1048]: "#4937 · 2026-09-08"
+                    - generic [ref=e1049]: DUP
+                    - generic [ref=e1050]:
+                      - generic [aria-hidden] [ref=e1051]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1052]:
+                  - 'button "Workshop Makum #4936 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1053]':
+                    - generic [ref=e1054]:
+                      - generic [ref=e1055]: Workshop Makum
+                      - generic [ref=e1056]: "#4936 · 2026-09-08"
+                    - generic [ref=e1057]: DUP
+                    - generic [ref=e1058]:
+                      - generic [aria-hidden] [ref=e1059]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1060]:
+                  - 'button "Digboi #4935 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1061]':
+                    - generic [ref=e1062]:
+                      - generic [ref=e1063]: Digboi
+                      - generic [ref=e1064]: "#4935 · 2026-09-08"
+                    - generic [ref=e1065]: DUP
+                    - generic [ref=e1066]:
+                      - generic [aria-hidden] [ref=e1067]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1068]:
+                  - 'button "(unspecified) #4934 · 2025-03-04 HIGH REVIEW PRIORITY" [ref=e1069]':
+                    - generic [ref=e1070]:
+                      - generic [ref=e1071]: (unspecified)
+                      - generic [ref=e1072]: "#4934 · 2025-03-04"
+                    - generic [ref=e1073]:
+                      - generic [aria-hidden] [ref=e1074]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1075]:
+                  - 'button "(unspecified) #4933 · 2025-08-05 HIGH REVIEW PRIORITY" [ref=e1076]':
+                    - generic [ref=e1077]:
+                      - generic [ref=e1078]: (unspecified)
+                      - generic [ref=e1079]: "#4933 · 2025-08-05"
+                    - generic [ref=e1080]:
+                      - generic [aria-hidden] [ref=e1081]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1082]:
+                  - 'button "(unspecified) #4932 · 2025-09-05 HIGH REVIEW PRIORITY" [ref=e1083]':
+                    - generic [ref=e1084]:
+                      - generic [ref=e1085]: (unspecified)
+                      - generic [ref=e1086]: "#4932 · 2025-09-05"
+                    - generic [ref=e1087]:
+                      - generic [aria-hidden] [ref=e1088]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1089]:
+                  - 'button "Moran GGS-1 #4931 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1090]':
+                    - generic [ref=e1091]:
+                      - generic [ref=e1092]: Moran GGS-1
+                      - generic [ref=e1093]: "#4931 · 2026-09-08"
+                    - generic [ref=e1094]: DUP
+                    - generic [ref=e1095]:
+                      - generic [aria-hidden] [ref=e1096]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1097]:
+                  - 'button "(unspecified) #4930 · 2024-05-07 HIGH REVIEW PRIORITY" [ref=e1098]':
+                    - generic [ref=e1099]:
+                      - generic [ref=e1100]: (unspecified)
+                      - generic [ref=e1101]: "#4930 · 2024-05-07"
+                    - generic [ref=e1102]:
+                      - generic [aria-hidden] [ref=e1103]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1104]:
+                  - 'button "Workover Rig #7 #4929 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1105]':
+                    - generic [ref=e1106]:
+                      - generic [ref=e1107]: "Workover Rig #7"
+                      - generic [ref=e1108]: "#4929 · 2026-09-08"
+                    - generic [ref=e1109]: DUP
+                    - generic [ref=e1110]:
+                      - generic [aria-hidden] [ref=e1111]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1112]:
+                  - 'button "Baghjan #4928 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1113]':
+                    - generic [ref=e1114]:
+                      - generic [ref=e1115]: Baghjan
+                      - generic [ref=e1116]: "#4928 · 2026-09-08"
+                    - generic [ref=e1117]: DUP
+                    - generic [ref=e1118]:
+                      - generic [aria-hidden] [ref=e1119]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1120]:
+                  - 'button "Moran-Naharkatiya #4927 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1121]':
+                    - generic [ref=e1122]:
+                      - generic [ref=e1123]: Moran-Naharkatiya
+                      - generic [ref=e1124]: "#4927 · 2026-09-08"
+                    - generic [ref=e1125]: DUP
+                    - generic [ref=e1126]:
+                      - generic [aria-hidden] [ref=e1127]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1128]:
+                  - 'button "Kathalguri #4926 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1129]':
+                    - generic [ref=e1130]:
+                      - generic [ref=e1131]: Kathalguri
+                      - generic [ref=e1132]: "#4926 · 2026-09-08"
+                    - generic [ref=e1133]: DUP
+                    - generic [ref=e1134]:
+                      - generic [aria-hidden] [ref=e1135]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1136]:
+                  - 'button "Duliajan GGS-4 #4925 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1137]':
+                    - generic [ref=e1138]:
+                      - generic [ref=e1139]: Duliajan GGS-4
+                      - generic [ref=e1140]: "#4925 · 2026-09-08"
+                    - generic [ref=e1141]: DUP
+                    - generic [ref=e1142]:
+                      - generic [aria-hidden] [ref=e1143]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1144]:
+                  - 'button "Kathalguri #4924 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1145]':
+                    - generic [ref=e1146]:
+                      - generic [ref=e1147]: Kathalguri
+                      - generic [ref=e1148]: "#4924 · 2026-09-08"
+                    - generic [ref=e1149]: DUP
+                    - generic [ref=e1150]:
+                      - generic [aria-hidden] [ref=e1151]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1152]:
+                  - 'button "Naharkatiya #4923 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1153]':
+                    - generic [ref=e1154]:
+                      - generic [ref=e1155]: Naharkatiya
+                      - generic [ref=e1156]: "#4923 · 2026-09-08"
+                    - generic [ref=e1157]: DUP
+                    - generic [ref=e1158]:
+                      - generic [aria-hidden] [ref=e1159]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1160]:
+                  - 'button "GGS-4 Duliajan #4922 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1161]':
+                    - generic [ref=e1162]:
+                      - generic [ref=e1163]: GGS-4 Duliajan
+                      - generic [ref=e1164]: "#4922 · 2026-09-08"
+                    - generic [ref=e1165]: DUP
+                    - generic [ref=e1166]:
+                      - generic [aria-hidden] [ref=e1167]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1168]:
+                  - 'button "Dumduma #4921 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1169]':
+                    - generic [ref=e1170]:
+                      - generic [ref=e1171]: Dumduma
+                      - generic [ref=e1172]: "#4921 · 2026-09-08"
+                    - generic [ref=e1173]: DUP
+                    - generic [ref=e1174]:
+                      - generic [aria-hidden] [ref=e1175]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1176]:
+                  - 'button "(unspecified) #4920 · 2025-06-26 HIGH REVIEW PRIORITY" [ref=e1177]':
+                    - generic [ref=e1178]:
+                      - generic [ref=e1179]: (unspecified)
+                      - generic [ref=e1180]: "#4920 · 2025-06-26"
+                    - generic [ref=e1181]:
+                      - generic [aria-hidden] [ref=e1182]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1183]:
+                  - 'button "Sapkhaiti #4919 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1184]':
+                    - generic [ref=e1185]:
+                      - generic [ref=e1186]: Sapkhaiti
+                      - generic [ref=e1187]: "#4919 · 2026-09-08"
+                    - generic [ref=e1188]: DUP
+                    - generic [ref=e1189]:
+                      - generic [aria-hidden] [ref=e1190]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1191]:
+                  - 'button "Dumduma #4918 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1192]':
+                    - generic [ref=e1193]:
+                      - generic [ref=e1194]: Dumduma
+                      - generic [ref=e1195]: "#4918 · 2026-09-08"
+                    - generic [ref=e1196]: DUP
+                    - generic [ref=e1197]:
+                      - generic [aria-hidden] [ref=e1198]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1199]:
+                  - 'button "(unspecified) #4917 · 2024-02-21 HIGH REVIEW PRIORITY" [ref=e1200]':
+                    - generic [ref=e1201]:
+                      - generic [ref=e1202]: (unspecified)
+                      - generic [ref=e1203]: "#4917 · 2024-02-21"
+                    - generic [ref=e1204]:
+                      - generic [aria-hidden] [ref=e1205]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1206]:
+                  - 'button "Duliajan GGS-2 #4916 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1207]':
+                    - generic [ref=e1208]:
+                      - generic [ref=e1209]: Duliajan GGS-2
+                      - generic [ref=e1210]: "#4916 · 2026-09-08"
+                    - generic [ref=e1211]: DUP
+                    - generic [ref=e1212]:
+                      - generic [aria-hidden] [ref=e1213]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1214]:
+                  - 'button "Baghjan EPS #4915 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1215]':
+                    - generic [ref=e1216]:
+                      - generic [ref=e1217]: Baghjan EPS
+                      - generic [ref=e1218]: "#4915 · 2026-09-08"
+                    - generic [ref=e1219]: DUP
+                    - generic [ref=e1220]:
+                      - generic [aria-hidden] [ref=e1221]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1222]:
+                  - 'button "(unspecified) #4914 · 2025-02-20 HIGH REVIEW PRIORITY" [ref=e1223]':
+                    - generic [ref=e1224]:
+                      - generic [ref=e1225]: (unspecified)
+                      - generic [ref=e1226]: "#4914 · 2025-02-20"
+                    - generic [ref=e1227]:
+                      - generic [aria-hidden] [ref=e1228]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1229]:
+                  - 'button "Kathalguri GCS #4913 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1230]':
+                    - generic [ref=e1231]:
+                      - generic [ref=e1232]: Kathalguri GCS
+                      - generic [ref=e1233]: "#4913 · 2026-09-08"
+                    - generic [ref=e1234]: DUP
+                    - generic [ref=e1235]:
+                      - generic [aria-hidden] [ref=e1236]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1237]:
+                  - 'button "Naharkatiya GGS-3 #4912 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1238]':
+                    - generic [ref=e1239]:
+                      - generic [ref=e1240]: Naharkatiya GGS-3
+                      - generic [ref=e1241]: "#4912 · 2026-09-08"
+                    - generic [ref=e1242]: DUP
+                    - generic [ref=e1243]:
+                      - generic [aria-hidden] [ref=e1244]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1245]:
+                  - 'button "(unspecified) #4911 · 2024-05-06 HIGH REVIEW PRIORITY" [ref=e1246]':
+                    - generic [ref=e1247]:
+                      - generic [ref=e1248]: (unspecified)
+                      - generic [ref=e1249]: "#4911 · 2024-05-06"
+                    - generic [ref=e1250]:
+                      - generic [aria-hidden] [ref=e1251]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1252]:
+                  - 'button "Kathalguri #4910 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1253]':
+                    - generic [ref=e1254]:
+                      - generic [ref=e1255]: Kathalguri
+                      - generic [ref=e1256]: "#4910 · 2026-09-08"
+                    - generic [ref=e1257]: DUP
+                    - generic [ref=e1258]:
+                      - generic [aria-hidden] [ref=e1259]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1260]:
+                  - 'button "(unspecified) #4909 · 2025-11-22 HIGH REVIEW PRIORITY" [ref=e1261]':
+                    - generic [ref=e1262]:
+                      - generic [ref=e1263]: (unspecified)
+                      - generic [ref=e1264]: "#4909 · 2025-11-22"
+                    - generic [ref=e1265]:
+                      - generic [aria-hidden] [ref=e1266]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1267]:
+                  - 'button "Kathalguri #4908 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1268]':
+                    - generic [ref=e1269]:
+                      - generic [ref=e1270]: Kathalguri
+                      - generic [ref=e1271]: "#4908 · 2026-09-08"
+                    - generic [ref=e1272]: DUP
+                    - generic [ref=e1273]:
+                      - generic [aria-hidden] [ref=e1274]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1275]:
+                  - 'button "(unspecified) #4907 · 2025-07-03 HIGH REVIEW PRIORITY" [ref=e1276]':
+                    - generic [ref=e1277]:
+                      - generic [ref=e1278]: (unspecified)
+                      - generic [ref=e1279]: "#4907 · 2025-07-03"
+                    - generic [ref=e1280]:
+                      - generic [aria-hidden] [ref=e1281]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1282]:
+                  - 'button "(unspecified) #4906 · 2024-01-17 LOW REVIEW PRIORITY" [ref=e1283]':
+                    - generic [ref=e1284]:
+                      - generic [ref=e1285]: (unspecified)
+                      - generic [ref=e1286]: "#4906 · 2024-01-17"
+                    - generic [ref=e1287]:
+                      - generic [aria-hidden] [ref=e1288]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1289]:
+                  - 'button "Dumduma #4905 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1290]':
+                    - generic [ref=e1291]:
+                      - generic [ref=e1292]: Dumduma
+                      - generic [ref=e1293]: "#4905 · 2026-09-08"
+                    - generic [ref=e1294]: DUP
+                    - generic [ref=e1295]:
+                      - generic [aria-hidden] [ref=e1296]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1297]:
+                  - 'button "(unspecified) #4904 · 2025-06-17 HIGH REVIEW PRIORITY" [ref=e1298]':
+                    - generic [ref=e1299]:
+                      - generic [ref=e1300]: (unspecified)
+                      - generic [ref=e1301]: "#4904 · 2025-06-17"
+                    - generic [ref=e1302]:
+                      - generic [aria-hidden] [ref=e1303]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1304]:
+                  - 'button "GGS Shalmari #4903 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1305]':
+                    - generic [ref=e1306]:
+                      - generic [ref=e1307]: GGS Shalmari
+                      - generic [ref=e1308]: "#4903 · 2026-09-08"
+                    - generic [ref=e1309]: DUP
+                    - generic [ref=e1310]:
+                      - generic [aria-hidden] [ref=e1311]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1312]:
+                  - 'button "(unspecified) #4902 · 2024-03-08 HIGH REVIEW PRIORITY" [ref=e1313]':
+                    - generic [ref=e1314]:
+                      - generic [ref=e1315]: (unspecified)
+                      - generic [ref=e1316]: "#4902 · 2024-03-08"
+                    - generic [ref=e1317]:
+                      - generic [aria-hidden] [ref=e1318]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1319]:
+                  - 'button "(unspecified) #4901 · 2024-07-23 HIGH REVIEW PRIORITY" [ref=e1320]':
+                    - generic [ref=e1321]:
+                      - generic [ref=e1322]: (unspecified)
+                      - generic [ref=e1323]: "#4901 · 2024-07-23"
+                    - generic [ref=e1324]:
+                      - generic [aria-hidden] [ref=e1325]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1326]:
+                  - 'button "(unspecified) #4900 · 2024-03-18 HIGH REVIEW PRIORITY" [ref=e1327]':
+                    - generic [ref=e1328]:
+                      - generic [ref=e1329]: (unspecified)
+                      - generic [ref=e1330]: "#4900 · 2024-03-18"
+                    - generic [ref=e1331]:
+                      - generic [aria-hidden] [ref=e1332]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1333]:
+                  - 'button "(unspecified) #4899 · 2024-03-13 LOW REVIEW PRIORITY" [ref=e1334]':
+                    - generic [ref=e1335]:
+                      - generic [ref=e1336]: (unspecified)
+                      - generic [ref=e1337]: "#4899 · 2024-03-13"
+                    - generic [ref=e1338]:
+                      - generic [aria-hidden] [ref=e1339]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1340]:
+                  - 'button "Hapjan #4898 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1341]':
+                    - generic [ref=e1342]:
+                      - generic [ref=e1343]: Hapjan
+                      - generic [ref=e1344]: "#4898 · 2026-09-08"
+                    - generic [ref=e1345]: DUP
+                    - generic [ref=e1346]:
+                      - generic [aria-hidden] [ref=e1347]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1348]:
+                  - 'button "(unspecified) #4897 · 2025-08-16 HIGH REVIEW PRIORITY" [ref=e1349]':
+                    - generic [ref=e1350]:
+                      - generic [ref=e1351]: (unspecified)
+                      - generic [ref=e1352]: "#4897 · 2025-08-16"
+                    - generic [ref=e1353]:
+                      - generic [aria-hidden] [ref=e1354]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1355]:
+                  - 'button "Kathalguri GCS #4896 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1356]':
+                    - generic [ref=e1357]:
+                      - generic [ref=e1358]: Kathalguri GCS
+                      - generic [ref=e1359]: "#4896 · 2026-09-08"
+                    - generic [ref=e1360]: DUP
+                    - generic [ref=e1361]:
+                      - generic [aria-hidden] [ref=e1362]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1363]:
+                  - 'button "(unspecified) #4895 · 2025-02-04 HIGH REVIEW PRIORITY" [ref=e1364]':
+                    - generic [ref=e1365]:
+                      - generic [ref=e1366]: (unspecified)
+                      - generic [ref=e1367]: "#4895 · 2025-02-04"
+                    - generic [ref=e1368]:
+                      - generic [aria-hidden] [ref=e1369]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1370]:
+                  - 'button "Guwahati Branch Office #4894 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1371]':
+                    - generic [ref=e1372]:
+                      - generic [ref=e1373]: Guwahati Branch Office
+                      - generic [ref=e1374]: "#4894 · 2026-09-08"
+                    - generic [ref=e1375]: DUP
+                    - generic [ref=e1376]:
+                      - generic [aria-hidden] [ref=e1377]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1378]:
+                  - 'button "Dumduma #4893 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1379]':
+                    - generic [ref=e1380]:
+                      - generic [ref=e1381]: Dumduma
+                      - generic [ref=e1382]: "#4893 · 2026-09-08"
+                    - generic [ref=e1383]: DUP
+                    - generic [ref=e1384]:
+                      - generic [aria-hidden] [ref=e1385]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1386]:
+                  - 'button "Naharkatiya #4892 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1387]':
+                    - generic [ref=e1388]:
+                      - generic [ref=e1389]: Naharkatiya
+                      - generic [ref=e1390]: "#4892 · 2026-09-08"
+                    - generic [ref=e1391]: DUP
+                    - generic [ref=e1392]:
+                      - generic [aria-hidden] [ref=e1393]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1394]:
+                  - 'button "(unspecified) #4891 · 2025-09-23 HIGH REVIEW PRIORITY" [ref=e1395]':
+                    - generic [ref=e1396]:
+                      - generic [ref=e1397]: (unspecified)
+                      - generic [ref=e1398]: "#4891 · 2025-09-23"
+                    - generic [ref=e1399]:
+                      - generic [aria-hidden] [ref=e1400]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1401]:
+                  - 'button "(unspecified) #4890 · 2025-07-07 HIGH REVIEW PRIORITY" [ref=e1402]':
+                    - generic [ref=e1403]:
+                      - generic [ref=e1404]: (unspecified)
+                      - generic [ref=e1405]: "#4890 · 2025-07-07"
+                    - generic [ref=e1406]:
+                      - generic [aria-hidden] [ref=e1407]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1408]:
+                  - 'button "Duliajan Transport Section #4889 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1409]':
+                    - generic [ref=e1410]:
+                      - generic [ref=e1411]: Duliajan Transport Section
+                      - generic [ref=e1412]: "#4889 · 2026-09-08"
+                    - generic [ref=e1413]: DUP
+                    - generic [ref=e1414]:
+                      - generic [aria-hidden] [ref=e1415]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1416]:
+                  - 'button "(unspecified) #4888 · 2025-03-05 HIGH REVIEW PRIORITY" [ref=e1417]':
+                    - generic [ref=e1418]:
+                      - generic [ref=e1419]: (unspecified)
+                      - generic [ref=e1420]: "#4888 · 2025-03-05"
+                    - generic [ref=e1421]:
+                      - generic [aria-hidden] [ref=e1422]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1423]:
+                  - 'button "Duliajan GGS-4 #4887 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1424]':
+                    - generic [ref=e1425]:
+                      - generic [ref=e1426]: Duliajan GGS-4
+                      - generic [ref=e1427]: "#4887 · 2026-09-08"
+                    - generic [ref=e1428]: DUP
+                    - generic [ref=e1429]:
+                      - generic [aria-hidden] [ref=e1430]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1431]:
+                  - 'button "ETP Kumchai #4886 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1432]':
+                    - generic [ref=e1433]:
+                      - generic [ref=e1434]: ETP Kumchai
+                      - generic [ref=e1435]: "#4886 · 2026-09-08"
+                    - generic [ref=e1436]: DUP
+                    - generic [ref=e1437]:
+                      - generic [aria-hidden] [ref=e1438]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1439]:
+                  - 'button "(unspecified) #4885 · 2024-10-31 LOW REVIEW PRIORITY" [ref=e1440]':
+                    - generic [ref=e1441]:
+                      - generic [ref=e1442]: (unspecified)
+                      - generic [ref=e1443]: "#4885 · 2024-10-31"
+                    - generic [ref=e1444]:
+                      - generic [aria-hidden] [ref=e1445]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1446]:
+                  - 'button "(unspecified) #4884 · 2025-09-24 HIGH REVIEW PRIORITY" [ref=e1447]':
+                    - generic [ref=e1448]:
+                      - generic [ref=e1449]: (unspecified)
+                      - generic [ref=e1450]: "#4884 · 2025-09-24"
+                    - generic [ref=e1451]:
+                      - generic [aria-hidden] [ref=e1452]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1453]:
+                  - 'button "Kathalguri GCS #4883 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1454]':
+                    - generic [ref=e1455]:
+                      - generic [ref=e1456]: Kathalguri GCS
+                      - generic [ref=e1457]: "#4883 · 2026-09-08"
+                    - generic [ref=e1458]: DUP
+                    - generic [ref=e1459]:
+                      - generic [aria-hidden] [ref=e1460]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1461]:
+                  - 'button "Naharkatiya #4882 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1462]':
+                    - generic [ref=e1463]:
+                      - generic [ref=e1464]: Naharkatiya
+                      - generic [ref=e1465]: "#4882 · 2026-09-08"
+                    - generic [ref=e1466]: DUP
+                    - generic [ref=e1467]:
+                      - generic [aria-hidden] [ref=e1468]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1469]:
+                  - 'button "Naharkatiya #4881 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1470]':
+                    - generic [ref=e1471]:
+                      - generic [ref=e1472]: Naharkatiya
+                      - generic [ref=e1473]: "#4881 · 2026-09-08"
+                    - generic [ref=e1474]: DUP
+                    - generic [ref=e1475]:
+                      - generic [aria-hidden] [ref=e1476]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1477]:
+                  - 'button "Moran #4880 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1478]':
+                    - generic [ref=e1479]:
+                      - generic [ref=e1480]: Moran
+                      - generic [ref=e1481]: "#4880 · 2026-09-08"
+                    - generic [ref=e1482]: DUP
+                    - generic [ref=e1483]:
+                      - generic [aria-hidden] [ref=e1484]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1485]:
+                  - 'button "Kathalguri #4879 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1486]':
+                    - generic [ref=e1487]:
+                      - generic [ref=e1488]: Kathalguri
+                      - generic [ref=e1489]: "#4879 · 2026-09-08"
+                    - generic [ref=e1490]: DUP
+                    - generic [ref=e1491]:
+                      - generic [aria-hidden] [ref=e1492]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1493]:
+                  - 'button "(unspecified) #4878 · 2024-08-05 HIGH REVIEW PRIORITY" [ref=e1494]':
+                    - generic [ref=e1495]:
+                      - generic [ref=e1496]: (unspecified)
+                      - generic [ref=e1497]: "#4878 · 2024-08-05"
+                    - generic [ref=e1498]:
+                      - generic [aria-hidden] [ref=e1499]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1500]:
+                  - 'button "Kumchai #4877 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1501]':
+                    - generic [ref=e1502]:
+                      - generic [ref=e1503]: Kumchai
+                      - generic [ref=e1504]: "#4877 · 2026-09-08"
+                    - generic [ref=e1505]: DUP
+                    - generic [ref=e1506]:
+                      - generic [aria-hidden] [ref=e1507]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1508]:
+                  - 'button "Central Stores Duliajan #4876 · 2026-09-08 GATE" [ref=e1509]':
+                    - generic [ref=e1510]:
+                      - generic [ref=e1511]: Central Stores Duliajan
+                      - generic [ref=e1512]: "#4876 · 2026-09-08"
+                    - generic [ref=e1513]: GATE
+                - listitem [ref=e1514]:
+                  - 'button "Tinsukia-Duliajan road #4875 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1515]':
+                    - generic [ref=e1516]:
+                      - generic [ref=e1517]: Tinsukia-Duliajan road
+                      - generic [ref=e1518]: "#4875 · 2026-09-08"
+                    - generic [ref=e1519]: DUP
+                    - generic [ref=e1520]:
+                      - generic [aria-hidden] [ref=e1521]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1522]:
+                  - 'button "Dumduma #4874 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1523]':
+                    - generic [ref=e1524]:
+                      - generic [ref=e1525]: Dumduma
+                      - generic [ref=e1526]: "#4874 · 2026-09-08"
+                    - generic [ref=e1527]: DUP
+                    - generic [ref=e1528]:
+                      - generic [aria-hidden] [ref=e1529]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1530]:
+                  - 'button "Baghjan EPS #4873 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1531]':
+                    - generic [ref=e1532]:
+                      - generic [ref=e1533]: Baghjan EPS
+                      - generic [ref=e1534]: "#4873 · 2026-09-08"
+                    - generic [ref=e1535]: DUP
+                    - generic [ref=e1536]:
+                      - generic [aria-hidden] [ref=e1537]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1538]:
+                  - 'button "workover rig #7 #4872 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1539]':
+                    - generic [ref=e1540]:
+                      - generic [ref=e1541]: "workover rig #7"
+                      - generic [ref=e1542]: "#4872 · 2026-09-08"
+                    - generic [ref=e1543]: DUP
+                    - generic [ref=e1544]:
+                      - generic [aria-hidden] [ref=e1545]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1546]:
+                  - 'button "Moran #4871 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1547]':
+                    - generic [ref=e1548]:
+                      - generic [ref=e1549]: Moran
+                      - generic [ref=e1550]: "#4871 · 2026-09-08"
+                    - generic [ref=e1551]: DUP
+                    - generic [ref=e1552]:
+                      - generic [aria-hidden] [ref=e1553]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1554]:
+                  - 'button "Baghjan EPS #4870 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1555]':
+                    - generic [ref=e1556]:
+                      - generic [ref=e1557]: Baghjan EPS
+                      - generic [ref=e1558]: "#4870 · 2026-09-08"
+                    - generic [ref=e1559]: DUP
+                    - generic [ref=e1560]:
+                      - generic [aria-hidden] [ref=e1561]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1562]:
+                  - 'button "Digboi #4869 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1563]':
+                    - generic [ref=e1564]:
+                      - generic [ref=e1565]: Digboi
+                      - generic [ref=e1566]: "#4869 · 2026-09-08"
+                    - generic [ref=e1567]: DUP
+                    - generic [ref=e1568]:
+                      - generic [aria-hidden] [ref=e1569]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1570]:
+                  - 'button "(unspecified) #4868 · 2024-03-15 HIGH REVIEW PRIORITY" [ref=e1571]':
+                    - generic [ref=e1572]:
+                      - generic [ref=e1573]: (unspecified)
+                      - generic [ref=e1574]: "#4868 · 2024-03-15"
+                    - generic [ref=e1575]:
+                      - generic [aria-hidden] [ref=e1576]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1577]:
+                  - 'button "Kathalguri #4867 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1578]':
+                    - generic [ref=e1579]:
+                      - generic [ref=e1580]: Kathalguri
+                      - generic [ref=e1581]: "#4867 · 2026-09-08"
+                    - generic [ref=e1582]: DUP
+                    - generic [ref=e1583]:
+                      - generic [aria-hidden] [ref=e1584]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1585]:
+                  - 'button "Tengakhat #4866 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1586]':
+                    - generic [ref=e1587]:
+                      - generic [ref=e1588]: Tengakhat
+                      - generic [ref=e1589]: "#4866 · 2026-09-08"
+                    - generic [ref=e1590]: DUP
+                    - generic [ref=e1591]:
+                      - generic [aria-hidden] [ref=e1592]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1593]:
+                  - 'button "Baghjan EPS #4865 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1594]':
+                    - generic [ref=e1595]:
+                      - generic [ref=e1596]: Baghjan EPS
+                      - generic [ref=e1597]: "#4865 · 2026-09-08"
+                    - generic [ref=e1598]: DUP
+                    - generic [ref=e1599]:
+                      - generic [aria-hidden] [ref=e1600]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1601]:
+                  - 'button "Naharkatiya #4864 · 2026-09-08 GATE" [ref=e1602]':
+                    - generic [ref=e1603]:
+                      - generic [ref=e1604]: Naharkatiya
+                      - generic [ref=e1605]: "#4864 · 2026-09-08"
+                    - generic [ref=e1606]: GATE
+                - listitem [ref=e1607]:
+                  - 'button "(unspecified) #4863 · 2025-07-25 HIGH REVIEW PRIORITY" [ref=e1608]':
+                    - generic [ref=e1609]:
+                      - generic [ref=e1610]: (unspecified)
+                      - generic [ref=e1611]: "#4863 · 2025-07-25"
+                    - generic [ref=e1612]:
+                      - generic [aria-hidden] [ref=e1613]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1614]:
+                  - 'button "workover rig #5 #4862 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1615]':
+                    - generic [ref=e1616]:
+                      - generic [ref=e1617]: "workover rig #5"
+                      - generic [ref=e1618]: "#4862 · 2026-09-08"
+                    - generic [ref=e1619]: DUP
+                    - generic [ref=e1620]:
+                      - generic [aria-hidden] [ref=e1621]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1622]:
+                  - 'button "(unspecified) #4861 · 2024-03-01 HIGH REVIEW PRIORITY" [ref=e1623]':
+                    - generic [ref=e1624]:
+                      - generic [ref=e1625]: (unspecified)
+                      - generic [ref=e1626]: "#4861 · 2024-03-01"
+                    - generic [ref=e1627]:
+                      - generic [aria-hidden] [ref=e1628]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1629]:
+                  - 'button "(unspecified) #4860 · 2024-02-29 HIGH REVIEW PRIORITY" [ref=e1630]':
+                    - generic [ref=e1631]:
+                      - generic [ref=e1632]: (unspecified)
+                      - generic [ref=e1633]: "#4860 · 2024-02-29"
+                    - generic [ref=e1634]:
+                      - generic [aria-hidden] [ref=e1635]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1636]:
+                  - 'button "Workover Rig #5 #4859 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1637]':
+                    - generic [ref=e1638]:
+                      - generic [ref=e1639]: "Workover Rig #5"
+                      - generic [ref=e1640]: "#4859 · 2026-09-08"
+                    - generic [ref=e1641]: DUP
+                    - generic [ref=e1642]:
+                      - generic [aria-hidden] [ref=e1643]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1644]:
+                  - 'button "GGS-2 Duliajan #4858 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1645]':
+                    - generic [ref=e1646]:
+                      - generic [ref=e1647]: GGS-2 Duliajan
+                      - generic [ref=e1648]: "#4858 · 2026-09-08"
+                    - generic [ref=e1649]: DUP
+                    - generic [ref=e1650]:
+                      - generic [aria-hidden] [ref=e1651]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1652]:
+                  - 'button "Digboi #4857 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1653]':
+                    - generic [ref=e1654]:
+                      - generic [ref=e1655]: Digboi
+                      - generic [ref=e1656]: "#4857 · 2026-09-08"
+                    - generic [ref=e1657]: DUP
+                    - generic [ref=e1658]:
+                      - generic [aria-hidden] [ref=e1659]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1660]:
+                  - 'button "(unspecified) #4856 · 2024-06-03 HIGH REVIEW PRIORITY" [ref=e1661]':
+                    - generic [ref=e1662]:
+                      - generic [ref=e1663]: (unspecified)
+                      - generic [ref=e1664]: "#4856 · 2024-06-03"
+                    - generic [ref=e1665]:
+                      - generic [aria-hidden] [ref=e1666]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1667]:
+                  - 'button "(unspecified) #4855 · 2024-03-04 LOW REVIEW PRIORITY" [ref=e1668]':
+                    - generic [ref=e1669]:
+                      - generic [ref=e1670]: (unspecified)
+                      - generic [ref=e1671]: "#4855 · 2024-03-04"
+                    - generic [ref=e1672]:
+                      - generic [aria-hidden] [ref=e1673]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1674]:
+                  - 'button "Chabua #4854 · 2026-09-08 DUP LOW REVIEW PRIORITY" [ref=e1675]':
+                    - generic [ref=e1676]:
+                      - generic [ref=e1677]: Chabua
+                      - generic [ref=e1678]: "#4854 · 2026-09-08"
+                    - generic [ref=e1679]: DUP
+                    - generic [ref=e1680]:
+                      - generic [aria-hidden] [ref=e1681]: ▽
+                      - text: LOW REVIEW PRIORITY
+                - listitem [ref=e1682]:
+                  - 'button "Kathalguri GCS #4853 · 07.11.2025 HIGH REVIEW PRIORITY" [ref=e1683]':
+                    - generic [ref=e1684]:
+                      - generic [ref=e1685]: Kathalguri GCS
+                      - generic [ref=e1686]: "#4853 · 07.11.2025"
+                    - generic [ref=e1687]:
+                      - generic [aria-hidden] [ref=e1688]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1689]:
+                  - 'button "Kathalguri GCS #4852 · 15.12.2025 HIGH REVIEW PRIORITY" [ref=e1690]':
+                    - generic [ref=e1691]:
+                      - generic [ref=e1692]: Kathalguri GCS
+                      - generic [ref=e1693]: "#4852 · 15.12.2025"
+                    - generic [ref=e1694]:
+                      - generic [aria-hidden] [ref=e1695]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1696]:
+                  - 'button "Baghjan EPS #4851 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1697]':
+                    - generic [ref=e1698]:
+                      - generic [ref=e1699]: Baghjan EPS
+                      - generic [ref=e1700]: "#4851 · 2026-09-08"
+                    - generic [ref=e1701]: DUP
+                    - generic [ref=e1702]:
+                      - generic [aria-hidden] [ref=e1703]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1704]:
+                  - 'button "Digboi #4850 · 2026-09-08 DUP HIGH REVIEW PRIORITY" [ref=e1705]':
+                    - generic [ref=e1706]:
+                      - generic [ref=e1707]: Digboi
+                      - generic [ref=e1708]: "#4850 · 2026-09-08"
+                    - generic [ref=e1709]: DUP
+                    - generic [ref=e1710]:
+                      - generic [aria-hidden] [ref=e1711]: ▲
+                      - text: HIGH REVIEW PRIORITY
+                - listitem [ref=e1712]:
+                  - 'button "(unspecified) #4849 · 2024-03-21 HIGH REVIEW PRIORITY" [ref=e1713]':
+                    - generic [ref=e1714]:
+                      - generic [ref=e1715]: (unspecified)
+                      - generic [ref=e1716]: "#4849 · 2024-03-21"
+                    - generic [ref=e1717]:
+                      - generic [aria-hidden] [ref=e1718]: ▲
+                      - text: HIGH REVIEW PRIORITY
+            - generic [ref=e1734]:
+              - generic [ref=e1735]:
+                - generic [ref=e1736]:
+                  - generic [aria-hidden] [ref=e1737]: ▽
+                  - text: LOW REVIEW PRIORITY
+                - generic [ref=e1738]: no action needed
+              - generic [ref=e1739]:
+                - generic [ref=e1740]:
+                  - generic [ref=e1741]: Band LOW
+                  - generic "triage score" [ref=e1742]: triage score 0.01
+                  - generic [ref=e1743]: 244ms
+                  - generic [ref=e1744]: (live paste) · ad-hoc classify
+                - generic "Rule probabilities" [ref=e1745]:
+                  - paragraph [ref=e1746]: Rule probabilities
+                  - generic [ref=e1749]:
+                    - generic [ref=e1750]: Working at Height
+                    - generic [ref=e1753]: "0.01"
+                  - generic [ref=e1754]:
+                    - generic [ref=e1755]: Safe Mechanical Lifting
+                    - generic [ref=e1758]: "0.01"
+                  - generic [ref=e1759]:
+                    - generic [ref=e1760]: Line of Fire
+                    - generic [ref=e1763]: "0.01"
+                - paragraph [ref=e1764]: "Declared out-of-scope (never scored): Work Authorisation (Permit to Work) · Bypassing Safety Controls"
+                - blockquote [ref=e1765]: One half-inch combination spanner dropped from mast platform of drilling rig RJ-18 at Jorajan during pipe handling in the morning. It fell on the rig floor matting near V-door side. No one was standing below as floor was cleared before the job. Derrickman reminded again to use wrist lanyard for hand tools kept at height.
+                - button "Why this score?" [ref=e1767]
+              - generic [ref=e1770]:
+                - generic [ref=e1771]:
+                  - button "Confirm SIF-potential" [ref=e1772]
+                  - button "Not SIF-potential" [ref=e1773]
+                - paragraph [ref=e1774]: Model proposes, HSE disposes. Your decision becomes a training label.
+          - region "Sentinel gate system" [ref=e141]:
+            - heading "The Sentinel gate system — routed to review, never auto-cleared" [level=2] [ref=e142]
+            - generic [ref=e143]:
+              - generic [ref=e152]:
+                - paragraph [ref=e153]: Short report
+                - paragraph [ref=e154]: Very short text with no recognized safety short code — not enough signal to score reliably. Routed to review, never auto-cleared.
+              - generic [ref=e160]:
+                - paragraph [ref=e161]: Negation guard
+                - paragraph [ref=e162]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+              - generic [ref=e169]:
+                - paragraph [ref=e170]: Language gate
+                - paragraph [ref=e171]: Language beyond current scoring support — the original text is preserved and routed to review, never silently mis-scored. Translation available on request.
+              - generic [ref=e177]:
+                - paragraph [ref=e178]: Low confidence
+                - paragraph [ref=e179]: Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.
+              - generic [ref=e184]:
+                - paragraph [ref=e185]: Drill / simulation
+                - paragraph [ref=e186]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+              - generic [ref=e192]:
+                - paragraph [ref=e193]: Near-duplicate
+                - paragraph [ref=e194]: Matches a training record — memory, not generalization. Shown as a banner on the triage card.
+              - generic [ref=e203]:
+                - paragraph [ref=e204]: Long report (chunked)
+                - paragraph [ref=e205]: Over 120 words — scored with the sliding-window path (length out of distribution). Shown as a chunked badge.
+  - contentinfo [ref=e206]:
+    - paragraph [ref=e207]: Model proposes, HSE disposes. Your decision becomes a training label.

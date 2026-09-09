@@ -12,7 +12,28 @@ what to read first. **"Model proposes, HSE disposes."**
 
 ## Architecture
 
-<!-- TODO: architecture diagram (rendered figure goes here) -->
+```mermaid
+flowchart LR
+    subgraph DEV["DEV-TIME (cloud-legal: public/synthetic data only)"]
+        A["OSHA SIR 105,996 rows<br/>2015–2025"] --> B["Dual era-conditional<br/>OIICS maps (v1/v2)"]
+        C["ASRS 47,723 reports<br/>(weak negatives)"] --> B
+        D["Synthetic OIL corpus<br/>9,687 rows (cloud LLM)"] --> E
+        B --> E["Token-level outcome<br/>neutralization"]
+        E --> F["Temporal hard split<br/>train ≤2023 / test 2024–25"]
+        F --> G["ModernBERT-base 149M<br/>3 heads: SIF · 7 rules · spans<br/>(Kaggle 2×T4)"]
+        G --> H["Hand-rolled ONNX export<br/>+ INT8 quantize + parity gate"]
+    end
+    subgraph RUN["RUNTIME (100% local, bare metal, no docker)"]
+        I["CSV/Excel · paste · JSON"] --> J["Validation + SQLite<br/>+ near-dup index (MiniLM)"]
+        H --> K["onnxruntime INT8<br/>p95 ≈ 20 ms"]
+        J --> K
+        K --> L["Triage score (calibrated)<br/>rule probabilities · evidence spans<br/>well-control tag"]
+        L --> M["Sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · long-input"]
+        M --> N["Deterministic explanations<br/>(optional local qwen3:4b rewording,<br/>template fallback on every call)"]
+        N --> O["React dashboard:<br/>feed · density re-rank · patterns<br/>review queue · EN/हिं toggle"]
+    end
+```
+
 Source of truth: [`runs/run2/ARCHITECTURE.md`](runs/run2/ARCHITECTURE.md)
 (adjudicated v2, 2026-09-08) with rulings in [`runs/run2/DECISION_LOG.md`](runs/run2/DECISION_LOG.md).
 
@@ -88,8 +109,23 @@ pip install -r requirements-dev.txt
 
 ## Honest claims
 
-<!-- TODO: full claims table with measured numbers (every deck claim measured on
-     this machine within 72h of the demo — ARCHITECTURE.md acceptance bar) -->
+Every number below was measured on the demo machine within 72 h of the demo and
+traces to a file (see [`runs/run2/kb/KNOWLEDGE_BASE.md`](runs/run2/kb/KNOWLEDGE_BASE.md)
+§10/§11 and [`runs/run2/day2/ship_decision.md`](runs/run2/day2/ship_decision.md)):
+
+| Claim | Measured value |
+|---|---|
+| Operating point (max recall @ precision ≥ 0.80), derived-label temporal holdout, n = 17,731 | **P 0.8000 · R 0.9748 · F1 0.8788** (proxy labels; blind human gold set is the arbiter) |
+| Classify latency, single report, CPU-only, 8 threads | p50 11.9 ms · **p95 19.7 ms** · p99 40.2 ms |
+| Bulk ingest, live end-to-end | **37.3 reports/s** (5,050 rows, 135.3 s wall; SLA ≥30/s) |
+| Evidence spans | 100% exact-substring validity, self-validated before render; invalid spans dropped, never shown |
+| Near-dup detection | measured cosine threshold 0.91 on a 70,398-vector MiniLM index, p95 3.8 ms |
+| Fine-tune vs zero-shot qwen3:8b (McNemar, Holm-corrected, n = 1,500) | fine-tune wins, **p = 0.0018**, at 1,083× lower per-classification latency |
+| Fine-tune vs TF-IDF+LogReg (same sample) | **not significant (p = 0.122) — disclosed, not hidden** |
+| Adversarial suite / packaging | 17/17 PASS · self-check: 2 clean start→classify→stop cycles |
+| Training cost | 4.19 + 1.11 GPU-h of a 30 h weekly Kaggle quota |
+| Air-gapped operation | zero external requests in the demo path by design; physical-unplug run is a scripted demo beat |
+| Gold set | 500 blind-labeled reports (300 OSHA 2024–25 incl. 150 oil-gas + 100 ASRS + 100 synthetic); 690 judgments = 500 primary + 150 double + 20 pilot × 2; real-only headline, synthetic never pooled |
 
 What this system is:
 
