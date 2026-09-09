@@ -138,3 +138,12 @@ Consolidates HANDOFF.md Part B + Phase 0 validation + Phase 1 swarm findings. Wh
 - **D29**: chunked-low-score gate (9th gate) ships; v2 positional dead-zone residual converted to gray-review routing.
 - **BLAS threadpool fix**: OpenBLAS spinning workers starved onnxruntime — threadpool_limits(1) around matmuls; live API p50 150→42.5ms, ingest 37.3→45.6/s.
 - **masked-v2 final latency (unclamped, measured)**: model p50/p95/p99 = 11.4/17.7/20.5 ms; API e2e p95 46.9ms; ingest 45.6/s.
+
+## 12. Gold results (added 2026-09-10 ~03:50 IST)
+
+- **All 4 label queues complete** (801 raw judgments, 500 items). Headline (human-consensus, all-4): real pooled n=313 — **P 0.838 / R 0.824 / F1 0.831**; OSHA stratum P 0.838 / R 0.895. κ (doubles, n=130) = 0.346; pilot κ 0.296.
+- **Labeler C outlier** (behavioral: 2s median/item, 6-items/s bursts, 0.27 label rate vs 0.58-0.70, worst pairwise): noC sensitivity → P 0.990 / R 0.809 / κ 0.491; 37/38 OSHA FPs are C-solo labels. Headline stays all-4 (no exclusion to defend); noC disclosed in appendix.
+- **LLM panel (cloud, rubric-fed, blind)**: per-model agreement with human consensus 0.68-0.71; 4-model majority 0.7253 (OSHA stratum 0.82, ASRS 0.54, synthetic 0.53). Reported-only transparency metric; never touched a label.
+- **LLM adjudication panel (user decision D30)**: 4 models × 3 personas ruled the 100 disputed items (72 SIF / 22 non-SIF / 6 tie-unsure). Supplementary variant: real pooled n=394 — P 0.838 / R 0.726 (disputed items are disproportionately model-misses the panel calls SIF — the "hard cases" effect, disclosed).
+- **ASRS stratum: recall 0.00 (19/19 missed, max p 0.0017)** — aviation is fully OOD; also self-inflicted (ASRS is train-only-negatives). Deck must disclose.
+- **Synthetic stratum: P 0.265-0.357** — conservative over-flagging of mechanism-rich near-miss negatives; the review-queue containment story.
