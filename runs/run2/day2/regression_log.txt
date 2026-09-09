@@ -1,4 +1,4 @@
-==================== onnx_classifier_check — 22:07:49 ====================
+==================== onnx_classifier_check — 23:10:41 ====================
 [1] factory resolution
   ok: missing model dir -> MockClassifier fallback
   ok: masked-v1 ship artifact -> RealOnnxClassifier
@@ -43,7 +43,7 @@
   ok: sif score in [0,1]
   ok: every span satisfies text[start:end]==span.text
   ok: top-3 spans cap
-      1500-word end-to-end: 0.55s
+      1500-word end-to-end: 0.68s
 [5] temperature hook
   ok: T read from metrics.json
   ok: T>1 pulls score toward 0.5
@@ -72,7 +72,7 @@
 
 ONNX CLASSIFIER CHECK PASS
 ---- onnx_classifier_check exit=0
-==================== postreview_fix_check — 22:07:50 ====================
+==================== postreview_fix_check — 23:10:43 ====================
 model: onnx:masked-v2/sif_multitask_int8.onnx quant=int8 supports_exact_batch=False stride=64
 [1] SEV1-1 rule-head order (zip == training order)
   ok: RULE_HEAD_ORDER == train.py RULES verbatim ('line_of_fire', 'working_at_height', 'driving', 'energy_isolation', 'hot_work', 'safe_mechanical_lifting', 'confined_space')
@@ -96,7 +96,7 @@ Traceback (most recent call last):
     raise AssertionError(f"FAIL: {label}")
 AssertionError: FAIL: worst-case score 0.030 > 0.20 (was 0.13 at stride 96)
 ---- postreview_fix_check exit=1
-==================== near_dup_embed_check — 22:07:52 ====================
+==================== near_dup_embed_check — 23:10:46 ====================
 threshold: 0.91 (artifacts/embeddings/threshold_report.md)
 [1] pooling verification vs official quickstart sims
   ok: mean-pool matches reference (worst |d|=4.5e-05)
@@ -114,7 +114,7 @@ threshold: 0.91 (artifacts/embeddings/threshold_report.md)
 
 NEAR-DUP CHECK PASS
 ---- near_dup_embed_check exit=0
-==================== explain_check — 22:07:52 ====================
+==================== explain_check — 23:10:46 ====================
 [1] template correctness
   ok: deterministic: same pred -> same template
   ok: triage score present
@@ -126,7 +126,7 @@ NEAR-DUP CHECK PASS
 [2] fallback when ollama is stopped (connection refused)
   ok: silent template fallback
   ok: fallback template identical to render_template
-  ok: fast failure (0.01s, no stall)
+  ok: fast failure (0.00s, no stall)
 [3] span validation + retry state machine
   ok: clean output accepted on first try
   ok: C10 contract on the wire: think:false + format schema
@@ -155,7 +155,7 @@ classifier: RealOnnxClassifier (onnx:masked-v2/sif_multitask_int8.onnx)
 [5] endpoint wiring (uvicorn, SIF_EXPLAIN_LLM=0)
   ok: classify?explain=1 -> 200
   ok: explanation attached: template present, reworded null (llm disabled)
-  ok: explain=1 stays fast with llm disabled (95 ms)
+  ok: explain=1 stays fast with llm disabled (151 ms)
   ok: plain classify untouched (explanation null)
   ok: GET /reports/{id}/explanation -> 200
   ok: second GET served from cache
@@ -163,7 +163,7 @@ classifier: RealOnnxClassifier (onnx:masked-v2/sif_multitask_int8.onnx)
 
 EXPLAIN CHECK PASS
 ---- explain_check exit=0
-==================== api_smoke — 22:07:54 ====================
+==================== api_smoke — 23:10:48 ====================
 [1] health
   ok: health ok
   ok: classifier named
@@ -214,7 +214,7 @@ EXPLAIN CHECK PASS
 
 SMOKE PASS
 ---- api_smoke exit=0
-==================== adversarial_suite — 22:07:55 ====================
+==================== adversarial_suite — 23:10:50 ====================
 classifier under test: RealOnnxClassifier (onnx:masked-v2/sif_multitask_int8.onnx)
 seeded near-dup index: 1 train-style + 1 synthetic-style row
   [PASS] # 1 B.3-1  negated fall ('No injury occurred')
@@ -261,7 +261,7 @@ seeded near-dup index: 1 train-style + 1 synthetic-style row
 
 ADVERSARIAL SUITE PASS — 18/18 routed correctly, no crashes, schema valid
 ---- adversarial_suite exit=0
-==================== pattern_mine_selfcheck — 22:07:57 ====================
+==================== pattern_mine_selfcheck — 23:10:53 ====================
 [1] hand-verifiable example (10-row corpus, base rate 0.4)
   ok: base rate 4/10 = 0.4
   ok: cell support n=4, n_sif=3
@@ -436,7 +436,7 @@ ADVERSARIAL SUITE PASS — 18/18 routed correctly, no crashes, schema valid
 
 SELF-CHECK PASS
 ---- pattern_mine_selfcheck exit=0
-==================== demo_pack_selfcheck — 22:07:59 ====================
+==================== demo_pack_selfcheck — 23:10:56 ====================
 == 1. demo_corpus.jsonl structure + ingest-schema validity ==
 [PASS] 13 demo cards — got 13
 [PASS] demo_ids unique
@@ -500,4 +500,4 @@ SELF-CHECK PASS
 
 SELF-CHECK PASSED: all checks green
 ---- demo_pack_selfcheck exit=0
-==================== BATTERY DONE 22:08:02 ====================
+==================== BATTERY DONE 23:10:59 ====================

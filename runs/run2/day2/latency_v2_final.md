@@ -77,6 +77,12 @@ Log: `runs/run2/day2/regression_log.txt`. Run 22:07–22:08 IST on the current t
 
 v2 fires when the hazard is near a window start (0.79 at offsets 0/64) but decays to 0.03–0.19 mid-window — **below the gray band → silent auto-green** on long (>~90-word) reports whose hazard sentences all land mid-window. Day-1 demo cards are unaffected (their hazard phrases repeat/appear early; long-report card scores 0.75). This is inherent to CLS pooling + v2's training mix — NOT fixable in test/config code, and retraining is out of scope tonight. **Suggested mitigation for adjudication:** route `chunked=True` inputs with score < gray_band_low to review instead of auto-green (one-line gate change), or accept + disclose. The test was deliberately NOT weakened; it now correctly fails against the ship model.
 
+**Resolution (audit-fix wave, Sep 9 23:10): FLAGGED, not re-baselined.** Decision rule: re-baseline only if v2 is equivalent-in-kind (valleys land in the gray band / above threshold where it matters). Evidence:
+
+- *On the probe (the test's own artifact): condition FAILS.* v2's 13 valleys sit at 0.03–0.38 — decisively below the gray band [0.40, 0.60] (v1's 2 valleys: 0.25/0.36, also sub-band but 8–12× higher; both models flag the hazard at window-initial positions). App plumbing is exonerated: D27 per-window-solo parity holds exactly on v2 (delta 4e-5), so this is the v2 weights' stronger CLS positional discount, not a chunking bug.
+- *On real multi-window rows (what ships): v1 ≈ v2.* Only 153/17,731 test rows (0.9%) are multi-window; on a 60-row sample (seed 7): v1 mean 0.951 / min 0.414, v2 mean 0.942 / min 0.311, 3 decision flips at the v2 threshold (both directions), 1/60 v2 scores in the silent-green zone (<0.40).
+- *Net:* real-input exposure is small but nonzero, and the synthetic worst case regressed in kind (0.25→0.03). That fails the equivalence bar, so the test keeps its v1-derived thresholds as the honest red flag. Mitigation options for the T-6h gate: (a) accept + disclose on the robustness slide with the 0.9%/1-of-60 numbers; (b) one-line gate: `chunked=True` + score < 0.40 → gray review (converts silent-green to human review; costs nothing on short inputs); (c) ship masked-v1 fallback (passes this probe, but re-opens the first-aid FP and loses +0.013 AUC — not recommended). masked-v2 remains the right ship call under (a) or (b).
+
 ## 6. Browser e2e (live :8177, 1920×1080, Playwright)
 
 Five key screens, **zero console errors** (the single 404 in the log is another agent's dead tab on :8191, unrelated origin):
