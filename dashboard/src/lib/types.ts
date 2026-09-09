@@ -25,7 +25,8 @@ export type GateKind =
   | "drill"
   | "near_dup"
   | "long_input"
-  | "well_control_watch";
+  | "well_control_watch"
+  | "chunked_low_score";
 
 export type GateAction = "badge" | "gray" | "block";
 

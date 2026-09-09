@@ -68,7 +68,8 @@ def _predict_with_gates(storage: Storage, clf: Classifier, cfg: Settings, text: 
     pred.evidence_spans = validate_spans(text, pred.evidence_spans)
     pred.gate_states = run_gates(text, pred.sif_score, storage, cfg,
                                  well_control=pred.well_control,
-                                 flag_thr=flag_threshold(clf))
+                                 flag_thr=flag_threshold(clf),
+                                 chunked=getattr(pred, "chunked", False))
     return pred
 
 
@@ -191,7 +192,8 @@ def ingest(body: IngestRequest, req: Request) -> IngestResult:
             pred.gate_states = run_gates(report.text, pred.sif_score, storage, cfg,
                                          vec=vec, base_hit=base_hit,
                                          well_control=pred.well_control,
-                                         flag_thr=flag_threshold(clf))
+                                         flag_thr=flag_threshold(clf),
+                                         chunked=getattr(pred, "chunked", False))
             prepared.append((report, pred, vec, th))
     # Phase 2 — ONE transaction: every row lands or none do. A failure here
     # rolls the whole batch back and the client gets an honest error instead

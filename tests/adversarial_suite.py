@@ -280,7 +280,7 @@ CASES: list[dict] = [
     },
 ]
 
-GATE_ORDER = ["min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input", "well_control_watch"]
+GATE_ORDER = ["min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input", "well_control_watch", "chunked_low_score"]
 
 # Set from /api/health in main(). Three expectations below were tuned to the
 # mock's sha256-seeded Beta scores; the real model disposes of those inputs

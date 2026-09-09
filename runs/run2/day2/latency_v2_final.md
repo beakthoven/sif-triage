@@ -53,7 +53,7 @@ The clean run is **+22% faster than Day-1 night's 37.3/s** on identical input �
 
 ## 4. Regression battery (all vs masked-v2, test ports 8191–8195, throwaway DBs)
 
-Log: `runs/run2/day2/regression_log.txt`. Run 22:07–22:08 IST on the current tree (incl. the wave's WC-watch gate + persist=1 changes and the storage fix above).
+Log: `runs/run2/day2/regression_log.txt`. Run twice with identical outcomes: 22:07–22:08 IST (wave tree) and 23:10–23:11 IST (committed tree, commit `1995018`, quiet cool machine) — deterministic.
 
 | Suite | Result | Notes |
 |---|---|---|

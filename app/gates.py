@@ -275,6 +275,26 @@ def gate_well_control_watch(well_control: bool, score: float, flag_thr: float) -
     )
 
 
+def gate_chunked_low_score(chunked: bool, score: float) -> GateState:
+    """Chunked-input humility gate (T-6h adjudication of the v2 positional
+    finding in runs/run2/day2/latency_v2_final.md §5): on multi-window inputs
+    the CLS-pooled head can discount mid-text hazards (measured valleys to
+    0.03 on synthetic probes). A chunked report scoring below the confidence
+    band may be a silent false negative — route to review (gray) instead of
+    auto-greening. Badge-only behavior for chunked + confident scores."""
+    triggered = chunked and score < 0.40
+    return GateState(
+        name="chunked_low_score",
+        triggered=triggered,
+        action="gray",
+        detail=(
+            f"chunked input scored {score:.3f} below the 0.40 confidence band — "
+            "long-report scoring can discount mid-text hazards; routed to "
+            "human review"
+        ) if triggered else "",
+    )
+
+
 def gate_long_input(text: str, cfg: Settings) -> GateState:
     """Long-input info badge: >120 words -> 'chunked' (sliding-window max-pool
     applies, score is length-OOD). Informational badge, never gray. Inputs
@@ -299,14 +319,17 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
               vec: "np.ndarray | None" = None,
               base_hit: "tuple[int | str, float] | None" = None,
               well_control: bool = False,
-              flag_thr: float = 0.5) -> list[GateState]:
+              flag_thr: float = 0.5,
+              chunked: bool = False) -> list[GateState]:
     # vec/base_hit (optional) are the bulk-ingest path's batch-computed
     # embedding + corpus-tier top-1 (D25); None = compute per row (the
     # /classify path, unchanged). well_control is the classifier's
     # deterministic barrier tag; flag_thr is its calibrated flag threshold
     # (flag_threshold(clf)) — both feed the well-control watch gate.
+    # chunked feeds the chunked-low-score humility gate.
     # Order is load-bearing (smoke test addresses drill by index 4);
-    # well_control_watch is appended LAST so existing positions hold.
+    # well_control_watch / chunked_low_score are appended LAST so existing
+    # positions hold.
     specs = (
         ("min_length", lambda: gate_min_length(text, cfg)),
         ("negation", lambda: gate_negation(text)),
@@ -316,6 +339,7 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
         ("near_dup", lambda: gate_near_dup(text, storage, cfg, vec=vec, base_hit=base_hit)),
         ("long_input", lambda: gate_long_input(text, cfg)),
         ("well_control_watch", lambda: gate_well_control_watch(well_control, score, flag_thr)),
+        ("chunked_low_score", lambda: gate_chunked_low_score(chunked, score)),
     )
     states: list[GateState] = []
     for name, fn in specs:

@@ -119,7 +119,7 @@ def main() -> int:
         check(pred.well_control is True, "well-control tag on kick/BOP language")
         check({g.name for g in pred.gate_states} == {
             "min_length", "negation", "language", "confidence", "drill", "near_dup",
-            "long_input", "well_control_watch",
+            "long_input", "well_control_watch", "chunked_low_score",
         }, "all 8 gates reported")
         _, pred2_raw = req("POST", "/classify", {"text": SAMPLE_REPORT})
         check(pred_raw == pred2_raw, "deterministic: same text -> same prediction")

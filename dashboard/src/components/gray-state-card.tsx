@@ -69,6 +69,12 @@ const GATE_META: Record<
     sentence:
       "Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.",
   },
+  chunked_low_score: {
+    icon: Scissors,
+    name: "Long report, low confidence",
+    sentence:
+      "A long (chunked) report scored below the confidence band — sliding-window scoring can discount mid-text hazards. Routed to human review, never auto-cleared.",
+  },
 };
 
 const GATE_ORDER: GateKind[] = [
@@ -80,6 +86,7 @@ const GATE_ORDER: GateKind[] = [
   "near_dup",
   "long_input",
   "well_control_watch",
+  "chunked_low_score",
 ];
 
 export function GrayStateCard({ report, gate }: { report: Report; gate: GateState }) {
