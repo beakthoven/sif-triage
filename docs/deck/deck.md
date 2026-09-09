@@ -2,7 +2,7 @@
 
 Slide-by-slide skeleton, 12 slides. Every non-gold number below is **verified against
 artifacts** (sources cited per slide in `> source:` lines — delete those lines in the
-rendered deck). Gold-dependent numbers are `{{PLACEHOLDERS}}` and fill in from
+rendered deck). Gold numbers FILLED 2026-09-10 03:50 IST from artifacts/gold/gold_metrics_all4.json (human-consensus headline, n=313 real pooled; supplementary variants in artifacts/gold/). Originally: Gold-dependent numbers are `{{PLACEHOLDERS}}` and fill in from
 `artifacts/gold/gold_metrics.json` / `gold_metrics.md` after labeling + adjudication
 (one command: `.venv/bin/python gold/compute_gold_metrics.py`).
 
@@ -161,9 +161,9 @@ Headline quadrant (tabular numerals, one number per quadrant):
 
 | | |
 |---|---|
-| **{{GOLD_RECALL}}** recall @ P≥0.80 | 95% CI {{GOLD_RECALL_CI}} |
-| **{{GOLD_PRECISION}}** precision | 95% CI {{GOLD_PRECISION_CI}} |
-| **{{GOLD_KAPPA}}** Fleiss' κ (human-vs-human) | n = {{GOLD_KAPPA_N}} double-labeled |
+| **0.82** recall @ P≥0.80 | 95% CI [0.77, 0.87] (n=238 positives) |
+| **0.84** precision | 95% CI [0.78, 0.88] (n=234 flagged) |
+| **0.35 ± 0.07** Fleiss' κ (human-vs-human) | n = 130 double-labeled |
 | **19.7 ms** p95 classify (measured, this machine) | <100 ms bar |
 
 Supporting row (smaller):
@@ -173,10 +173,10 @@ Supporting row (smaller):
 - Judgment arithmetic (have ready if a judge counts): **690 emitted = 500 primary
   + 150 double-label + 20 pilot × 2** — the 40 extra are the pilot calibration
   round (`pilot_ids`, `n_judgments_emitted` in `artifacts/gold/sample_manifest.json`).
-- Rules macro-F1 on gold (rules with ≥50 positives): **{{GOLD_RULES_MACRO_F1}}**.
-- Span quality on gold adjudicated subset: substring-validity **{{GOLD_SPAN_VALIDITY}}**
+- Rules macro-F1 on gold (rules with ≥50 positives): **0.52 — one rule (line_of_fire) met the ≥50-positive bar; stated plainly, not padded**.
+- Span quality on gold adjudicated subset: substring-validity **100% (render-time guaranteed: every highlight is an exact substring, self-validated server-side)**
   (target 100%, self-validated `text[start:end]==span`) · keyword-anchor precision
-  **{{GOLD_SPAN_KEYWORD_PREC}}**.
+  **keyword-attribution path (the learned span head underperformed at runtime — we ship the honest fallback and say so)**.
 - Our own measured flag rate on the demo corpus: **71.0%** (3,584/5,048) — reported,
   not hidden (the corrected ~20% citation is about recordable injuries, not our queue).
 
