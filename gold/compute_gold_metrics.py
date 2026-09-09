@@ -29,6 +29,13 @@ eval-metrics-engineer.md, DECISION_LOG D19/D25/D27):
   * Gold truth = unanimous label across an item's raters. Any disagreement or
     'unsure' goes to the adjudication queue and is excluded from metrics
     until adjudicated. The queue is BLIND: no stratum, no model output.
+  * Adjudication: rulings in artifacts/gold/labels/adjudication.jsonl (written
+    by gold/adjudicate.py) are applied as a PRE-CONSENSUS step: a ruling is an
+    item-level override that SUPERSEDES the item's split votes (it is NOT a
+    5th rater and never enters the kappa computation), so the item becomes
+    unanimous-by-ruling and enters metrics with the ruled truth. A final
+    'unsure' ruling keeps the item excluded but clears it from the pending
+    queue. Latest ruling per item wins. No rulings file = current behavior.
 
 Run:        .venv/bin/python gold/compute_gold_metrics.py
 Self-check: .venv/bin/python gold/compute_gold_metrics.py --self-check
@@ -57,6 +64,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "runs" / "run2" / "day1" / "real_model_integration"))
 
 from gold_common import LABELS, RULES, SEED  # noqa: E402
+from adjudicate import load_rulings  # noqa: E402
 from export_labels import BOOTSTRAP_N, bootstrap_se, fleiss_kappa, kappa_matrix  # noqa: E402
 from onnx_score import RULES as MODEL_RULES  # noqa: E402
 from onnx_score import Scorer, sigmoid  # noqa: E402
@@ -363,9 +371,9 @@ def fci(d: dict) -> str:
 
 def render_md(result: dict) -> str:
     md = []
+    fp = result["model"]
     md.append(f"# Gold metrics — final blind eval ({fp['model_dir']}, D27 ship path)")
     md.append("")
-    fp = result["model"]
     op = result["operating_point"]
     md.append(f"- Model: `{fp['model_dir']}` int8 (`{fp['onnx']}` sha "
               f"{fp['onnx_sha256_12']}…), scored {fp['scoring']}")
@@ -376,7 +384,11 @@ def render_md(result: dict) -> str:
     g = result["gold"]
     md.append(f"- Gold truth: {g['consensus_policy']}")
     md.append(f"- Coverage: {g['n_consensus']} consensus / {g['n_items']} items; "
-              f"{g['n_adjudication']} pending adjudication, {g['n_unlabeled']} unlabeled")
+              f"{g['n_adjudication']} pending adjudication, {g['n_unlabeled']} unlabeled"
+              + (f"; **{g['n_adjudicated']} adjudicated** (rulings applied as "
+                 f"superseding overrides), {g['n_adjudicated_unsure']} ruled "
+                 f"final-unsure (excluded)" if g["n_adjudicated"]
+                 or g["n_adjudicated_unsure"] else ""))
     md.append("")
     md.append("## Per-stratum results")
     md.append("")
@@ -437,12 +449,27 @@ def render_md(result: dict) -> str:
     adj = result["adjudication"]
     md.append("## Adjudication")
     md.append("")
-    md.append(f"- {adj['n']} items need a 3rd labeler citing the frozen spec → "
-              f"`{adj['path']}` (by reason: "
-              + ", ".join(f"{k}={v}" for k, v in sorted(adj["by_reason"].items())) + ")")
-    md.append("- Queue is blind: no stratum, no model output. After adjudication, "
-              "merge the rulings into the label files and re-run this script "
-              "(score cache makes the re-run seconds).")
+    ru = adj["rulings"]
+    if ru["n_applied"]:
+        md.append(f"- **{ru['n_applied']} rulings applied** from `{ru['path']}` "
+                  f"(by label: "
+                  + ", ".join(f"{k}={v}" for k, v in sorted(ru["by_label"].items()))
+                  + ") — each ruling superseded the item's split votes "
+                  "(pre-consensus override; latest ruling wins; rulings never "
+                  "enter kappa, which stays human-vs-human).")
+        if ru["stale_ids_ignored"]:
+            md.append(f"- WARNING: {len(ru['stale_ids_ignored'])} ruling(s) reference "
+                      f"ids outside the gold set and were ignored: "
+                      f"{ru['stale_ids_ignored'][:5]}")
+    if adj["n"]:
+        md.append(f"- {adj['n']} items still need a ruling → `{adj['path']}` (by reason: "
+                  + ", ".join(f"{k}={v}" for k, v in sorted(adj["by_reason"].items())) + ")")
+        md.append("- Queue is blind: no stratum, no model output. Rule on it with "
+                  "`gold/adjudicate.py` (see gold/RUNBOOK_HUMANS.md), then re-run "
+                  "this script — rulings apply automatically (score cache makes "
+                  "the re-run seconds).")
+    else:
+        md.append("- Pending queue is empty — every disagreement/unsure has a final ruling.")
     md.append("")
     md.append("## Provenance")
     md.append("")
@@ -500,14 +527,39 @@ def run(args: argparse.Namespace) -> int:
     for gid, row in scores.items():
         row["pred_sif"] = row["p_raw"] >= thr
 
-    # Step 3: consensus, strata, adjudication queue.
+    # Step 3: adjudication rulings (pre-consensus overrides), then consensus,
+    # strata, adjudication queue.
+    rulings_path = Path(args.rulings)
+    rulings = load_rulings(rulings_path) if rulings_path.exists() else {}
+    if rulings:
+        print(f"adjudication: applying {len(rulings)} ruling(s) from "
+              f"{rulings_path} as superseding item-level overrides (latest wins)")
     items_by_stratum: dict[str, list[dict]] = {s: [] for s in STRATA}
     adjudication: list[dict] = []
     unlabeled: list[str] = []
+    adjudicated_unsure: list[str] = []
+    n_adjudicated = 0
+    ruling_by_label: dict[str, int] = {}
+    stale_rulings = sorted(set(rulings) - {r["gold_id"] for r in gold})
     orphans = sorted(set(merged_by_id) - set(gold_by_id))
     for item in gold:
         gid = item["gold_id"]
         stratum = item["source_stratum"]
+        ruling = rulings.get(gid)
+        if ruling is not None:
+            # The ruling REPLACES the item's split votes (not a 5th rater):
+            # the item is unanimous-by-ruling. A final 'unsure' ruling keeps
+            # the item out of metrics but clears it from the pending queue.
+            ruling_by_label[ruling["label"]] = ruling_by_label.get(ruling["label"], 0) + 1
+            if ruling["label"] == "unsure":
+                adjudicated_unsure.append(gid)
+                continue
+            n_adjudicated += 1
+            items_by_stratum[stratum].append({
+                "gold_id": gid, "truth": ruling["label"],
+                "gold_rules": sorted(ruling.get("rules") or []),
+            })
+            continue
         rec = merged_by_id.get(gid)
         if rec is None:
             unlabeled.append(gid)
@@ -601,6 +653,8 @@ def run(args: argparse.Namespace) -> int:
             "n_scored": len(scores),
             "n_merged_rows": len(merged),
             "n_consensus": n_consensus,
+            "n_adjudicated": n_adjudicated,
+            "n_adjudicated_unsure": len(adjudicated_unsure),
             "n_adjudication": len(adjudication),
             "n_unlabeled": len(unlabeled),
             "unlabeled_ids": unlabeled,
@@ -617,6 +671,16 @@ def run(args: argparse.Namespace) -> int:
             "by_reason": by_reason,
             "path": str(adj_path),
             "blind": "no stratum, no model output in the queue",
+            "rulings": {
+                "path": str(rulings_path) if rulings else None,
+                "n_applied": n_adjudicated + len(adjudicated_unsure),
+                "by_label": ruling_by_label,
+                "stale_ids_ignored": stale_rulings,
+                "policy": ("latest ruling per item wins; a ruling SUPERSEDES the "
+                           "item's split votes (item-level override, not a 5th "
+                           "rater; never enters kappa); a final 'unsure' ruling "
+                           "keeps the item excluded but clears the pending queue"),
+            },
         },
         "artifacts": {
             "scores": str(scores_path),
@@ -718,6 +782,7 @@ def self_check(args: argparse.Namespace) -> int:
             "--out-json", str(tmp / "gold_metrics.json"),
             "--out-md", str(tmp / "gold_metrics.md"),
             "--adjudication-out", str(tmp / "adjudication_queue.jsonl"),
+            "--rulings", str(tmp / "labels" / "adjudication.jsonl"),
         ]
         # Fast path: reuse the real score cache when it exists (same
         # fingerprint -> cache hit); otherwise this scores 500 items fresh.
@@ -778,6 +843,65 @@ def self_check(args: argparse.Namespace) -> int:
               rc2 == 0 and "cache hit" in buf2.getvalue())
         check("score cache bytes unchanged on re-run",
               (tmp / "model_scores.jsonl").read_bytes() == cache_bytes)
+
+        print("== e2e: adjudication rulings applied as superseding overrides ==")
+        rulings_file = tmp / "labels" / "adjudication.jsonl"
+        with open(rulings_file, "w", encoding="utf-8") as fh:
+            for row in adj_rows:
+                rec = sim_label(row["gold_id"], "adjudicator_senior", row["masked_text"])
+                fh.write(json.dumps({
+                    "ts": ts, "gold_id": row["gold_id"], "label": rec["label"],
+                    "rules": rec["rules"] if rec["label"] == "sif" else [],
+                    "justification": "self-check ruling (rubric: judge the mechanism)",
+                    "adjudicator": "senior"}) + "\n")
+        buf3 = io.StringIO()
+        with contextlib.redirect_stdout(buf3):
+            rc3 = main(argv)
+        check("re-run with rulings file exits 0", rc3 == 0)
+        r3 = json.loads((tmp / "gold_metrics.json").read_text())
+        g3 = r3["gold"]
+        ruled = {json.loads(l)["gold_id"]: json.loads(l)
+                 for l in rulings_file.read_text().splitlines()}
+        n_unsure_ruled = sum(1 for v in ruled.values() if v["label"] == "unsure")
+        check("every queued item ruled -> pending queue empty, ADJUDICATION_PENDING clears",
+              g3["n_adjudication"] == 0 and
+              not load_jsonl(tmp / "adjudication_queue.jsonl") and
+              not any(f["id"] == "ADJUDICATION_PENDING" for f in r3["flags"]))
+        check("n_adjudicated provenance recorded (final-unsure counted separately)",
+              g3["n_adjudicated"] == len(ruled) - n_unsure_ruled and
+              g3["n_adjudicated_unsure"] == n_unsure_ruled,
+              f"{g3['n_adjudicated']} applied, {n_unsure_ruled} final-unsure")
+        check("adjudicated items enter metrics: consensus grows by exactly the ruled sif/non_sif count",
+              g3["n_consensus"] == g["n_consensus"] + g3["n_adjudicated"],
+              f"{g['n_consensus']} -> {g3['n_consensus']}")
+        check("invariant: consensus + pending + unlabeled + final-unsure == 500",
+              g3["n_consensus"] + g3["n_adjudication"] + g3["n_unlabeled"]
+              + g3["n_adjudicated_unsure"] == 500)
+        stratum_of = {it["gold_id"]: it["source_stratum"] for it in gold}
+        real_add = sum(1 for v in ruled.values()
+                       if v["label"] != "unsure" and stratum_of[v["gold_id"]] in REAL_STRATA)
+        check("real-pooled stratum grows by exactly the ruled real items",
+              r3["strata"]["real_pooled"]["n"] == strata["real_pooled"]["n"] + real_add,
+              f"{strata['real_pooled']['n']} -> {r3['strata']['real_pooled']['n']} (+{real_add})")
+        check("rulings block: n_applied + policy + path recorded",
+              r3["adjudication"]["rulings"]["n_applied"] == len(ruled) and
+              r3["adjudication"]["rulings"]["path"] == str(rulings_file) and
+              "supersede" in r3["adjudication"]["rulings"]["policy"].lower())
+        check("kappa untouched by rulings (human-vs-human only)",
+              r3["agreement"]["subsets"] == result["agreement"]["subsets"])
+        check("markdown reports the applied rulings",
+              "rulings applied" in (tmp / "gold_metrics.md").read_text())
+
+        print("== e2e: backward compat (no rulings file = original behavior) ==")
+        rulings_file.unlink()
+        buf4 = io.StringIO()
+        with contextlib.redirect_stdout(buf4):
+            rc4 = main(argv)
+        g4 = json.loads((tmp / "gold_metrics.json").read_text())["gold"]
+        check("rulings file removed -> original numbers + ADJUDICATION_PENDING return",
+              rc4 == 0 and g4["n_consensus"] == g["n_consensus"] and
+              g4["n_adjudication"] == g["n_adjudication"] and
+              g4["n_adjudicated"] == 0 and g4["n_adjudicated_unsure"] == 0)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -806,6 +930,10 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--out-md", default=str(REPO / "artifacts" / "gold" / "gold_metrics.md"))
     ap.add_argument("--adjudication-out",
                     default=str(REPO / "artifacts" / "gold" / "adjudication_queue.jsonl"))
+    ap.add_argument("--rulings",
+                    default=str(REPO / "artifacts" / "gold" / "labels" / "adjudication.jsonl"),
+                    help="adjudication rulings (gold/adjudicate.py output); applied as "
+                         "pre-consensus superseding overrides. Absent file = no overrides.")
     ap.add_argument("--threads", type=int, default=4,
                     help="ONNX threads (default 4 — the demo server shares this box)")
     ap.add_argument("--seed", type=int, default=SEED)

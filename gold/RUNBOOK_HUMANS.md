@@ -144,3 +144,68 @@ adjudication citing the frozen spec (spec: "3rd labeler cites frozen spec").
 cases against throwaway ports; `--reset` wipes all label files. Already run and
 reset — tonight starts clean. Do not run it after humans have labeled (it
 refuses unless `--force`).
+
+---
+
+# Adjudication session (morning after the export freeze, ~45–60 min)
+
+The export leaves a queue of items the labelers split on or marked unsure:
+`artifacts/gold/adjudication_queue_all4.jsonl` (100 items: 60 disagreements,
+40 unsures). Every one needs a final ruling before the headline metrics are
+credible. The queue is blind: no stratum, no model output, and the app
+additionally hides the individual votes — you judge the item against the
+rubric, not against each other.
+
+**Who:** two adjudicators — a junior (first pass) and the **senior person,
+whose ruling is final** (second pass). If only one person is available, one
+pass with `--adjudicator senior` is acceptable but note it in the deck.
+
+**The one hard rule: every ruling must cite `gold/RUBRIC.md`.** The
+justification field is mandatory (the app refuses to save without it). One
+line is enough — e.g. *"drill, not a real exposure → N (rubric: edge cases)"*
+or *"suspended load over worker → S (rubric: the one question)"*. A ruling of
+**U** is allowed and is FINAL: the item stays out of the metrics but leaves
+the pending queue. When torn between S and N: high-energy mechanism present
+→ S (rubric).
+
+## Commands
+
+```bash
+cd /home/dakkshesh/sih26-round2
+.venv/bin/python gold/adjudicate.py --adjudicator junior --port 8010   # junior: first pass
+.venv/bin/python gold/adjudicate.py --adjudicator senior --port 8011   # senior: final pass (after junior finishes)
+```
+
+(The labeler apps may still be up on 8001–8004 — leave them; adjudication
+uses 8010+. Two people can also share one port sequentially; progress is
+tracked per `--adjudicator` name.)
+
+Open your URL (http://127.0.0.1:8010/ or :8011/). Keys: **S** / **N** / **U**,
+then type the justification and press **Enter**. Rule tags are optional on S
+rulings. ~100 items × ~30 s ≈ **45–60 min for one pass**. Rulings append to
+`artifacts/gold/labels/adjudication.jsonl` — one shared file, **latest ruling
+per item wins**, so the senior's second pass automatically supersedes the
+junior's wherever they differ. Close/reopen or restart any time; it resumes.
+
+## After the session (admin)
+
+```bash
+.venv/bin/python gold/compute_gold_metrics.py \
+  --merged artifacts/gold/labels_merged_all4.jsonl \
+  --agreement artifacts/gold/agreement_all4.json \
+  --adjudication-out artifacts/gold/adjudication_queue_all4.jsonl \
+  --out-json artifacts/gold/gold_metrics_all4.json \
+  --out-md artifacts/gold/gold_metrics_all4.md
+```
+
+Rulings are applied automatically as **superseding item-level overrides**
+(pre-consensus; they replace the split votes — they are NOT a 5th rater and
+never touch the human-vs-human κ). Verify in the output JSON:
+`gold.n_adjudicated` = rulings that entered metrics, `n_adjudicated_unsure` =
+final-unsure exclusions, `n_adjudication` should be **0**, and the
+`ADJUDICATION_PENDING` flag should be gone. Repeat for the noC variant with
+`labels_merged_noC.jsonl` / `agreement_noC.json` / `_noC` outputs if that table
+is still needed.
+
+Tooling check (any time, never touches real files):
+`.venv/bin/python gold/adjudicate.py --self-test`
