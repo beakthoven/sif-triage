@@ -161,9 +161,9 @@ Headline quadrant (tabular numerals, one number per quadrant):
 
 | | |
 |---|---|
-| **0.82** recall @ P≥0.80 | 95% CI [0.77, 0.87] (n=238 positives) |
-| **0.84** precision | 95% CI [0.78, 0.88] (n=234 flagged) |
-| **0.35 ± 0.07** Fleiss' κ (human-vs-human) | n = 130 double-labeled |
+| **0.82** recall | 95% CI [0.77, 0.87] (n=266 positives) |
+| **0.98** precision | 95% CI [0.95, 0.99] (n=249 flagged) |
+| **0.55 ± 0.07** Fleiss' κ (human-vs-human) | n = 110 double-labeled |
 | **19.7 ms** p95 classify (measured, this machine) | <100 ms bar |
 
 Supporting row (smaller):
