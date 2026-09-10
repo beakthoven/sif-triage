@@ -1,5 +1,3 @@
-import { Languages } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import type { Lang } from "@/lib/phrasebook";
 import { cn } from "@/lib/utils";
 
@@ -12,22 +10,24 @@ export function LangToggle({
   onChange: (l: Lang) => void;
 }) {
   return (
-    <div className="flex items-center gap-1" role="group" aria-label="UI language">
-      <Languages className="mr-1 size-4 text-muted-foreground" aria-hidden />
-      {(["en", "hi"] as const).map((l) => (
-        <Button
-          key={l}
-          variant={lang === l ? "default" : "ghost"}
-          size="sm"
-          aria-pressed={lang === l}
-          onClick={() => onChange(l)}
-          className={cn(
-            "min-h-9 min-w-11 font-mono",
-            lang === l && "bg-primary text-primary-foreground hover:bg-primary/90",
-          )}
-        >
-          {l === "en" ? "EN" : "हिं"}
-        </Button>
+    <div className="flex items-center font-mono text-sm" role="group" aria-label="UI language">
+      {(["en", "hi"] as const).map((l, i) => (
+        <span key={l} className="flex items-center">
+          {i > 0 && <span className="mx-1 text-border" aria-hidden>/</span>}
+          <button
+            type="button"
+            aria-pressed={lang === l}
+            onClick={() => onChange(l)}
+            className={cn(
+              "min-h-9 min-w-9 rounded-sm px-1 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              lang === l
+                ? "font-semibold text-foreground underline underline-offset-4"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {l === "en" ? "EN" : "हिं"}
+          </button>
+        </span>
       ))}
     </div>
   );

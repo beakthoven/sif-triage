@@ -105,9 +105,9 @@ export function FeedView({
       ) : (
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(320px,1fr)_2fr]">
           {/* Report queue */}
-          <Card className="self-start border-border py-0">
+          <Card className="self-start gap-0 border-border py-0">
             <CardContent className="px-0 py-0">
-              <p className="px-4 pt-3 pb-2 font-mono text-xs tracking-wide text-muted-foreground uppercase">
+              <p className="px-4 pt-3 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                 {t(lang, "reportQueue")} · {reports.length}
               </p>
               <Separator />
@@ -127,33 +127,36 @@ export function FeedView({
                         aria-current={active}
                         className={cn(
                           "flex min-h-11 w-full items-center gap-3 px-4 py-2.5 text-left transition-colors",
-                          active ? "bg-accent" : "hover:bg-muted/60",
+                          active ? "bg-muted" : "hover:bg-muted/50",
                         )}
                       >
                         <span className="min-w-0 flex-1">
                           <span className="block truncate font-medium text-foreground">
                             {r.site}
                           </span>
-                          <span className="block font-mono text-xs text-muted-foreground">
+                          <span className="block truncate font-mono text-xs text-muted-foreground">
                             {live ? t(lang, "liveChip") : `#${r.id}`} · {r.reported_at}
                           </span>
                         </span>
                         {live && (
-                          <span className="rounded-sm bg-primary px-1.5 py-0.5 font-mono text-xs font-semibold text-primary-foreground">
+                          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-foreground">
+                            <span className="status-dot bg-foreground" aria-hidden />
                             {t(lang, "liveChip")}
                           </span>
                         )}
                         {dup && !gated && (
-                          <span className="rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 font-mono text-xs font-semibold text-primary">
+                          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-verdict">
+                            <span className="status-dot bg-verdict" aria-hidden />
                             DUP
                           </span>
                         )}
                         {gated ? (
-                          <span className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-quiet">
+                            <span className="status-dot bg-quiet" aria-hidden />
                             GATE
                           </span>
                         ) : (
-                          <BandBadge band={r.prediction.band} className="px-1.5 py-0.5 text-xs" />
+                          <BandBadge band={r.prediction.band} />
                         )}
                       </button>
                       <Separator />
@@ -168,10 +171,9 @@ export function FeedView({
               the classify skeleton while a paste is in flight */}
           <div className="space-y-4">
             {classifying ? (
-              <Card className="overflow-hidden border-border py-0" aria-busy="true" aria-label={t(lang, "pasteBusy")}>
-                <div className="hazard-stripe h-10 w-full animate-pulse" />
-                <CardContent className="space-y-3 px-5 py-5">
-                  <div className="h-4 w-1/3 animate-pulse rounded-sm bg-muted" />
+              <Card className="border-border py-0" aria-busy="true" aria-label={t(lang, "pasteBusy")}>
+                <CardContent className="space-y-3 px-6 py-6">
+                  <div className="h-6 w-1/3 animate-pulse rounded-sm bg-muted" />
                   <div className="h-4 w-full animate-pulse rounded-sm bg-muted" />
                   <div className="h-4 w-5/6 animate-pulse rounded-sm bg-muted" />
                   <div className="h-4 w-2/3 animate-pulse rounded-sm bg-muted" />

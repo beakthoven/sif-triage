@@ -1,0 +1,115 @@
+- generic [ref=f17e3]:
+  - banner [ref=f17e4]:
+    - generic [ref=f17e5]:
+      - generic [ref=f17e6]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=f17e7]
+        - paragraph [ref=f17e8]: OIL India · Triage Console
+      - generic [ref=f17e9]:
+        - generic [ref=f17e10]: LIVE · onnx:masked-v2/sif_multitask_int8.onnx · 5050 reports
+        - group "UI language" [ref=f17e12]:
+          - button "EN" [pressed] [ref=f17e14]
+          - generic [ref=f17e15]:
+            - generic [aria-hidden] [ref=f17e16]: /
+            - button "हिं" [ref=f17e17]
+  - main [ref=f17e18]:
+    - generic [ref=f17e19]:
+      - tablist [ref=f17e20]:
+        - tab "Feed" [ref=f17e21]
+        - tab "Density" [ref=f17e22]
+        - tab "Patterns" [ref=f17e23]
+        - tab "Review" [active] [selected] [ref=f17e24]
+      - tabpanel "Review" [ref=f17e6111]:
+        - generic [ref=f17e6112]:
+          - generic [ref=f17e6113]:
+            - heading "Awaiting HSE disposition (8)" [level=2] [ref=f17e6114]:
+              - text: Awaiting HSE disposition
+              - generic [ref=f17e6115]: (8)
+            - generic [ref=f17e6116]:
+              - generic [ref=f17e6117]:
+                - generic [ref=f17e6118]:
+                  - paragraph [ref=f17e6119]: Sentinel gate
+                  - heading "Drill / simulation" [level=3] [ref=f17e6121]
+                - generic [ref=f17e6122]:
+                  - paragraph [ref=f17e6123]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6124]: Gas leak emergency mock drill conducted at Dumduma GGS on 25.08.2025 using a simulated scenario. SCBA donning practiced by four operators within time. One SCBA face strap found loose and adjusted by fire staff. Escape route wind sock found faded and replacement indented. Drill report submitted to fire section.
+                  - paragraph [ref=f17e6125]: "#5046 · Dumduma · emergency drill"
+                  - paragraph [ref=f17e6126]: "drill badge: mock drill, simulated"
+              - generic [ref=f17e6127]:
+                - generic [ref=f17e6128]:
+                  - paragraph [ref=f17e6129]: Sentinel gate
+                  - heading "Low confidence" [level=3] [ref=f17e6131]
+                - generic [ref=f17e6132]:
+                  - paragraph [ref=f17e6133]: Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6134]: At Duliajan GGS-4, separator internal inspection in monsoon, humidity so high the blower air felt warm and wet. inspector felt heaviness after ten minutes and came out. work shifted to early morning hours. weather window added to the permit for summer and monsoon jobs.
+                  - paragraph [ref=f17e6135]: "#4991 · Duliajan GGS-4 · separator vessel manway work"
+                  - paragraph [ref=f17e6136]: score 0.583 in gray band [0.4, 0.6]
+              - generic [ref=f17e6137]:
+                - generic [ref=f17e6138]:
+                  - paragraph [ref=f17e6139]: Sentinel gate
+                  - heading "Well-control watch" [level=3] [ref=f17e6141]
+                - generic [ref=f17e6142]:
+                  - paragraph [ref=f17e6143]: Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.
+                  - blockquote [ref=f17e6144]: During workover operation at Well BGR-23, mud pump pressure shot up suddenly due to plugged nozzle. Driller pressed e-stop and pump tripped before relief line hammered. Nozzle cleaned, pressure normal. Could have burst the hose. Informed tool pusher, pump checked before restart.
+                  - paragraph [ref=f17e6145]: "#4990 · Well BGR-23 · workover operation"
+                  - paragraph [ref=f17e6146]: "well-control watch: barrier tag fired but triage score 0.019 < flag threshold 0.658 — rare high-consequence domain, automated screening defers; routed to human review"
+              - generic [ref=f17e6147]:
+                - generic [ref=f17e6148]:
+                  - paragraph [ref=f17e6149]: Sentinel gate
+                  - heading "Low confidence" [level=3] [ref=f17e6151]
+                - generic [ref=f17e6152]:
+                  - paragraph [ref=f17e6153]: Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6154]: The concrete marker as it happened, post at the SRP approach-road right then, crossing on the at that very point, Moran field road at that moment, broke and halted us on 27.10.2024, about 01:20 hrs. The driver just then, had been on a call and all at once, not ever saw the crossing. The real SRP foundation stood a at that instant, handful of metres by chance, beyond; that would in that moment, not have broken. The call was right at that point, around the next day's duty roster, of all things. He got a at that very moment, stern warning; phones ride in the then and there, glove box from the first kilometre in a flash, currently, and the crossing markers were without warning, repainted with reflective tape.
+                  - paragraph [ref=f17e6155]: "#4975 · Moran field roads · light vehicle on lease road at night"
+                  - paragraph [ref=f17e6156]: score 0.482 in gray band [0.4, 0.6]
+              - generic [ref=f17e6157]:
+                - generic [ref=f17e6158]:
+                  - paragraph [ref=f17e6159]: Sentinel gate
+                  - heading "Low confidence" [level=3] [ref=f17e6161]
+                - generic [ref=f17e6162]:
+                  - paragraph [ref=f17e6163]: Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6164]: An employee was stepping down off a 6-inch containment platform to finish loading his truck, when his right ankle rolled. The employee sustained a [OUTCOME] tibia and fibula at the right ankle and required [OUTCOME].
+                  - paragraph [ref=f17e6165]: "#4929 · (unspecified) · (unspecified)"
+                  - paragraph [ref=f17e6166]: score 0.589 in gray band [0.4, 0.6]
+              - generic [ref=f17e6167]:
+                - generic [ref=f17e6168]:
+                  - paragraph [ref=f17e6169]: Sentinel gate
+                  - heading "Negation guard" [level=3] [ref=f17e6171]
+                - generic [ref=f17e6172]:
+                  - paragraph [ref=f17e6173]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6174]: At around 11:40 hrs a mini truck delivering stores at GCP Makum misjudged the low portico of the old record room and almost entered. The cleaner standing there waved him to stop. Clearance was checked and the truck was routed to the rear gate instead. No scrape on the portico, no damage to the truck. Height bar to be fixed.
+                  - paragraph [ref=f17e6175]: "#4928 · GCP Makum · vehicle transit"
+                  - paragraph [ref=f17e6176]: "negated outcome language (cue~outcome within 5 tokens): 'no'~'damage'"
+              - generic [ref=f17e6177]:
+                - generic [ref=f17e6178]:
+                  - paragraph [ref=f17e6179]: Sentinel gate
+                  - heading "Drill / simulation" [level=3] [ref=f17e6181]
+                - generic [ref=f17e6182]:
+                  - paragraph [ref=f17e6183]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6184]: Transformer pit entry at Baghjan EPS for gland plate work. rescue kit was kept at the main fire tender which was out for a mock drill at the CTF. entry held till the tender returned. drill planning now checks that site kits are not pulled away during drills.
+                  - paragraph [ref=f17e6185]: "#4919 · Baghjan EPS · transformer pit maintenance"
+                  - paragraph [ref=f17e6186]: "drill badge: mock drill"
+              - generic [ref=f17e6187]:
+                - generic [ref=f17e6188]:
+                  - paragraph [ref=f17e6189]: Sentinel gate
+                  - heading "Negation guard" [level=3] [ref=f17e6191]
+                - generic [ref=f17e6192]:
+                  - paragraph [ref=f17e6193]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+                  - blockquote [ref=f17e6194]: N2 purged vessel at Duliajan GGS-4, vented but the internal downcomer pipe trapped N2 like a cup. Entrant working near downcomer put his head at its opening to inspect, felt instant suffocation, pulled back and sat on tray breathing hard for a minute. Pocket gas inside internals does not show at manway testing. Downcomer flushed with air lance, re-tested at multiple points inside. Pockets, not averages, hurt people.
+                  - paragraph [ref=f17e6195]: "#4893 · Duliajan GGS-4 · N2-purged vessel"
+                  - paragraph [ref=f17e6196]: "negated outcome language (cue~outcome within 5 tokens): 'not'~'hurt'"
+          - generic [ref=f17e6197]:
+            - heading "Logged overrides overrides → future gold labels" [level=2] [ref=f17e6198]
+            - table [ref=f17e6202]:
+              - rowgroup [ref=f17e6203]:
+                - row [ref=f17e6204]:
+                  - columnheader "Report" [ref=f17e6205]
+                  - columnheader "Field" [ref=f17e6206]
+                  - columnheader "Old" [ref=f17e6207]
+                  - columnheader "New" [ref=f17e6208]
+                  - columnheader "Labeler" [ref=f17e6209]
+                  - columnheader "Timestamp" [ref=f17e6210]
+              - rowgroup
+  - contentinfo [ref=f17e183]:
+    - generic [ref=f17e184]:
+      - paragraph [ref=f17e185]: Model proposes, HSE disposes. Your decision becomes a training label.
+      - generic [ref=f17e186]: "demo data: synthetic OIL-style corpus"

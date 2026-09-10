@@ -82,8 +82,10 @@ export default function App() {
 
   // Live paste-classify: the persisted result (?persist=1, real server id) is
   // prepended to the queue; offline falls back to a negative-id LIVE row.
+  // The server dedups exact repeat pastes and returns the same row id — drop
+  // the stale copy so the queue never holds duplicate keys.
   const onClassified = useCallback((report: Report) => {
-    setReports((cur) => [report, ...cur]);
+    setReports((cur) => [report, ...cur.filter((r) => r.id !== report.id)]);
   }, []);
 
   // B3: the density ingest beat changes server state — refetch the header
@@ -97,48 +99,60 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-4">
-          <span className="hazard-stripe h-8 w-12 shrink-0 rounded-sm" aria-hidden />
+        <div className="mx-auto flex max-w-[1100px] items-center gap-4 px-6 py-5">
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold tracking-tight text-foreground">
+            <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
               {t(lang, "appTitle")}
             </h1>
-            <p className="font-mono text-xs text-muted-foreground">{t(lang, "appSub")}</p>
+            <p className="text-sm text-muted-foreground">{t(lang, "appSub")}</p>
           </div>
-          <div className="ml-auto flex items-center gap-3">
-            <span
-              className={
-                health
-                  ? "rounded-sm border border-primary/60 bg-primary/10 px-2 py-1 font-mono text-xs font-semibold text-primary"
-                  : "rounded-sm border border-border px-2 py-1 font-mono text-xs text-muted-foreground"
-              }
-            >
+          <div className="ml-auto flex items-center gap-6">
+            <span className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground">
+              <span
+                className={health ? "status-dot bg-ok" : "status-dot bg-quiet"}
+                aria-hidden
+              />
               {health
                 ? `LIVE · ${health.model_version} · ${health.n_reports} reports`
-                : "OFFLINE DEMO"}
+                : "Offline demo"}
             </span>
             <LangToggle lang={lang} onChange={setLang} />
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-6 py-6">
+      <main className="mx-auto max-w-[1100px] px-6 py-8">
         <Tabs defaultValue="feed">
-          <TabsList className="mb-6 h-11 bg-muted">
-            <TabsTrigger value="feed" className="min-h-11 px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+          <TabsList
+            variant="line"
+            className="mb-8 h-auto w-full justify-start gap-7 rounded-none border-b border-border p-0"
+          >
+            <TabsTrigger
+              value="feed"
+              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
+            >
               {t(lang, "tabFeed")}
             </TabsTrigger>
-            <TabsTrigger value="density" className="min-h-11 px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="density"
+              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
+            >
               {t(lang, "tabDensity")}
             </TabsTrigger>
-            <TabsTrigger value="patterns" className="min-h-11 px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="patterns"
+              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
+            >
               {t(lang, "tabPatterns")}
             </TabsTrigger>
-            <TabsTrigger value="review" className="min-h-11 px-5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsTrigger
+              value="review"
+              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
+            >
               {t(lang, "tabReview")}
               {sessionOverrides > 0 && (
-                <span className="ml-2 rounded-full bg-primary px-1.5 font-mono text-xs text-primary-foreground">
-                  {sessionOverrides}
+                <span className="ml-1.5 font-mono text-sm font-normal text-muted-foreground">
+                  ({sessionOverrides})
                 </span>
               )}
             </TabsTrigger>
@@ -160,14 +174,15 @@ export default function App() {
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-6 py-4">
-          <p className="font-mono text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-[1100px] flex-wrap items-center gap-3 px-6 py-4">
+          <p className="text-sm text-muted-foreground">
             {t(lang, "footer")}
           </p>
           {/* Provenance disclosure (audit C6): the seeded corpus is synthetic
               stand-in data — say so on-screen, not just in the deck. English-only
               by design: a data label, not UI chrome (keeps the QA'd phrasebook frozen). */}
-          <span className="rounded-sm border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+            <span className="status-dot bg-quiet" aria-hidden />
             demo data: synthetic OIL-style corpus
           </span>
         </div>

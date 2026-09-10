@@ -1,24 +1,26 @@
 import type { Band } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const BAND_STYLES: Record<Band, string> = {
-  HIGH: "bg-primary text-primary-foreground",
-  MODERATE: "bg-accent text-accent-foreground",
-  LOW: "bg-muted text-muted-foreground",
+const BAND_STYLE: Record<Band, { dot: string; text: string; label: string }> = {
+  HIGH: { dot: "bg-verdict", text: "text-verdict", label: "High review priority" },
+  MODERATE: { dot: "bg-verdict", text: "text-verdict", label: "Moderate review priority" },
+  LOW: { dot: "bg-ok", text: "text-ok", label: "Low review priority" },
 };
 
-/** Review-priority band chip — icon + text, never color-only. */
+/** Review-priority band — small text label with a 6px dot, never a pill.
+ *  Words carry the meaning; the dot only reinforces (never color-only). */
 export function BandBadge({ band, className }: { band: Band; className?: string }) {
+  const s = BAND_STYLE[band];
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 font-mono text-sm font-semibold tracking-wide",
-        BAND_STYLES[band],
+        "inline-flex items-center gap-1.5 text-xs font-medium whitespace-nowrap",
+        s.text,
         className,
       )}
     >
-      <span aria-hidden>{band === "HIGH" ? "▲" : band === "MODERATE" ? "◆" : "▽"}</span>
-      {band} REVIEW PRIORITY
+      <span className={cn("status-dot", s.dot)} aria-hidden />
+      {s.label}
     </span>
   );
 }

@@ -29,7 +29,7 @@ export function HighlightedText({
   if (cursor < text.length) parts.push({ key: -1, node: text.slice(cursor), hit: false });
 
   return (
-    <blockquote className="border-l-2 border-border pl-4 text-lg leading-relaxed text-foreground/90">
+    <blockquote className="border-l-2 border-border pl-4 text-lg leading-relaxed text-foreground">
       {parts.map((p) =>
         p.hit ? (
           <mark key={p.key} className="span-highlight">

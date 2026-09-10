@@ -1,0 +1,271 @@
+- generic [ref=f17e3]:
+  - banner [ref=f17e4]:
+    - generic [ref=f17e5]:
+      - generic [ref=f17e6]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=f17e7]
+        - paragraph [ref=f17e8]: OIL India · Triage Console
+      - generic [ref=f17e9]:
+        - generic [ref=f17e10]: LIVE · onnx:masked-v2/sif_multitask_int8.onnx · 5050 reports
+        - group "UI language" [ref=f17e12]:
+          - button "EN" [pressed] [ref=f17e14]
+          - generic [ref=f17e15]:
+            - generic [aria-hidden] [ref=f17e16]: /
+            - button "हिं" [ref=f17e17]
+  - main [ref=f17e18]:
+    - generic [ref=f17e19]:
+      - tablist [ref=f17e20]:
+        - tab "Feed" [ref=f17e21]
+        - tab "Density" [ref=f17e22]
+        - tab "Patterns" [selected] [ref=f17e23]
+        - tab "Review" [ref=f17e24]
+      - tabpanel "Patterns" [ref=f17e5623]:
+        - generic [ref=f17e5624]:
+          - tablist "pattern kind" [ref=f17e5625]:
+            - tab "Site × Activity" [ref=f17e5626]
+            - tab "Activity × Barrier" [active] [selected] [ref=f17e5627]
+          - paragraph [ref=f17e5628]: Lift-ranked activity × failed-barrier co-occurrence from the mined corpus. The dominant IOGP rule tags each cell.
+          - list [ref=f17e5630]:
+            - listitem [ref=f17e5871]:
+              - generic [ref=f17e5872]:
+                - generic [ref=f17e5873]: "#1"
+                - heading "gas cutting abandoned flowline × LEL re-test not done after break" [level=3] [ref=f17e5874]
+                - generic [ref=f17e5875]: Hot Work
+              - generic [ref=f17e5877]:
+                - generic [ref=f17e5878]: 47 reports
+                - generic [ref=f17e5879]: flagged 100 per 100
+                - generic [ref=f17e5880]:
+                  - text: lift
+                  - generic [ref=f17e5881]: 1.5×
+                - generic [ref=f17e5882]: 95% CI [0.92, 1.00]
+            - listitem [ref=f17e5883]:
+              - generic [ref=f17e5884]:
+                - generic [ref=f17e5885]: "#2"
+                - heading "antenna/lighting mast at telecom tower × PFAS inspected but wrongly worn" [level=3] [ref=f17e5886]
+                - generic [ref=f17e5887]: Working at Height
+              - generic [ref=f17e5889]:
+                - generic [ref=f17e5890]: 39 reports
+                - generic [ref=f17e5891]: flagged 100 per 100
+                - generic [ref=f17e5892]:
+                  - text: lift
+                  - generic [ref=f17e5893]: 1.5×
+                - generic [ref=f17e5894]: 95% CI [0.91, 1.00]
+            - listitem [ref=f17e5895]:
+              - generic [ref=f17e5896]:
+                - generic [ref=f17e5897]: "#3"
+                - heading "braze repair instrument air line × wind shift toward vegetation" [level=3] [ref=f17e5898]
+                - generic [ref=f17e5899]: Hot Work
+              - generic [ref=f17e5901]:
+                - generic [ref=f17e5902]: 37 reports
+                - generic [ref=f17e5903]: flagged 100 per 100
+                - generic [ref=f17e5904]:
+                  - text: lift
+                  - generic [ref=f17e5905]: 1.5×
+                - generic [ref=f17e5906]: 95% CI [0.91, 1.00]
+            - listitem [ref=f17e5907]:
+              - generic [ref=f17e5908]:
+                - generic [ref=f17e5909]: "#4"
+                - heading "working on fragile AC-sheet roof near workshop × stepping on fragile roof sheet" [level=3] [ref=f17e5910]
+                - generic [ref=f17e5911]: Working at Height
+              - generic [ref=f17e5913]:
+                - generic [ref=f17e5914]: 33 reports
+                - generic [ref=f17e5915]: flagged 100 per 100
+                - generic [ref=f17e5916]:
+                  - text: lift
+                  - generic [ref=f17e5917]: 1.5×
+                - generic [ref=f17e5918]: 95% CI [0.90, 1.00]
+            - listitem [ref=f17e5919]:
+              - generic [ref=f17e5920]:
+                - generic [ref=f17e5921]: "#5"
+                - heading "tank farm staircase repair × working at edge without barricade" [level=3] [ref=f17e5922]
+                - generic [ref=f17e5923]: Working at Height
+              - generic [ref=f17e5925]:
+                - generic [ref=f17e5926]: 33 reports
+                - generic [ref=f17e5927]: flagged 100 per 100
+                - generic [ref=f17e5928]:
+                  - text: lift
+                  - generic [ref=f17e5929]: 1.5×
+                - generic [ref=f17e5930]: 95% CI [0.90, 1.00]
+            - listitem [ref=f17e5931]:
+              - generic [ref=f17e5932]:
+                - generic [ref=f17e5933]: "#6"
+                - heading "elevated manifold work × scaffold base on soft monsoon ground" [level=3] [ref=f17e5934]
+                - generic [ref=f17e5935]: Working at Height
+              - generic [ref=f17e5937]:
+                - generic [ref=f17e5938]: 33 reports
+                - generic [ref=f17e5939]: flagged 100 per 100
+                - generic [ref=f17e5940]:
+                  - text: lift
+                  - generic [ref=f17e5941]: 1.5×
+                - generic [ref=f17e5942]: 95% CI [0.90, 1.00]
+            - listitem [ref=f17e5943]:
+              - generic [ref=f17e5944]:
+                - generic [ref=f17e5945]: "#7"
+                - heading "crane boom inspection × dropped spanner from height near walkway" [level=3] [ref=f17e5946]
+                - generic [ref=f17e5947]: Working at Height
+              - generic [ref=f17e5949]:
+                - generic [ref=f17e5950]: 32 reports
+                - generic [ref=f17e5951]: flagged 100 per 100
+                - generic [ref=f17e5952]:
+                  - text: lift
+                  - generic [ref=f17e5953]: 1.5×
+                - generic [ref=f17e5954]: 95% CI [0.89, 1.00]
+            - listitem [ref=f17e5955]:
+              - generic [ref=f17e5956]:
+                - generic [ref=f17e5957]: "#8"
+                - heading "hot work inside tank dike × no gas test in dike low point" [level=3] [ref=f17e5958]
+                - generic [ref=f17e5959]: Hot Work
+              - generic [ref=f17e5961]:
+                - generic [ref=f17e5962]: 31 reports
+                - generic [ref=f17e5963]: flagged 100 per 100
+                - generic [ref=f17e5964]:
+                  - text: lift
+                  - generic [ref=f17e5965]: 1.5×
+                - generic [ref=f17e5966]: 95% CI [0.89, 1.00]
+            - listitem [ref=f17e5967]:
+              - generic [ref=f17e5968]:
+                - generic [ref=f17e5969]: "#9"
+                - heading "DG exhaust duct inspection × breathing air line kinked" [level=3] [ref=f17e5970]
+                - generic [ref=f17e5971]: Confined Space
+              - generic [ref=f17e5973]:
+                - generic [ref=f17e5974]: 30 reports
+                - generic [ref=f17e5975]: flagged 100 per 100
+                - generic [ref=f17e5976]:
+                  - text: lift
+                  - generic [ref=f17e5977]: 1.5×
+                - generic [ref=f17e5978]: 95% CI [0.89, 1.00]
+            - listitem [ref=f17e5979]:
+              - generic [ref=f17e5980]:
+                - generic [ref=f17e5981]: "#10"
+                - heading "monsoon-wet ladder runs × night work with poor lighting" [level=3] [ref=f17e5982]
+                - generic [ref=f17e5983]: Working at Height
+              - generic [ref=f17e5985]:
+                - generic [ref=f17e5986]: 30 reports
+                - generic [ref=f17e5987]: flagged 100 per 100
+                - generic [ref=f17e5988]:
+                  - text: lift
+                  - generic [ref=f17e5989]: 1.5×
+                - generic [ref=f17e5990]: 95% CI [0.89, 1.00]
+            - listitem [ref=f17e5991]:
+              - generic [ref=f17e5992]:
+                - generic [ref=f17e5993]: "#11"
+                - heading "angle grinding on pipe rack × sparks entering drain gap" [level=3] [ref=f17e5994]
+                - generic [ref=f17e5995]: Hot Work
+              - generic [ref=f17e5997]:
+                - generic [ref=f17e5998]: 30 reports
+                - generic [ref=f17e5999]: flagged 100 per 100
+                - generic [ref=f17e6000]:
+                  - text: lift
+                  - generic [ref=f17e6001]: 1.5×
+                - generic [ref=f17e6002]: 95% CI [0.89, 1.00]
+            - listitem [ref=f17e6003]:
+              - generic [ref=f17e6004]:
+                - generic [ref=f17e6005]: "#12"
+                - heading "welding on rig substructure × no standby extinguisher" [level=3] [ref=f17e6006]
+                - generic [ref=f17e6007]: Hot Work
+              - generic [ref=f17e6009]:
+                - generic [ref=f17e6010]: 27 reports
+                - generic [ref=f17e6011]: flagged 100 per 100
+                - generic [ref=f17e6012]:
+                  - text: lift
+                  - generic [ref=f17e6013]: 1.5×
+                - generic [ref=f17e6014]: 95% CI [0.88, 1.00]
+            - listitem [ref=f17e6015]:
+              - generic [ref=f17e6016]:
+                - generic [ref=f17e6017]: "#13"
+                - heading "forklift unloading at drill store × pedestrians in hi-vis absent" [level=3] [ref=f17e6018]
+                - generic [ref=f17e6019]: Driving
+              - generic [ref=f17e6021]:
+                - generic [ref=f17e6022]: 23 reports
+                - generic [ref=f17e6023]: flagged 100 per 100
+                - generic [ref=f17e6024]:
+                  - text: lift
+                  - generic [ref=f17e6025]: 1.5×
+                - generic [ref=f17e6026]: 95% CI [0.86, 1.00]
+            - listitem [ref=f17e6027]:
+              - generic [ref=f17e6028]:
+                - generic [ref=f17e6029]: "#14"
+                - heading "crew bus transport × bridge too narrow" [level=3] [ref=f17e6030]
+                - generic [ref=f17e6031]: Driving
+              - generic [ref=f17e6033]:
+                - generic [ref=f17e6034]: 22 reports
+                - generic [ref=f17e6035]: flagged 100 per 100
+                - generic [ref=f17e6036]:
+                  - text: lift
+                  - generic [ref=f17e6037]: 1.5×
+                - generic [ref=f17e6038]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6039]:
+              - generic [ref=f17e6040]:
+                - generic [ref=f17e6041]: "#15"
+                - heading "mobile crane transit × no IVMS" [level=3] [ref=f17e6042]
+                - generic [ref=f17e6043]: Driving
+              - generic [ref=f17e6045]:
+                - generic [ref=f17e6046]: 22 reports
+                - generic [ref=f17e6047]: flagged 100 per 100
+                - generic [ref=f17e6048]:
+                  - text: lift
+                  - generic [ref=f17e6049]: 1.5×
+                - generic [ref=f17e6050]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6051]:
+              - generic [ref=f17e6052]:
+                - generic [ref=f17e6053]: "#16"
+                - heading "reversing at drill-site laydown × spotter absent at dusk" [level=3] [ref=f17e6054]
+                - generic [ref=f17e6055]: Driving
+              - generic [ref=f17e6057]:
+                - generic [ref=f17e6058]: 22 reports
+                - generic [ref=f17e6059]: flagged 100 per 100
+                - generic [ref=f17e6060]:
+                  - text: lift
+                  - generic [ref=f17e6061]: 1.5×
+                - generic [ref=f17e6062]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6063]:
+              - generic [ref=f17e6064]:
+                - generic [ref=f17e6065]: "#17"
+                - heading "handrail welding near drain × sparks entering drain gap" [level=3] [ref=f17e6066]
+                - generic [ref=f17e6067]: Hot Work
+              - generic [ref=f17e6069]:
+                - generic [ref=f17e6070]: 22 reports
+                - generic [ref=f17e6071]: flagged 100 per 100
+                - generic [ref=f17e6072]:
+                  - text: lift
+                  - generic [ref=f17e6073]: 1.5×
+                - generic [ref=f17e6074]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6075]:
+              - generic [ref=f17e6076]:
+                - generic [ref=f17e6077]: "#18"
+                - heading "paint stripping with heat gun × no standby extinguisher" [level=3] [ref=f17e6078]
+                - generic [ref=f17e6079]: Hot Work
+              - generic [ref=f17e6081]:
+                - generic [ref=f17e6082]: 21 reports
+                - generic [ref=f17e6083]: flagged 100 per 100
+                - generic [ref=f17e6084]:
+                  - text: lift
+                  - generic [ref=f17e6085]: 1.5×
+                - generic [ref=f17e6086]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6087]:
+              - generic [ref=f17e6088]:
+                - generic [ref=f17e6089]: "#19"
+                - heading "christmas tree lifting during workover × load swung over personnel" [level=3] [ref=f17e6090]
+                - generic [ref=f17e6091]: Safe Mechanical Lifting
+              - generic [ref=f17e6093]:
+                - generic [ref=f17e6094]: 21 reports
+                - generic [ref=f17e6095]: flagged 100 per 100
+                - generic [ref=f17e6096]:
+                  - text: lift
+                  - generic [ref=f17e6097]: 1.5×
+                - generic [ref=f17e6098]: 95% CI [0.85, 1.00]
+            - listitem [ref=f17e6099]:
+              - generic [ref=f17e6100]:
+                - generic [ref=f17e6101]: "#20"
+                - heading "water bowser operation × no IVMS" [level=3] [ref=f17e6102]
+                - generic [ref=f17e6103]: Driving
+              - generic [ref=f17e6105]:
+                - generic [ref=f17e6106]: 20 reports
+                - generic [ref=f17e6107]: flagged 100 per 100
+                - generic [ref=f17e6108]:
+                  - text: lift
+                  - generic [ref=f17e6109]: 1.5×
+                - generic [ref=f17e6110]: 95% CI [0.84, 1.00]
+  - contentinfo [ref=f17e183]:
+    - generic [ref=f17e184]:
+      - paragraph [ref=f17e185]: Model proposes, HSE disposes. Your decision becomes a training label.
+      - generic [ref=f17e186]: "demo data: synthetic OIL-style corpus"

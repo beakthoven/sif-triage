@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -27,22 +26,16 @@ import { cn } from "@/lib/utils";
  * it before every run. */
 
 function RankDelta({ delta }: { delta: number }) {
-  if (delta === 0)
-    return (
-      <span className="inline-flex items-center gap-1 text-muted-foreground">
-        <Minus className="size-4" aria-hidden /> 0
-      </span>
-    );
+  if (delta === 0) return <span className="font-mono text-muted-foreground">0</span>;
   const up = delta > 0;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 font-mono font-semibold",
-        up ? "text-primary" : "text-muted-foreground",
+        "font-mono font-medium",
+        up ? "text-foreground" : "text-muted-foreground",
       )}
     >
-      {up ? <ArrowUp className="size-4" aria-hidden /> : <ArrowDown className="size-4" aria-hidden />}
-      {up ? `▲${delta}` : `▼${Math.abs(delta)}`}
+      {up ? `+${delta}` : `−${Math.abs(delta)}`}
     </span>
   );
 }
@@ -147,7 +140,7 @@ export function DensityView({
           size="lg"
           onClick={runIngest}
           disabled={ingesting || (live && ingestedOnce)}
-          className="min-h-11 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+          className="min-h-11"
         >
           {ingesting
             ? t(lang, "ingesting")
@@ -161,10 +154,10 @@ export function DensityView({
             aria-valuenow={Math.round(progress)}
             aria-valuemin={0}
             aria-valuemax={100}
-            className="h-2 min-w-48 flex-1 overflow-hidden rounded-full bg-muted"
+            className="h-1.5 min-w-48 flex-1 overflow-hidden rounded-full bg-muted"
           >
             <div
-              className="hazard-stripe-dense hazard-animated h-full transition-[width] duration-100"
+              className="h-full rounded-full bg-foreground/70 transition-[width] duration-100"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -173,18 +166,19 @@ export function DensityView({
           <p className="font-mono text-xs text-muted-foreground">{ingestNote}</p>
         )}
         {ingestError && !ingesting && (
-          <p role="alert" className="font-mono text-xs text-primary">
+          <p role="alert" className="text-sm font-medium text-destructive">
             {ingestError}
           </p>
         )}
         {topClimber && !ingesting && (
-          <p className="font-mono text-sm text-primary">
+          <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
+            <span className="status-dot bg-verdict" aria-hidden />
             {topClimber.key} just climbed to #1.
           </p>
         )}
       </div>
 
-      <Card className="border-border py-0">
+      <Card className="gap-0 border-border py-0">
         <CardContent className="px-0 py-0">
           <Table>
             <TableHeader>
@@ -205,7 +199,7 @@ export function DensityView({
                   ref={setRowRef(r.key)}
                   className="border-border hover:bg-muted/40"
                 >
-                  <TableCell className="font-mono text-lg font-bold text-primary">
+                  <TableCell className="font-mono font-semibold text-foreground">
                     #{r.rank}
                   </TableCell>
                   <TableCell className="font-medium text-foreground">{r.key}</TableCell>

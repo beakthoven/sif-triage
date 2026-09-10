@@ -1,29 +1,31 @@
-import { ChevronDown, ChevronUp, CircleCheck, CircleX, Copy, Zap } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { BandBadge } from "@/components/band-badge";
 import { HighlightedText } from "@/components/highlighted-text";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getExplanation } from "@/lib/api";
 import { t, type Lang } from "@/lib/phrasebook";
 import type { ExplanationOut, Report } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 /**
- * THE triage card (money shot). Amber "review priority" band — never red,
- * never "detected", score labeled "triage score" and shown as a band,
- * per D14 / UX SEV1-1. Equal-weight Confirm / Not-SIF override buttons;
- * footer: "model proposes, HSE disposes".
+ * THE triage card (money shot) — the one memorable element on the page.
+ * The verdict is the biggest type: "High review priority" in the single
+ * amber accent (#B45309), marked by a quiet 3px amber top-border (the old
+ * hazard stripe's last appearance). Score is a calm mono number labeled
+ * "triage score" — never %, never "detected" (D14 / UX SEV1-1).
  *
- * D22: the top-3 in-scope rule probabilities render as bars — never a
- * single asserted rule. The header chip says "Flagged for HSE review" on
- * HIGH/MODERATE and "no action needed" on LOW (review SEV2-4/SEV2-5).
+ * D22: the top-3 in-scope rule probabilities render as thin bars — never a
+ * single asserted rule. The sub-line says "Flagged for HSE review" on
+ * HIGH/MODERATE (review SEV2-4/SEV2-5); LOW reads "No action needed" in
+ * quiet green, without the amber border.
  *
  * Badge gates annotate here instead of routing to the gray queue:
- * near_dup -> amber-striped "memory, not generalization" banner;
- * chunked / long_input -> CHUNKED badge. The explanation expander fetches
- * GET /api/reports/{id}/explanation lazily — async with a skeleton, the
- * card never blocks on it; template always renders, the ollama rewording
- * is shown when (and only when) the API produced one.
+ * near_dup -> amber left-border "memory, not generalization" note;
+ * chunked / long_input -> a slate dot label. The explanation expander
+ * fetches GET /api/reports/{id}/explanation lazily — async with a skeleton,
+ * the card never blocks on it; template always renders, the ollama
+ * rewording is shown when (and only when) the API produced one.
  */
 export function TriageCard({
   report,
@@ -40,103 +42,128 @@ export function TriageCard({
   const nearDup = p.gate_states.find((g) => g.name === "near_dup" && g.triggered);
   const longInput = p.gate_states.find((g) => g.name === "long_input" && g.triggered);
   const chunked = p.chunked || longInput !== undefined;
+  const reviewPriority = p.band !== "LOW";
+  const verdict =
+    p.band === "HIGH"
+      ? "High review priority"
+      : p.band === "MODERATE"
+        ? "Moderate review priority"
+        : t(lang, "noAction");
 
   return (
-    <Card className="overflow-hidden border-border py-0">
-      {/* Signature hazard-tape header */}
-      <div className="hazard-stripe flex items-center justify-between gap-3 px-4 py-2.5">
-        <BandBadge band={p.band} className="shadow-sm" />
-        <span className="rounded-sm bg-background/90 px-2 py-1 font-mono text-sm font-medium text-primary">
-          {p.band === "LOW" ? t(lang, "noAction") : t(lang, "flaggedFor")}
-        </span>
-      </div>
-
-      {/* Near-dup banner: badge gate, amber-striped, never gray. */}
-      {nearDup && (
-        <div className="hazard-stripe-dense flex items-center gap-3 px-4 py-2">
-          <span className="flex items-center gap-2 rounded-sm bg-background/90 px-2 py-1 text-sm font-medium text-primary">
-            <Copy className="size-4 shrink-0" aria-hidden />
-            {t(lang, "nearDupBanner")}
-          </span>
-          {nearDup.detail && (
-            <span className="hidden rounded-sm bg-background/90 px-2 py-1 font-mono text-xs text-muted-foreground lg:inline">
-              {nearDup.detail}
-            </span>
-          )}
-        </div>
+    <Card
+      className={cn(
+        "gap-0 border-border py-0",
+        reviewPriority && "border-t-[3px] border-t-verdict",
       )}
+    >
+      <CardContent className="gap-0 px-6 pt-6 pb-6">
+        {/* Verdict + score */}
+        <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-2">
+          <h2
+            className={cn(
+              "text-3xl font-semibold tracking-tight first-letter:uppercase",
+              reviewPriority ? "text-verdict" : "text-ok",
+            )}
+          >
+            {verdict}
+          </h2>
+          <p
+            className="flex items-baseline gap-2 text-sm text-muted-foreground"
+            aria-label={t(lang, "triageScore")}
+          >
+            {t(lang, "triageScore")}
+            <span className="font-mono text-xl font-semibold text-foreground">
+              {p.sif_score.toFixed(2)}
+            </span>
+          </p>
+        </div>
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          {reviewPriority ? t(lang, "flaggedFor") : "\u00a0"}
+        </p>
 
-      <CardContent className="space-y-4 px-5 pt-4">
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-sm text-muted-foreground">
+        {/* Meta row */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
           <span>
-            Band <span className="font-semibold text-foreground">{p.band}</span>
-          </span>
-          <span aria-label={t(lang, "triageScore")}>
-            {t(lang, "triageScore")}{" "}
-            <span className="font-semibold text-foreground">{p.sif_score.toFixed(2)}</span>
+            {report.site} · {report.activity}
           </span>
           {p.latency_ms > 0 && <span>{p.latency_ms}ms</span>}
           {chunked && (
             <span
-              className="rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 text-xs font-semibold text-primary"
+              className="inline-flex items-center gap-1.5 font-sans font-medium text-quiet"
               title={longInput?.detail}
             >
+              <span className="status-dot bg-quiet" aria-hidden />
               {t(lang, "chunkedBadge")}
             </span>
           )}
-          <span className="ml-auto">
-            {report.site} · {report.activity}
-          </span>
         </div>
 
+        {/* Near-dup note: badge gate, amber left border, quiet. */}
+        {nearDup && (
+          <div className="mt-4 border-l-[3px] border-l-verdict bg-verdict/5 px-4 py-2.5">
+            <p className="text-sm font-medium text-foreground">
+              {t(lang, "nearDupBanner")}
+            </p>
+            {nearDup.detail && (
+              <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                {nearDup.detail}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Rule probabilities — thin quiet bars, top 3 in-scope */}
         {inScope.length > 0 && (
-          <div className="space-y-1.5" aria-label={t(lang, "ruleProbs")}>
-            <p className="flex items-center gap-1.5 font-mono text-xs tracking-wide text-muted-foreground uppercase">
-              <Zap className="size-4 text-primary" aria-hidden />
+          <div className="mt-6 space-y-2" aria-label={t(lang, "ruleProbs")}>
+            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
               {t(lang, "ruleProbs")}
             </p>
             {inScope.slice(0, 3).map((r) => (
               <div key={r.code} className="flex items-center gap-3">
-                <span className="w-40 shrink-0 truncate text-sm font-medium text-foreground">
+                <span className="w-44 shrink-0 truncate text-sm text-foreground">
                   {r.name}
                 </span>
-                <span className="h-2 min-w-24 flex-1 overflow-hidden rounded-full bg-muted">
+                <span className="h-1 min-w-24 flex-1 overflow-hidden rounded-full bg-muted">
                   <span
-                    className="block h-full rounded-full bg-primary"
+                    className="block h-full rounded-full bg-foreground/70"
                     style={{ width: `${Math.min(100, Math.max(0, r.prob * 100))}%` }}
                   />
                 </span>
-                <span className="w-9 shrink-0 text-right font-mono text-sm text-primary">
+                <span className="w-9 shrink-0 text-right font-mono text-sm text-foreground">
                   {r.prob.toFixed(2)}
                 </span>
               </div>
             ))}
             {p.well_control && (
-              <span className="inline-block rounded-sm border border-primary/60 bg-primary/10 px-2 py-0.5 font-mono text-xs font-semibold text-primary">
-                WELL-CONTROL / BARRIER TAG
-              </span>
+              <p className="inline-flex items-center gap-1.5 pt-1 text-xs font-medium text-quiet">
+                <span className="status-dot bg-quiet" aria-hidden />
+                Well-control / barrier tag
+              </p>
             )}
           </div>
         )}
         {oos.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            Declared out-of-scope (never scored): {oos.map((r) => r.name).join(" · ")}
+          <p className="mt-4 text-xs text-muted-foreground">
+            Declared out of scope (never scored): {oos.map((r) => r.name).join(" · ")}
           </p>
         )}
 
-        <HighlightedText text={report.text} spans={p.evidence_spans} />
+        <div className="mt-5">
+          <HighlightedText text={report.text} spans={p.evidence_spans} />
+        </div>
 
         <ExplanationSection report={report} lang={lang} />
       </CardContent>
 
-      <CardFooter className="flex flex-wrap items-center gap-3 border-t border-border px-5 py-4 [.border-t]:pt-4">
-        <div className="flex gap-3">
+      <CardFooter className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-4 [.border-t]:pt-4">
+        <div className="flex flex-wrap gap-3">
           <Button
             size="lg"
+            variant="outline"
             onClick={() => onOverride?.(report.id, "confirm")}
-            className="min-h-11 bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+            className="min-h-11"
           >
-            <CircleCheck aria-hidden />
             {t(lang, "confirm")}
           </Button>
           <Button
@@ -145,13 +172,10 @@ export function TriageCard({
             onClick={() => onOverride?.(report.id, "not_sif")}
             className="min-h-11"
           >
-            <CircleX aria-hidden />
             {t(lang, "notSif")}
           </Button>
         </div>
-        <p className="ml-auto font-mono text-xs text-muted-foreground">
-          {t(lang, "footer")}
-        </p>
+        <p className="ml-auto text-xs text-muted-foreground">{t(lang, "footer")}</p>
       </CardFooter>
     </Card>
   );
@@ -195,28 +219,29 @@ function ExplanationSection({ report, lang }: { report: Report; lang: Lang }) {
   }, [open, report.id]);
 
   return (
-    <div className="rounded-md border border-border">
+    <div className="mt-6 border-t border-border">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left font-medium text-foreground transition-colors hover:bg-muted/60"
+        className="flex min-h-11 w-full items-center gap-2 py-2 text-left text-sm font-medium text-foreground transition-colors hover:text-foreground/70"
       >
         {open ? (
-          <ChevronUp className="size-4 text-primary" aria-hidden />
+          <ChevronUp className="size-4 text-muted-foreground" aria-hidden />
         ) : (
-          <ChevronDown className="size-4 text-primary" aria-hidden />
+          <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
         )}
         {t(lang, "whyScore")}
         {explanation?.source === "ollama" && (
-          <span className="ml-auto rounded-sm border border-primary/60 bg-primary/10 px-1.5 py-0.5 font-mono text-xs text-primary">
+          <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+            <span className="status-dot bg-quiet" aria-hidden />
             {t(lang, "llmPhrased")}
             {explanation.cached ? " · cached" : ""}
           </span>
         )}
       </button>
       {open && (
-        <div className="space-y-3 border-t border-border px-4 py-3">
+        <div className="space-y-3 pb-2">
           {loading ? (
             <div className="space-y-2" aria-busy="true" aria-label="loading explanation">
               <div className="h-3 w-3/4 animate-pulse rounded-sm bg-muted" />

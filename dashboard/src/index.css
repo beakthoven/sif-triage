@@ -8,6 +8,9 @@
     --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     --font-heading: var(--font-sans);
+    --color-verdict: var(--verdict);
+    --color-ok: var(--ok);
+    --color-quiet: var(--quiet);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,45 +52,49 @@
 }
 
 /*
- * SIF dashboard theme — navy #0B1220 primary (designed/rehearsed at 1920x1080).
- * Amber #FBBF24 on navy = 11.2:1 contrast (WCAG AAA, projector-robust).
- * No red/green pairing anywhere: band semantics are amber/intensity, not color hue.
+ * SIF dashboard theme — "reading room" light palette (client: simple, clear,
+ * not cluttered). Paper background, ink text, hairline borders, ONE amber
+ * (#B45309, 5.9:1 on white — WCAG AA) reserved for review-priority verdicts,
+ * quiet green for clear/ok, slate for gray/humility states. No red/green
+ * pairing anywhere: band semantics are words + position, never hue alone.
  */
 :root {
-    --navy: #0b1220;
-    --amber: #fbbf24;
-    --background: #0b1220;
-    --foreground: #f1f5f9;
-    --card: #111c31;
-    --card-foreground: #f1f5f9;
-    --popover: #111c31;
-    --popover-foreground: #f1f5f9;
-    --primary: #fbbf24;
-    --primary-foreground: #0b1220;
-    --secondary: #1b2946;
-    --secondary-foreground: #e2e8f0;
-    --muted: #16223c;
-    --muted-foreground: #94a3b8;
-    --accent: #2b3c5e;
-    --accent-foreground: #fbbf24;
-    --destructive: #b91c1c;
-    --border: #263652;
-    --input: #263652;
-    --ring: #fbbf24;
-    --chart-1: #fbbf24;
-    --chart-2: #94a3b8;
+    --paper: #f8f7f4;
+    --verdict: #b45309;
+    --ok: #047857;
+    --quiet: #64748b;
+    --background: #f8f7f4;
+    --foreground: #1c1e21;
+    --card: #ffffff;
+    --card-foreground: #1c1e21;
+    --popover: #ffffff;
+    --popover-foreground: #1c1e21;
+    --primary: #1c1e21;
+    --primary-foreground: #ffffff;
+    --secondary: #f0eee8;
+    --secondary-foreground: #1c1e21;
+    --muted: #f0eee8;
+    --muted-foreground: #5b6470;
+    --accent: #edeae2;
+    --accent-foreground: #1c1e21;
+    --destructive: #b42318;
+    --border: #e4e2da;
+    --input: #e4e2da;
+    --ring: #1c1e21;
+    --chart-1: #b45309;
+    --chart-2: #5b6470;
     --chart-3: #64748b;
-    --chart-4: #475569;
-    --chart-5: #334155;
+    --chart-4: #94a3b8;
+    --chart-5: #cbd5e1;
     --radius: 0.5rem;
-    --sidebar: #0b1220;
-    --sidebar-foreground: #f1f5f9;
-    --sidebar-primary: #fbbf24;
-    --sidebar-primary-foreground: #0b1220;
-    --sidebar-accent: #16223c;
-    --sidebar-accent-foreground: #fbbf24;
-    --sidebar-border: #263652;
-    --sidebar-ring: #fbbf24;
+    --sidebar: #f8f7f4;
+    --sidebar-foreground: #1c1e21;
+    --sidebar-primary: #1c1e21;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f0eee8;
+    --sidebar-accent-foreground: #1c1e21;
+    --sidebar-border: #e4e2da;
+    --sidebar-ring: #1c1e21;
 }
 
 @layer base {
@@ -105,49 +112,16 @@
 }
 
 @layer components {
-  /*
-   * Signature hazard-tape stripe: 45deg amber/navy diagonal, pure CSS.
-   * Used on triage card headers — instantly recognizable in screenshots.
-   */
-  .hazard-stripe {
-    background-color: var(--navy);
-    background-image: repeating-linear-gradient(
-      -45deg,
-      var(--amber) 0px,
-      var(--amber) 12px,
-      transparent 12px,
-      transparent 24px
-    );
-  }
-  .hazard-stripe-dense {
-    background-color: var(--navy);
-    background-image: repeating-linear-gradient(
-      -45deg,
-      var(--amber) 0px,
-      var(--amber) 6px,
-      transparent 6px,
-      transparent 12px
-    );
-  }
-  /* Animated tape for the ingest progress bar — one tile (12px) period at
-   * 45deg is 12*sqrt(2) ≈ 16.97px along x. Static under reduced-motion via
-   * the global media query below. */
-  @keyframes hazard-slide {
-    from {
-      background-position: 0 0;
-    }
-    to {
-      background-position: 16.97px 0;
-    }
-  }
-  .hazard-animated {
-    animation: hazard-slide 0.7s linear infinite;
-  }
-  /* Amber evidence-span highlight: navy text on amber, never color-only. */
+  /* Evidence-span highlight: quiet warm tint on paper, ink text, medium
+   * weight — never color-only (weight + tint both carry the mark). */
   .span-highlight {
     @apply rounded-sm px-0.5 font-medium;
-    background-color: color-mix(in oklab, var(--amber) 88%, transparent);
-    color: var(--navy);
+    background-color: #efe9dc;
+    color: var(--foreground);
+  }
+  /* 6px status dot — replaces pill chips everywhere except the verdict. */
+  .status-dot {
+    @apply inline-block size-1.5 shrink-0 rounded-full;
   }
 }
 

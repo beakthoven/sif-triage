@@ -56,7 +56,7 @@ export function ReviewView({
             overrides → future gold labels
           </span>
         </h2>
-        <Card className="border-border py-0">
+        <Card className="gap-0 border-border py-0">
           <CardContent className="px-0 py-0">
             <Table>
               <TableHeader>
@@ -77,7 +77,7 @@ export function ReviewView({
                     <TableCell className="font-mono text-muted-foreground line-through">
                       {o.old_value ?? "—"}
                     </TableCell>
-                    <TableCell className="font-mono font-semibold text-primary">
+                    <TableCell className="font-mono font-semibold text-foreground">
                       {o.new_value}
                     </TableCell>
                     <TableCell className="font-mono text-muted-foreground">{o.labeler}</TableCell>
