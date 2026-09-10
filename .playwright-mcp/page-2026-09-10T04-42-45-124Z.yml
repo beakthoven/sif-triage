@@ -1,0 +1,271 @@
+- generic [ref=f19e3]:
+  - banner [ref=f19e4]:
+    - generic [ref=f19e5]:
+      - generic [ref=f19e6]:
+        - heading "SIF-Precursor Detection Engine" [level=1] [ref=f19e7]
+        - paragraph [ref=f19e8]: OIL India · Triage Console
+      - generic [ref=f19e9]:
+        - generic [ref=f19e10]: LIVE · onnx:masked-v2/sif_multitask_int8.onnx · 5050 reports
+        - group "UI language" [ref=f19e12]:
+          - button "EN" [pressed] [ref=f19e14]
+          - generic [ref=f19e15]:
+            - generic [aria-hidden] [ref=f19e16]: /
+            - button "हिं" [ref=f19e17]
+  - main [ref=f19e18]:
+    - generic [ref=f19e19]:
+      - tablist [ref=f19e20]:
+        - tab "Feed" [ref=f19e21]
+        - tab "Density" [ref=f19e22]
+        - tab "Patterns" [active] [selected] [ref=f19e23]
+        - tab "Review" [ref=f19e24]
+      - tabpanel "Patterns" [ref=f19e7560]:
+        - generic [ref=f19e7561]:
+          - tablist "pattern kind" [ref=f19e7562]:
+            - tab "Site × Activity" [selected] [ref=f19e7563]
+            - tab "Activity × Barrier" [ref=f19e7564]
+          - paragraph [ref=f19e7565]: Lift-ranked activity × site co-occurrence on structured facets. Wilson 95% CI on the flag rate — no LLM tagging.
+          - list [ref=f19e7567]:
+            - listitem [ref=f19e7568]:
+              - generic [ref=f19e7569]:
+                - generic [ref=f19e7570]: "#1"
+                - 'heading "derrick/mast climbing × Workover Rig #7" [level=3] [ref=f19e7571]'
+                - generic [ref=f19e7572]: Working at Height
+              - generic [ref=f19e7574]:
+                - generic [ref=f19e7575]: 37 reports
+                - generic [ref=f19e7576]: flagged 100 per 100
+                - generic [ref=f19e7577]:
+                  - text: lift
+                  - generic [ref=f19e7578]: 1.5×
+                - generic [ref=f19e7579]: 95% CI [0.91, 1.00]
+            - listitem [ref=f19e7580]:
+              - generic [ref=f19e7581]:
+                - generic [ref=f19e7582]: "#2"
+                - heading "DG exhaust duct inspection × Kathalguri GCS" [level=3] [ref=f19e7583]
+                - generic [ref=f19e7584]: Confined Space
+              - generic [ref=f19e7586]:
+                - generic [ref=f19e7587]: 31 reports
+                - generic [ref=f19e7588]: flagged 100 per 100
+                - generic [ref=f19e7589]:
+                  - text: lift
+                  - generic [ref=f19e7590]: 1.5×
+                - generic [ref=f19e7591]: 95% CI [0.89, 1.00]
+            - listitem [ref=f19e7592]:
+              - generic [ref=f19e7593]:
+                - generic [ref=f19e7594]: "#3"
+                - heading "angle grinding on pipe rack × Duliajan GGS-4" [level=3] [ref=f19e7595]
+                - generic [ref=f19e7596]: Hot Work
+              - generic [ref=f19e7598]:
+                - generic [ref=f19e7599]: 30 reports
+                - generic [ref=f19e7600]: flagged 100 per 100
+                - generic [ref=f19e7601]:
+                  - text: lift
+                  - generic [ref=f19e7602]: 1.5×
+                - generic [ref=f19e7603]: 95% CI [0.89, 1.00]
+            - listitem [ref=f19e7604]:
+              - generic [ref=f19e7605]:
+                - generic [ref=f19e7606]: "#4"
+                - heading "tank roof work × Baghjan EPS" [level=3] [ref=f19e7607]
+                - generic [ref=f19e7608]: Working at Height
+              - generic [ref=f19e7610]:
+                - generic [ref=f19e7611]: 27 reports
+                - generic [ref=f19e7612]: flagged 100 per 100
+                - generic [ref=f19e7613]:
+                  - text: lift
+                  - generic [ref=f19e7614]: 1.5×
+                - generic [ref=f19e7615]: 95% CI [0.88, 1.00]
+            - listitem [ref=f19e7616]:
+              - generic [ref=f19e7617]:
+                - generic [ref=f19e7618]: "#5"
+                - heading "braze repair instrument air line × Baghjan EPS" [level=3] [ref=f19e7619]
+                - generic [ref=f19e7620]: Hot Work
+              - generic [ref=f19e7622]:
+                - generic [ref=f19e7623]: 27 reports
+                - generic [ref=f19e7624]: flagged 100 per 100
+                - generic [ref=f19e7625]:
+                  - text: lift
+                  - generic [ref=f19e7626]: 1.5×
+                - generic [ref=f19e7627]: 95% CI [0.88, 1.00]
+            - listitem [ref=f19e7628]:
+              - generic [ref=f19e7629]:
+                - generic [ref=f19e7630]: "#6"
+                - heading "forklift unloading at drill store × Baghjan" [level=3] [ref=f19e7631]
+                - generic [ref=f19e7632]: Driving
+              - generic [ref=f19e7634]:
+                - generic [ref=f19e7635]: 26 reports
+                - generic [ref=f19e7636]: flagged 100 per 100
+                - generic [ref=f19e7637]:
+                  - text: lift
+                  - generic [ref=f19e7638]: 1.5×
+                - generic [ref=f19e7639]: 95% CI [0.87, 1.00]
+            - listitem [ref=f19e7640]:
+              - generic [ref=f19e7641]:
+                - generic [ref=f19e7642]: "#7"
+                - heading "gas cutting abandoned flowline × Kathalguri" [level=3] [ref=f19e7643]
+                - generic [ref=f19e7644]: Hot Work
+              - generic [ref=f19e7646]:
+                - generic [ref=f19e7647]: 26 reports
+                - generic [ref=f19e7648]: flagged 100 per 100
+                - generic [ref=f19e7649]:
+                  - text: lift
+                  - generic [ref=f19e7650]: 1.5×
+                - generic [ref=f19e7651]: 95% CI [0.87, 1.00]
+            - listitem [ref=f19e7652]:
+              - generic [ref=f19e7653]:
+                - generic [ref=f19e7654]: "#8"
+                - heading "hot work inside tank dike × Duliajan GGS-4" [level=3] [ref=f19e7655]
+                - generic [ref=f19e7656]: Hot Work
+              - generic [ref=f19e7658]:
+                - generic [ref=f19e7659]: 26 reports
+                - generic [ref=f19e7660]: flagged 100 per 100
+                - generic [ref=f19e7661]:
+                  - text: lift
+                  - generic [ref=f19e7662]: 1.5×
+                - generic [ref=f19e7663]: 95% CI [0.87, 1.00]
+            - listitem [ref=f19e7664]:
+              - generic [ref=f19e7665]:
+                - generic [ref=f19e7666]: "#9"
+                - heading "reversing at drill-site laydown × Baghjan" [level=3] [ref=f19e7667]
+                - generic [ref=f19e7668]: Driving
+              - generic [ref=f19e7670]:
+                - generic [ref=f19e7671]: 25 reports
+                - generic [ref=f19e7672]: flagged 100 per 100
+                - generic [ref=f19e7673]:
+                  - text: lift
+                  - generic [ref=f19e7674]: 1.5×
+                - generic [ref=f19e7675]: 95% CI [0.87, 1.00]
+            - listitem [ref=f19e7676]:
+              - generic [ref=f19e7677]:
+                - generic [ref=f19e7678]: "#10"
+                - heading "electric welding (power fluctuation) × Digboi" [level=3] [ref=f19e7679]
+                - generic [ref=f19e7680]: Hot Work
+              - generic [ref=f19e7682]:
+                - generic [ref=f19e7683]: 25 reports
+                - generic [ref=f19e7684]: flagged 100 per 100
+                - generic [ref=f19e7685]:
+                  - text: lift
+                  - generic [ref=f19e7686]: 1.5×
+                - generic [ref=f19e7687]: 95% CI [0.87, 1.00]
+            - listitem [ref=f19e7688]:
+              - generic [ref=f19e7689]:
+                - generic [ref=f19e7690]: "#11"
+                - heading "monsoon-flooded flowline excavation entry × Duliajan GGS-2" [level=3] [ref=f19e7691]
+                - generic [ref=f19e7692]: Confined Space
+              - generic [ref=f19e7694]:
+                - generic [ref=f19e7695]: 23 reports
+                - generic [ref=f19e7696]: flagged 100 per 100
+                - generic [ref=f19e7697]:
+                  - text: lift
+                  - generic [ref=f19e7698]: 1.5×
+                - generic [ref=f19e7699]: 95% CI [0.86, 1.00]
+            - listitem [ref=f19e7700]:
+              - generic [ref=f19e7701]:
+                - generic [ref=f19e7702]: "#12"
+                - heading "water tanker on narrow embankment road × Moran field roads" [level=3] [ref=f19e7703]
+                - generic [ref=f19e7704]: Driving
+              - generic [ref=f19e7706]:
+                - generic [ref=f19e7707]: 23 reports
+                - generic [ref=f19e7708]: flagged 100 per 100
+                - generic [ref=f19e7709]:
+                  - text: lift
+                  - generic [ref=f19e7710]: 1.5×
+                - generic [ref=f19e7711]: 95% CI [0.86, 1.00]
+            - listitem [ref=f19e7712]:
+              - generic [ref=f19e7713]:
+                - generic [ref=f19e7714]: "#13"
+                - heading "mud tank entry on workover rig × Tengakhat" [level=3] [ref=f19e7715]
+                - generic [ref=f19e7716]: Confined Space
+              - generic [ref=f19e7718]:
+                - generic [ref=f19e7719]: 22 reports
+                - generic [ref=f19e7720]: flagged 100 per 100
+                - generic [ref=f19e7721]:
+                  - text: lift
+                  - generic [ref=f19e7722]: 1.5×
+                - generic [ref=f19e7723]: 95% CI [0.85, 1.00]
+            - listitem [ref=f19e7724]:
+              - generic [ref=f19e7725]:
+                - generic [ref=f19e7726]: "#14"
+                - heading "handrail welding near drain × Baghjan EPS" [level=3] [ref=f19e7727]
+                - generic [ref=f19e7728]: Hot Work
+              - generic [ref=f19e7730]:
+                - generic [ref=f19e7731]: 22 reports
+                - generic [ref=f19e7732]: flagged 100 per 100
+                - generic [ref=f19e7733]:
+                  - text: lift
+                  - generic [ref=f19e7734]: 1.5×
+                - generic [ref=f19e7735]: 95% CI [0.85, 1.00]
+            - listitem [ref=f19e7736]:
+              - generic [ref=f19e7737]:
+                - generic [ref=f19e7738]: "#15"
+                - 'heading "workover rig drawworks maintenance × Workover Rig #5" [level=3] [ref=f19e7739]'
+                - generic [ref=f19e7740]: Energy Isolation
+              - generic [ref=f19e7742]:
+                - generic [ref=f19e7743]: 20 reports
+                - generic [ref=f19e7744]: flagged 100 per 100
+                - generic [ref=f19e7745]:
+                  - text: lift
+                  - generic [ref=f19e7746]: 1.5×
+                - generic [ref=f19e7747]: 95% CI [0.84, 1.00]
+            - listitem [ref=f19e7748]:
+              - generic [ref=f19e7749]:
+                - generic [ref=f19e7750]: "#16"
+                - 'heading "workover rig drawworks maintenance × Workover Rig #7" [level=3] [ref=f19e7751]'
+                - generic [ref=f19e7752]: Energy Isolation
+              - generic [ref=f19e7754]:
+                - generic [ref=f19e7755]: 20 reports
+                - generic [ref=f19e7756]: flagged 100 per 100
+                - generic [ref=f19e7757]:
+                  - text: lift
+                  - generic [ref=f19e7758]: 1.5×
+                - generic [ref=f19e7759]: 95% CI [0.84, 1.00]
+            - listitem [ref=f19e7760]:
+              - generic [ref=f19e7761]:
+                - generic [ref=f19e7762]: "#17"
+                - heading "night convoy to remote well site × Baghjan" [level=3] [ref=f19e7763]
+                - generic [ref=f19e7764]: Driving
+              - generic [ref=f19e7766]:
+                - generic [ref=f19e7767]: 20 reports
+                - generic [ref=f19e7768]: flagged 100 per 100
+                - generic [ref=f19e7769]:
+                  - text: lift
+                  - generic [ref=f19e7770]: 1.5×
+                - generic [ref=f19e7771]: 95% CI [0.84, 1.00]
+            - listitem [ref=f19e7772]:
+              - generic [ref=f19e7773]:
+                - generic [ref=f19e7774]: "#18"
+                - 'heading "mud pump liner change × Workover Rig #5" [level=3] [ref=f19e7775]'
+                - generic [ref=f19e7776]: Energy Isolation
+              - generic [ref=f19e7778]:
+                - generic [ref=f19e7779]: 19 reports
+                - generic [ref=f19e7780]: flagged 100 per 100
+                - generic [ref=f19e7781]:
+                  - text: lift
+                  - generic [ref=f19e7782]: 1.5×
+                - generic [ref=f19e7783]: 95% CI [0.83, 1.00]
+            - listitem [ref=f19e7784]:
+              - generic [ref=f19e7785]:
+                - generic [ref=f19e7786]: "#19"
+                - heading "christmas tree lifting during workover × Baghjan EPS" [level=3] [ref=f19e7787]
+                - generic [ref=f19e7788]: Safe Mechanical Lifting
+              - generic [ref=f19e7790]:
+                - generic [ref=f19e7791]: 19 reports
+                - generic [ref=f19e7792]: flagged 100 per 100
+                - generic [ref=f19e7793]:
+                  - text: lift
+                  - generic [ref=f19e7794]: 1.5×
+                - generic [ref=f19e7795]: 95% CI [0.83, 1.00]
+            - listitem [ref=f19e7796]:
+              - generic [ref=f19e7797]:
+                - generic [ref=f19e7798]: "#20"
+                - heading "old separator internal inspection × Dumduma" [level=3] [ref=f19e7799]
+                - generic [ref=f19e7800]: Confined Space
+              - generic [ref=f19e7802]:
+                - generic [ref=f19e7803]: 19 reports
+                - generic [ref=f19e7804]: flagged 100 per 100
+                - generic [ref=f19e7805]:
+                  - text: lift
+                  - generic [ref=f19e7806]: 1.5×
+                - generic [ref=f19e7807]: 95% CI [0.83, 1.00]
+  - contentinfo [ref=f19e183]:
+    - generic [ref=f19e184]:
+      - paragraph [ref=f19e185]: Model proposes, HSE disposes. Your decision becomes a training label.
+      - generic [ref=f19e186]: "demo data: synthetic OIL-style corpus"
