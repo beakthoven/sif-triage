@@ -28,7 +28,7 @@ flowchart LR
         H --> K["onnxruntime INT8<br/>p95 ≈ 20 ms"]
         J --> K
         K --> L["Triage score (calibrated)<br/>rule probabilities · evidence spans<br/>well-control tag"]
-        L --> M["Sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · long-input"]
+        L --> M["9 sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · well-control<br/>long-input · chunked-low-score"]
         M --> N["Deterministic explanations<br/>(optional local qwen3:4b rewording,<br/>template fallback on every call)"]
         N --> O["React dashboard:<br/>feed · density re-rank · patterns<br/>review queue · EN/हिं toggle"]
     end
@@ -63,7 +63,17 @@ rewording with template fallback) → React dashboard with 4 engineered gray sta
 
 ## Quickstart
 
-One command brings up the whole demo — **bare-metal, 100% offline, no docker**
+**System requirements:** Linux x86_64 · Python 3.14 · 4 cores · 8 GB RAM free
+(+3.2 GB if qwen3:4b rewording runs) · no network at demo time.
+
+First-time setup (needs network once):
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+cd dashboard && npm ci && npm run build && cd ..
+```
+
+Then one command brings up the whole demo — **bare-metal, 100% offline, no docker**
 (uvicorn + static React dashboard + SQLite; ARCHITECTURE runtime section):
 
 ```bash
@@ -77,16 +87,6 @@ One command brings up the whole demo — **bare-metal, 100% offline, no docker**
 `OLLAMA_NUM_PARALLEL=6` (DECISION_LOG D18); an already-running ollama is reused
 and never killed by `--stop`. If ollama is absent entirely, the deterministic
 explanation templates carry the demo (template fallback by design).
-
-**System requirements:** Linux x86_64 · Python 3.14 · 4 cores · 8 GB RAM free
-(+3.2 GB if qwen3:4b rewording runs) · no network at demo time.
-
-First-time setup (needs network once):
-
-```bash
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-cd dashboard && npm ci && npm run build && cd ..
-```
 
 **Offline / USB install:** `packaging/make_tarball.sh` builds the air-gapped
 bundle (code + prebuilt dashboard + model artifacts + vendored tokenizer +
@@ -111,21 +111,22 @@ pip install -r requirements-dev.txt
 
 Every number below was measured on the demo machine within 72 h of the demo and
 traces to a file (see [`runs/run2/kb/KNOWLEDGE_BASE.md`](runs/run2/kb/KNOWLEDGE_BASE.md)
-§10/§11 and [`runs/run2/day2/ship_decision.md`](runs/run2/day2/ship_decision.md)):
+§10–12, [`runs/run2/day2/ship_decision.md`](runs/run2/day2/ship_decision.md),
+and [`runs/run2/day2/latency_v2_final.md`](runs/run2/day2/latency_v2_final.md)):
 
 | Claim | Measured value |
 |---|---|
-| Operating point (max recall @ precision ≥ 0.80), derived-label temporal holdout, n = 17,731 | **P 0.8000 · R 0.9748 · F1 0.8788** (proxy labels; blind human gold set is the arbiter) |
-| Classify latency, single report, CPU-only, 8 threads | p50 11.9 ms · **p95 19.7 ms** · p99 40.2 ms |
-| Bulk ingest, live end-to-end | **37.3 reports/s** (5,050 rows, 135.3 s wall; SLA ≥30/s) |
+| Operating point (max recall @ precision ≥ 0.80), derived-label temporal holdout, n = 17,731 | **P 0.8000 · R 0.9748 · F1 0.8788** (proxy labels; the blind human gold verdict is the next row) |
+| **Blind human gold — FINAL (2026-09-10)** | 500 blind-labeled reports (300 OSHA 2024–25 incl. 150 oil-gas + 100 ASRS + 100 synthetic), 4 labelers. Real-pooled headline (n = 318 human-consensus): **P 0.976 [0.948, 0.989] · R 0.836 [0.788, 0.874] · F1 0.900**; Fleiss κ 0.513 ± 0.066 (130 doubles). ASRS stratum recall 0.00 — aviation is fully out-of-distribution, disclosed. Synthetic stratum reported separately (P 0.347), never pooled. 93 split/unsure items excluded pending adjudication. Full detail: [`artifacts/gold/gold_metrics_final.md`](artifacts/gold/gold_metrics_final.md) |
+| Classify latency, single report, CPU-only, 8 threads (masked-v2 int8, model-only ship path) | p50 11.4 ms · **p95 17.7 ms** · p99 20.5 ms |
+| Bulk ingest, end-to-end | **45.6 reports/s** (5,050-row CSV → 5,048 accepted, 110.8 s wall; SLA ≥30/s) |
 | Evidence spans | 100% exact-substring validity, self-validated before render; invalid spans dropped, never shown |
 | Near-dup detection | measured cosine threshold 0.91 on a 70,398-vector MiniLM index, p95 3.8 ms |
 | Fine-tune vs zero-shot qwen3:8b (McNemar, Holm-corrected, n = 1,500) | fine-tune wins, **p = 0.0018**, at 1,083× lower per-classification latency |
 | Fine-tune vs TF-IDF+LogReg (same sample) | **not significant (p = 0.122) — disclosed, not hidden** |
-| Adversarial suite / packaging | 17/17 PASS · self-check: 2 clean start→classify→stop cycles |
+| Adversarial suite / packaging | 18/18 PASS · self-check: 2 clean start→classify→stop cycles |
 | Training cost | 4.19 + 1.11 GPU-h of a 30 h weekly Kaggle quota |
 | Air-gapped operation | zero external requests in the demo path by design; physical-unplug run is a scripted demo beat |
-| Gold set | 500 blind-labeled reports (300 OSHA 2024–25 incl. 150 oil-gas + 100 ASRS + 100 synthetic); 690 judgments = 500 primary + 150 double + 20 pilot × 2; real-only headline, synthetic never pooled |
 
 What this system is:
 

@@ -39,7 +39,7 @@ vocabulary gate passed 24/24 (GGS, GCS, christmas tree, WOC, kick ≥50 rows eac
 (c) The proof instrument is the gold set: 500 blind-labeled reports — 300 real OSHA
 2024–25 with a 150-row oil-gas-NAICS oversample, 100 ASRS, 100 synthetic — headline
 metrics on **real data only**, synthetic reported separately, never pooled (D8).
-Gold recall @ P≥0.80: **{{GOLD_RECALL}}** [{{GOLD_RECALL_CI}}].
+Gold recall @ P≥0.80: **0.836** [0.788, 0.874].
 
 ### Q4. "Would your tool have prevented Baghjan?"
 **A:** We never claim that — it's on our what-we-don't-claim slide. The verified facts:
@@ -56,7 +56,8 @@ prose vs US inspector prose, not LLM artifacts; the same detector separates regi
 even against oil-gas-only OSHA rows. Critically, register is **balanced across
 synthetic positives and negatives**, so the SIF label is unconfounded by the tells.
 Synthetic is 13.6% of training, carries the thin rules (confined-space real support is
-~0.2–0.7%), and gold reports the synthetic stratum separately, never pooled. It is
+~0.29–2.5% depending on proxy), and gold reports the synthetic stratum separately,
+never pooled. It is
 coverage augmentation, claimed as nothing more.
 
 ### Q6. "Val AUC 0.997 but test AUC 0.868 — your model doesn't generalize."
@@ -73,11 +74,9 @@ not derived labels.
 doesn't ship: a precision-≥0.80-guaranteed operating point, calibrated scores, the
 7-rule multi-label head (fine-tune rules exact-set 0.819 vs tfidf 0.788), evidence
 spans, and an explanation layer. And derived labels are a proxy — the blind gold set is
-the arbiter. (Gold-vs-baselines McNemar requires baseline scores on the gold items —
-that wiring is a Day-3 task per gold_metrics_pipeline.md; if it lands, quote
-**{{GOLD_MCNEMAR_TFIDF_P}}** here, otherwise rest on the derived-sample table + the
-capability list, and say the gold head-to-head is the fine-tune vs the proxy labels
-tonight.) Either way: the fine-tune *does* beat the 8B zero-shot LLM significantly
+the arbiter. (The gold-vs-baselines McNemar was **never measured on the gold items** —
+that wiring didn't land; we say so plainly and rest on the derived-sample table + the
+capability list.) Either way: the fine-tune *does* beat the 8B zero-shot LLM significantly
 (p = 0.0018) at 1/1083 the per-row latency.
 
 ### Q8. "Why not just run an LLM zero-shot over the reports?"
@@ -110,11 +109,13 @@ outcome-redacted text + event title — never model output, never derived labels
 (machine-verified: zero provenance fields in the labeler payload); (2) the label spec
 was frozen and sha256-hashed *before* labeling started; (3) the operating point was
 frozen on the temporal holdout and applied to gold **once** — no re-tuning on gold;
-(4) agreement is human-vs-human Fleiss' κ on a 150-item double-labeled subset +
-20-item pilot — **{{GOLD_KAPPA}}** — never model-vs-human dressed up as validity.
-Judgment arithmetic, if a judge counts: **690 emitted = 500 primary + 150 double +
-20 pilot × 2** — the 40 extra are the pilot calibration round (`pilot_ids` and
-`n_judgments_emitted: 690` in `artifacts/gold/sample_manifest.json`).
+(4) agreement is human-vs-human Fleiss' κ on a 130-item double-labeled subset +
+20-item pilot — **0.513 ± 0.07 (n=130)** — never model-vs-human dressed up as validity.
+Judgment arithmetic, if a judge counts: **731 human judgments on disk** across all 500
+items (500 primary + double-label rounds + the 20-item pilot, plus the adjudicator
+C re-label pass). The headline scores the **407 unanimous-consensus items**; 93
+disputed items (44 disagreement + 49 unsure) are held out adjudication-pending, not
+majority-voted — the conservative choice.
 Contamination separation: the synthetic-corpus generator LLM, the zero-shot baseline
 LLM, and any LLM near the gold materials are three different things.
 
@@ -123,8 +124,58 @@ LLM, and any LLM near the gold materials are three different things.
 beat). Requirements: Linux x86-64, Python 3.14, 4 cores, 8 GB RAM, no network, no
 docker. One command — `./run.sh` — brings up model + API + dashboard + SQLite; a USB
 tarball (775 MB) with vendored wheels installs offline; the packaging self-check runs
-two full start→classify→stop cycles. Measured on this laptop: p95 19.7 ms classify,
-37.3 reports/s live bulk ingest, near-dup lookup p95 3.8 ms over a 70k-vector index.
+two full start→classify→stop cycles. Measured on this laptop: p95 17.7 ms classify
+model-only (live API e2e p95 56 ms), 45.6 reports/s live bulk ingest, near-dup lookup
+p95 3.8 ms over a 70k-vector index.
+
+---
+
+## The 5 unrehearsed gaps (now rehearsed)
+
+### Q13. "Break your 0.836 recall down by source."
+**A:** The ASRS aviation stratum recalls **0.00 (19/19 missed)** — reported plainly in
+`artifacts/gold/gold_metrics_final.json`, not hidden. This is out-of-distribution by
+construction: ASRS served as **train-only weak negatives**, so aviation phraseology is
+exactly what the model was taught to down-weight — and aviation is outside the tool's
+claimed domain (OIL register triage). The OSHA 2024–25 stratum — the one that proxies
+OIL — recalls **0.895**. The real-pooled headline pools the in-domain strata honestly
+and the per-stratum table is on the record.
+
+### Q14. "Your strata sum to 407, not 500. Where are the other 93?"
+**A:** All 500 items are labeled — zero unlabeled. The headline is computed on the
+**407 unanimous-consensus items**; **93 disputed items (44 labeler disagreement + 49
+marked unsure) are held out as adjudication-pending rather than majority-voted** — the
+conservative choice, SEV3-flagged in the metrics artifact itself, and ruling them is a
+one-command re-run. Judgment arithmetic if you count the label files: **731 human
+judgments on disk** across the 500 items (500 primary + double-label rounds + the
+20-item pilot, plus the adjudicator C re-label pass that finished 16:25 on Sep 10).
+
+### Q15. "Did any LLM touch your gold pipeline?" (the D30 panel)
+**A:** One honest sentence: **a disclosed LLM panel adjudicated the disputed-quarantine
+as a supplementary analysis; the headline metrics exclude those items entirely — human
+consensus only.** The panel ran under user decision D30; its 100 rulings sit
+quarantined in `artifacts/gold/labels/adjudication_llm.jsonl`, the headline was
+computed before and without them, and human adjudication remains available as the
+superseding upgrade.
+
+### Q16. "The span head in your architecture diagram — does it actually work?"
+**A:** Honestly: the learned span head is dead at runtime (max token probability ~0.3,
+fires on punctuation — KB §11), so highlights ship via the **keyword-attribution
+fallback** — the D2 pre-authorized ship path — with **100% substring-validity enforced
+server-side** (every highlight is an exact substring of the report, asserted before
+render). This is disclosed on slides 7–8 and narrated in demo beat 1; the span head
+stays in the repo as a research artifact. What we never do is show a highlight the
+shipped path didn't produce.
+
+### Q17. "So did an LLM label or grade any of your gold?" (the clean combined answer)
+**A:** No LLM labeled, graded, or re-tuned anything in the headline. The protocol is
+blind end-to-end: labelers saw only outcome-redacted text + event title — never model
+output, never derived labels (machine-verified: zero provenance fields in the labeler
+payload); the label spec was frozen and sha256-hashed before labeling started; the
+operating point was applied to gold exactly once; and κ is human-vs-human
+(0.513 ± 0.07, n=130). The one LLM that touched the repo's gold folder is the
+disclosed D30 adjudication panel from Q15 — a supplementary analysis, quarantined in a
+separate file, excluded from every headline number.
 
 ---
 
@@ -141,8 +192,9 @@ two full start→classify→stop cycles. Measured on this laptop: p95 19.7 ms cl
   10k-char cap; nothing is silently truncated.
 - **"Terse codes like 'LOTO not applied'?"** 16 chars, accepted via the short-codes
   path, keyword-tagged Energy Isolation, routed to review as low-information.
-- **"What does the demo DB contain?"** 5,048 seeded reports (synthetic OIL register +
-  one verbatim OSHA row used for the near-dup beat), all labeled as demo data.
+- **"What does the demo DB contain?"** 4,548 pre-seeded reports + the 500-row live
+  ingest (5,048 total after that demo beat) — synthetic OIL register +
+  one verbatim OSHA row used for the near-dup beat, all labeled as demo data.
 
 ## Never-say list (verbatim bans)
 
@@ -156,12 +208,12 @@ two full start→classify→stop cycles. Measured on this laptop: p95 19.7 ms cl
 6. "trained on OIL data" → **US OSHA proxy + synthetic + ASRS, all disclosed**.
 7. "covers all 9 IOGP rules" → **7 learnable; 2 declared out of scope**.
 8. Any unmeasured latency/throughput ("500 reports/s", "<100 ms" without the measured
-   19.7 ms p95 next to it) → quote only measured numbers from the last 72 h.
+   17.7 ms p95 next to it) → quote only measured numbers from the last 72 h.
 9. "the AI explains" without qualification → **deterministic template first; LLM only
    rewords, with fallback**.
 10. "real-time translation" → **phrasebook chrome only; language gate grays the rest**.
 11. Val AUC 0.997 as a headline → **the slide number is derived-test 0.868 + gold
-    {{GOLD_RECALL}}**; val saturation is a disclosure, not a brag.
+    recall 0.836**; val saturation is a disclosure, not a brag.
 12. "fully automated HSE" → **"model proposes, HSE disposes."**
 
 ## If a number is challenged live

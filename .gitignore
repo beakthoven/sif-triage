@@ -8,5 +8,11 @@ dist/
 .DS_Store
 .run/
 app/runtime.db
+app/runtime.db-shm
+app/runtime.db-wal
+.playwright-mcp/
 packaging/wheels/
 packaging/sif-demo-usb-*.tar.gz
+
+app/runtime.db*
+.playwright-mcp/

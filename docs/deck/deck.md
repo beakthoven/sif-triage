@@ -87,7 +87,7 @@ flowchart LR
     end
     subgraph RUN["RUNTIME (100% local, bare metal, no docker)"]
         I["CSV/Excel · paste · JSON"] --> J["Validation + SQLite<br/>+ near-dup index (MiniLM)"]
-        H --> K["onnxruntime INT8<br/>p95 ≈ 20 ms"]
+        H --> K["onnxruntime INT8<br/>p95 ≈ 18 ms (model-only)"]
         J --> K
         K --> L["Triage score (calibrated)<br/>rule probabilities · evidence spans<br/>well-control tag"]
         L --> M["Sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · long-input"]
@@ -162,18 +162,23 @@ Headline quadrant (tabular numerals, one number per quadrant):
 | | |
 |---|---|
 | **0.84** recall | 95% CI [0.788, 0.874] (n=286 positives) |
-| **0.98** precision | 95% CI [0.948, 0.989] (n=243 flagged) |
+| **0.98** precision | 95% CI [0.948, 0.989] (n=245 flagged) |
 | **0.51 ± 0.07** Fleiss' κ (human-vs-human) | n = 130 double-labeled |
-| **19.7 ms** p95 classify (measured, this machine) | <100 ms bar |
+| **17.7 ms** p95 classify (model-only; live API e2e p95 56 ms, this machine) | <100 ms bar |
 
 Supporting row (smaller):
 - Gold set: 500 blind-labeled reports — 300 OSHA 2024–25 (150 oil-gas NAICS) +
   100 ASRS + 100 synthetic. **Real-only pooled headline; synthetic stratum reported
   separately, never pooled.**
-- Judgment arithmetic (have ready if a judge counts): **690 emitted = 500 primary
-  + 150 double-label + 20 pilot × 2** — the 40 extra are the pilot calibration
-  round (`pilot_ids`, `n_judgments_emitted` in `artifacts/gold/sample_manifest.json`).
-- Rules macro-F1 on gold (rules with ≥50 positives): **0.52 — one rule (line_of_fire) met the ≥50-positive bar; stated plainly, not padded**.
+- Judgment arithmetic (have ready if a judge counts): **731 human judgments on disk**
+  across all 500 items (500 primary + double-label rounds + the 20-item pilot, plus
+  the adjudicator C re-label pass). The headline is computed on the **407
+  unanimous-consensus items** — **93 disputed items are held out as
+  adjudication-pending**, the conservative choice, not majority-voted.
+- Per-stratum disclosure: the ASRS aviation stratum recalls **0.00 (19/19)** —
+  out-of-distribution by construction (ASRS was train-only weak negatives) and outside
+  the tool's claimed domain; the OSHA 2024–25 stratum that proxies OIL recalls **0.895**.
+- Rules macro-F1 on gold (rules with ≥50 positives): **0.68 — one rule (line_of_fire) met the ≥50-positive bar; stated plainly, not padded**.
 - Span quality on gold adjudicated subset: substring-validity **100% (render-time guaranteed: every highlight is an exact substring, self-validated server-side)**
   (target 100%, self-validated `text[start:end]==span`) · keyword-anchor precision
   **keyword-attribution path (the learned span head underperformed at runtime — we ship the honest fallback and say so)**.
@@ -186,7 +191,8 @@ loud. Never mix the two.
 
 > source: gold_metrics_pipeline.md (one-command: `gold/compute_gold_metrics.py`);
 > gold_tooling_report.md (composition); KB §6 (corrected CIs: never quote the handoff's
-> intervals); latency: KB §10 (p50 11.9 / p95 19.7 / p99 40.2 ms);
+> intervals); latency: runs/run2/day2/latency_v2_final.md (masked-v2 model-only
+> p50 11.4 / p95 17.7 / p99 20.5 ms; live API e2e p95 56 ms);
 > flag rate: runs/run2/day2/demo_final_state.md §1.
 
 ---
@@ -219,14 +225,15 @@ The story, honestly:
 
 - **Recall 0.9748 at precision 0.80** on a 17,731-row temporal holdout (proxy labels;
   gold replaces this line tonight).
-- **p95 19.7 ms** classify, single report, CPU-only, 8 threads. **<100 ms bar: PASS.**
-- **37.3 reports/s** live end-to-end bulk ingest (5,050-row file, 135.3 s wall,
-  SLA ≥30/s: PASS); 39.4/s classify-only batch-32.
+- **p95 17.7 ms** classify, model-only (p50 11.4 / p99 20.5 ms), single report,
+  CPU-only, 8 threads; live API end-to-end p95 56 ms. **<100 ms bar: PASS.**
+- **45.6 reports/s** live end-to-end bulk ingest (5,050-row file → 5,048 accepted,
+  110.8 s wall, SLA ≥30/s: PASS).
 - **Spans are always exact substrings** of the report (100% substring-validity,
   self-asserted before render; invalid spans are dropped, never shown).
 - **Near-dup detection from a measured threshold** (cosine 0.91 on a 70k-vector MiniLM
   index, p95 3.8 ms) — "memory, not generalization" is a feature we demonstrate live.
-- **Adversarial suite 17/17 PASS**; API smoke suite PASS; packaging self-check
+- **Adversarial suite 18/18 PASS**; API smoke suite PASS; packaging self-check
   2 clean start→classify→stop cycles.
 - **Runs air-gapped by design** — zero external requests in the demo path;
   physical-unplug rehearsal on the checklist.
