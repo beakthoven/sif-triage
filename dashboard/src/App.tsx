@@ -107,14 +107,17 @@ export default function App() {
             <p className="text-sm text-muted-foreground">{t(lang, "appSub")}</p>
           </div>
           <div className="ml-auto flex items-center gap-6">
-            <span className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <span
                 className={health ? "status-dot bg-ok" : "status-dot bg-quiet"}
                 aria-hidden
               />
-              {health
-                ? `LIVE · ${health.model_version} · ${health.n_reports} reports`
-                : "Offline demo"}
+              {health ? t(lang, "statusOnline") : t(lang, "statusOffline")}
+              {health && (
+                <span className="text-muted-foreground/70">
+                  · {health.n_reports.toLocaleString("en-IN")} {t(lang, "reportsIndexed")}
+                </span>
+              )}
             </span>
             <LangToggle lang={lang} onChange={setLang} />
           </div>
@@ -183,7 +186,7 @@ export default function App() {
               by design: a data label, not UI chrome (keeps the QA'd phrasebook frozen). */}
           <span className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
             <span className="status-dot bg-quiet" aria-hidden />
-            demo data: synthetic OIL-style corpus
+            demo data: synthetic OIL-style reports
           </span>
         </div>
       </footer>

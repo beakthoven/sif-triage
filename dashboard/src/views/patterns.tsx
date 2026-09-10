@@ -10,13 +10,13 @@ const KIND_TABS: { kind: PatternKind; label: string; blurb: string }[] = [
     kind: "site_activity",
     label: "Site × Activity",
     blurb:
-      "Lift-ranked activity × site co-occurrence on structured facets. Wilson 95% CI on the flag rate — no LLM tagging.",
+      "Recurring combinations of activity × site — where to plan inspections. Ranked by lift, with the flag rate's 95% confidence interval.",
   },
   {
     kind: "activity_barrier",
     label: "Activity × Barrier",
     blurb:
-      "Lift-ranked activity × failed-barrier co-occurrence from the mined corpus. The dominant IOGP rule tags each cell.",
+      "Recurring combinations of activity × failed barrier — which safeguards keep failing. The dominant Life-Saving Rule tags each row.",
   },
 ];
 

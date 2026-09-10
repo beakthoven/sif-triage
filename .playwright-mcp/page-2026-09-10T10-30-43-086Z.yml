@@ -1,0 +1,117 @@
+- generic [ref=f22e3]:
+  - banner [ref=f22e4]:
+    - generic [ref=f22e5]:
+      - generic [ref=f22e6]:
+        - heading "Safety Report Triage" [level=1] [ref=f22e7]
+        - paragraph [ref=f22e8]: OIL India
+      - generic [ref=f22e9]:
+        - generic [ref=f22e10]:
+          - text: Online
+          - generic [ref=f22e187]: · 5,050 reports indexed
+        - group "UI language" [ref=f22e12]:
+          - button "EN" [pressed] [ref=f22e14]
+          - generic [ref=f22e15]:
+            - generic [aria-hidden] [ref=f22e16]: /
+            - button "हिं" [ref=f22e17]
+  - main [ref=f22e18]:
+    - generic [ref=f22e19]:
+      - tablist [ref=f22e20]:
+        - tab "Feed" [ref=f22e21]
+        - tab "Density" [ref=f22e22]
+        - tab "Patterns" [ref=f22e23]
+        - tab "Review" [active] [selected] [ref=f22e24]
+      - tabpanel "Review" [ref=f22e4212]:
+        - generic [ref=f22e4213]:
+          - generic [ref=f22e4214]:
+            - heading "Awaiting your review (8)" [level=2] [ref=f22e4215]:
+              - text: Awaiting your review
+              - generic [ref=f22e4216]: (8)
+            - generic [ref=f22e4217]:
+              - generic [ref=f22e4218]:
+                - generic [ref=f22e4219]:
+                  - paragraph [ref=f22e4220]: Needs human review
+                  - heading "Report mentions a drill or test" [level=3] [ref=f22e4222]
+                - generic [ref=f22e4223]:
+                  - paragraph [ref=f22e4224]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4225]: Gas leak emergency mock drill conducted at Dumduma GGS on 25.08.2025 using a simulated scenario. SCBA donning practiced by four operators within time. One SCBA face strap found loose and adjusted by fire staff. Escape route wind sock found faded and replacement indented. Drill report submitted to fire section.
+                  - paragraph [ref=f22e4226]: Dumduma · emergency drill · 2026-09-10
+                  - paragraph [ref=f22e4227]: "drill badge: mock drill, simulated"
+              - generic [ref=f22e4228]:
+                - generic [ref=f22e4229]:
+                  - paragraph [ref=f22e4230]: Needs human review
+                  - heading "Uncertain score" [level=3] [ref=f22e4232]
+                - generic [ref=f22e4233]:
+                  - paragraph [ref=f22e4234]: The score sits in the uncertain band — not enough signal to rank confidently. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4235]: At Duliajan GGS-4, separator internal inspection in monsoon, humidity so high the blower air felt warm and wet. inspector felt heaviness after ten minutes and came out. work shifted to early morning hours. weather window added to the permit for summer and monsoon jobs.
+                  - paragraph [ref=f22e4236]: Duliajan GGS-4 · separator vessel manway work · 2026-09-10
+                  - paragraph [ref=f22e4237]: score 0.583 in gray band [0.4, 0.6]
+              - generic [ref=f22e4238]:
+                - generic [ref=f22e4239]:
+                  - paragraph [ref=f22e4240]: Needs human review
+                  - heading "Possible well-control concern" [level=3] [ref=f22e4242]
+                - generic [ref=f22e4243]:
+                  - paragraph [ref=f22e4244]: Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.
+                  - blockquote [ref=f22e4245]: During workover operation at Well BGR-23, mud pump pressure shot up suddenly due to plugged nozzle. Driller pressed e-stop and pump tripped before relief line hammered. Nozzle cleaned, pressure normal. Could have burst the hose. Informed tool pusher, pump checked before restart.
+                  - paragraph [ref=f22e4246]: Well BGR-23 · workover operation · 2026-09-10
+                  - paragraph [ref=f22e4247]: "well-control watch: barrier tag fired but triage score 0.019 < flag threshold 0.658 — rare high-consequence domain, automated screening defers; routed to human review"
+              - generic [ref=f22e4248]:
+                - generic [ref=f22e4249]:
+                  - paragraph [ref=f22e4250]: Needs human review
+                  - heading "Uncertain score" [level=3] [ref=f22e4252]
+                - generic [ref=f22e4253]:
+                  - paragraph [ref=f22e4254]: The score sits in the uncertain band — not enough signal to rank confidently. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4255]: The concrete marker as it happened, post at the SRP approach-road right then, crossing on the at that very point, Moran field road at that moment, broke and halted us on 27.10.2024, about 01:20 hrs. The driver just then, had been on a call and all at once, not ever saw the crossing. The real SRP foundation stood a at that instant, handful of metres by chance, beyond; that would in that moment, not have broken. The call was right at that point, around the next day's duty roster, of all things. He got a at that very moment, stern warning; phones ride in the then and there, glove box from the first kilometre in a flash, currently, and the crossing markers were without warning, repainted with reflective tape.
+                  - paragraph [ref=f22e4256]: Moran field roads · light vehicle on lease road at night · 2026-09-10
+                  - paragraph [ref=f22e4257]: score 0.482 in gray band [0.4, 0.6]
+              - generic [ref=f22e4258]:
+                - generic [ref=f22e4259]:
+                  - paragraph [ref=f22e4260]: Needs human review
+                  - heading "Uncertain score" [level=3] [ref=f22e4262]
+                - generic [ref=f22e4263]:
+                  - paragraph [ref=f22e4264]: The score sits in the uncertain band — not enough signal to rank confidently. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4265]: An employee was stepping down off a 6-inch containment platform to finish loading his truck, when his right ankle rolled. The employee sustained a [OUTCOME] tibia and fibula at the right ankle and required [OUTCOME].
+                  - paragraph [ref=f22e4266]: (unspecified) · (unspecified) · 2025-10-22
+                  - paragraph [ref=f22e4267]: score 0.589 in gray band [0.4, 0.6]
+              - generic [ref=f22e4268]:
+                - generic [ref=f22e4269]:
+                  - paragraph [ref=f22e4270]: Needs human review
+                  - heading "Negation detected" [level=3] [ref=f22e4272]
+                - generic [ref=f22e4273]:
+                  - paragraph [ref=f22e4274]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4275]: At around 11:40 hrs a mini truck delivering stores at GCP Makum misjudged the low portico of the old record room and almost entered. The cleaner standing there waved him to stop. Clearance was checked and the truck was routed to the rear gate instead. No scrape on the portico, no damage to the truck. Height bar to be fixed.
+                  - paragraph [ref=f22e4276]: GCP Makum · vehicle transit · 2026-09-10
+                  - paragraph [ref=f22e4277]: "negated outcome language (cue~outcome within 5 tokens): 'no'~'damage'"
+              - generic [ref=f22e4278]:
+                - generic [ref=f22e4279]:
+                  - paragraph [ref=f22e4280]: Needs human review
+                  - heading "Report mentions a drill or test" [level=3] [ref=f22e4282]
+                - generic [ref=f22e4283]:
+                  - paragraph [ref=f22e4284]: Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4285]: Transformer pit entry at Baghjan EPS for gland plate work. rescue kit was kept at the main fire tender which was out for a mock drill at the CTF. entry held till the tender returned. drill planning now checks that site kits are not pulled away during drills.
+                  - paragraph [ref=f22e4286]: Baghjan EPS · transformer pit maintenance · 2026-09-10
+                  - paragraph [ref=f22e4287]: "drill badge: mock drill"
+              - generic [ref=f22e4288]:
+                - generic [ref=f22e4289]:
+                  - paragraph [ref=f22e4290]: Needs human review
+                  - heading "Negation detected" [level=3] [ref=f22e4292]
+                - generic [ref=f22e4293]:
+                  - paragraph [ref=f22e4294]: ‘No injury’ phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.
+                  - blockquote [ref=f22e4295]: N2 purged vessel at Duliajan GGS-4, vented but the internal downcomer pipe trapped N2 like a cup. Entrant working near downcomer put his head at its opening to inspect, felt instant suffocation, pulled back and sat on tray breathing hard for a minute. Pocket gas inside internals does not show at manway testing. Downcomer flushed with air lance, re-tested at multiple points inside. Pockets, not averages, hurt people.
+                  - paragraph [ref=f22e4296]: Duliajan GGS-4 · N2-purged vessel · 2026-09-10
+                  - paragraph [ref=f22e4297]: "negated outcome language (cue~outcome within 5 tokens): 'not'~'hurt'"
+          - generic [ref=f22e4298]:
+            - heading "Logged overrides Your decisions become training examples" [level=2] [ref=f22e4299]
+            - table [ref=f22e4303]:
+              - rowgroup [ref=f22e4304]:
+                - row [ref=f22e4305]:
+                  - columnheader "Report" [ref=f22e4306]
+                  - columnheader "Field" [ref=f22e4307]
+                  - columnheader "Was" [ref=f22e4308]
+                  - columnheader "Now" [ref=f22e4309]
+                  - columnheader "Reviewer" [ref=f22e4310]
+                  - columnheader "When" [ref=f22e4311]
+              - rowgroup
+  - contentinfo [ref=f22e182]:
+    - generic [ref=f22e183]:
+      - paragraph [ref=f22e184]: Model proposes, HSE disposes. Your decision becomes a training label.
+      - generic [ref=f22e185]: "demo data: synthetic OIL-style reports"

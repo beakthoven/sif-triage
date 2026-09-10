@@ -135,6 +135,7 @@ export function DensityView({
 
   return (
     <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">{t(lang, "densitySub")}</p>
       <div className="flex flex-wrap items-center gap-4">
         <Button
           size="lg"

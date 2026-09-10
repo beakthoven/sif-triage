@@ -2,56 +2,55 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { GateKind, GateState, Report } from "@/lib/types";
 
 /**
- * The Sentinel gate system — one honesty UI for the 8 input gates
- * (app/gates.py). Slate (never red/error styling), a quiet dot + one plain
- * sentence, "routed to review — never auto-cleared". Gates annotate; they
- * never block.
+ * The gate system — one honesty UI for the 8 input gates (app/gates.py).
+ * Slate (never red/error styling), a quiet dot + one plain sentence,
+ * "routed to review — never auto-cleared". Gates annotate; they never block.
  */
 const GATE_META: Record<GateKind, { name: string; sentence: string }> = {
   min_length: {
-    name: "Short report",
+    name: "Very short report",
     sentence:
       "Very short text with no recognized safety short code — not enough signal to score reliably. Routed to review, never auto-cleared.",
   },
   negation: {
-    name: "Negation guard",
+    name: "Negation detected",
     sentence:
       "\u2018No injury\u2019 phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.",
   },
   language: {
-    name: "Language gate",
+    name: "Language not currently scored",
     sentence:
       "Language beyond current scoring support — the original text is preserved and routed to review, never silently mis-scored. Translation available on request.",
   },
   confidence: {
-    name: "Low confidence",
+    name: "Uncertain score",
     sentence:
-      "Score inside the calibrated gray band τ — not enough signal to rank. Routed to review, never auto-cleared.",
+      "The score sits in the uncertain band — not enough signal to rank confidently. Routed to review, never auto-cleared.",
   },
   drill: {
-    name: "Drill / simulation",
+    name: "Report mentions a drill or test",
     sentence:
       "Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.",
   },
   near_dup: {
-    name: "Near-duplicate",
+    name: "Possible duplicate of a training record",
     sentence:
       "Matches a training record — memory, not generalization. Shown as a banner on the triage card.",
   },
   long_input: {
-    name: "Long report (chunked)",
+    name: "Long report, scored in sections",
     sentence:
-      "Over 120 words — scored with the sliding-window path (length out of distribution). Shown as a chunked badge.",
+      "Over 120 words — scored section by section, since very long reports are rare in training. Marked as \u2018scored in sections\u2019 on the card.",
   },
   well_control_watch: {
-    name: "Well-control watch",
+    name: "Possible well-control concern",
     sentence:
       "Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.",
   },
   chunked_low_score: {
-    name: "Long report, low confidence",
+    name: "Long report with uncertain score",
     sentence:
-      "A long (chunked) report scored below the confidence band — sliding-window scoring can discount mid-text hazards. Routed to human review, never auto-cleared.",
+      "A long report scored in sections landed in the uncertain band — section scoring can discount mid-text hazards. Routed to human review, never auto-cleared.",
   },
 };
 
@@ -72,11 +71,11 @@ export function GrayStateCard({ report, gate }: { report: Report; gate: GateStat
   return (
     <Card className="border-border">
       <CardHeader className="gap-1">
-        <p className="flex items-center gap-2 text-xs font-medium tracking-wide text-quiet uppercase">
+        <p className="flex items-center gap-2 text-xs font-medium text-quiet">
           <span className="status-dot bg-quiet" aria-hidden />
-          Sentinel gate
+          Needs human review
           {gate.name === "language" && (
-            <span className="ml-auto font-mono normal-case">
+            <span className="ml-auto font-mono">
               translation available
             </span>
           )}
@@ -89,7 +88,9 @@ export function GrayStateCard({ report, gate }: { report: Report; gate: GateStat
           {report.text}
         </blockquote>
         <p className="font-mono text-xs text-muted-foreground">
-          #{report.id} · {report.site} · {report.activity}
+          {report.site === "(live paste)"
+            ? report.reported_at
+            : `${report.site} · ${report.activity} · ${report.reported_at}`}
         </p>
         {gate.detail && (
           <p className="font-mono text-xs text-muted-foreground/70">{gate.detail}</p>
@@ -104,8 +105,8 @@ export function GrayStateCard({ report, gate }: { report: Report; gate: GateStat
 export function SentinelGateLegend() {
   return (
     <section aria-label="Sentinel gate system">
-      <h2 className="mb-3 text-sm font-medium tracking-wide text-muted-foreground uppercase">
-        The Sentinel gate system — routed to review, never auto-cleared
+      <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+        Needs human review — never auto-cleared
       </h2>
       <Card className="gap-0 border-border py-0">
         <ul>

@@ -11,10 +11,10 @@ import {
 import { t, type Lang } from "@/lib/phrasebook";
 import type { OverrideOut, Report } from "@/lib/types";
 
-/** Review: override queue. Section 1 — gated reports awaiting HSE disposition
- *  (Sentinel gates route here, never auto-clear). Section 2 — logged overrides
- *  (GET /api/review; → future gold labels, source column separates "override"
- *  from "blind_gold"). */
+/** Review: override queue. Section 1 — gated reports awaiting the HSE
+ *  reviewer (gates route here, never auto-clear). Section 2 — logged
+ *  overrides (GET /api/review; → future gold labels, source column
+ *  separates "override" from "blind_gold"). */
 export function ReviewView({
   gatedReports,
   overrides,
@@ -34,8 +34,8 @@ export function ReviewView({
           </span>
         </h2>
         {gatedReports.length === 0 && (
-          <p className="font-mono text-sm text-muted-foreground">
-            No gated reports — every report cleared the Sentinel gates.
+          <p className="text-sm text-muted-foreground">
+            Nothing waiting — every report cleared the review gates.
           </p>
         )}
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -52,8 +52,8 @@ export function ReviewView({
       <section>
         <h2 className="mb-3 text-xl font-semibold text-foreground">
           {t(lang, "overrides")}{" "}
-          <span className="ml-2 font-mono text-sm font-normal text-muted-foreground">
-            overrides → future gold labels
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            {t(lang, "overridesNote")}
           </span>
         </h2>
         <Card className="gap-0 border-border py-0">
@@ -61,12 +61,12 @@ export function ReviewView({
             <Table>
               <TableHeader>
                 <TableRow className="border-border hover:bg-transparent">
-                  <TableHead className="text-muted-foreground">Report</TableHead>
-                  <TableHead className="text-muted-foreground">Field</TableHead>
-                  <TableHead className="text-muted-foreground">Old</TableHead>
-                  <TableHead className="text-muted-foreground">New</TableHead>
-                  <TableHead className="text-muted-foreground">Labeler</TableHead>
-                  <TableHead className="text-right text-muted-foreground">Timestamp</TableHead>
+                  <TableHead className="text-muted-foreground">{t(lang, "colReport")}</TableHead>
+                  <TableHead className="text-muted-foreground">{t(lang, "colField")}</TableHead>
+                  <TableHead className="text-muted-foreground">{t(lang, "colWas")}</TableHead>
+                  <TableHead className="text-muted-foreground">{t(lang, "colNow")}</TableHead>
+                  <TableHead className="text-muted-foreground">{t(lang, "colReviewer")}</TableHead>
+                  <TableHead className="text-right text-muted-foreground">{t(lang, "colWhen")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

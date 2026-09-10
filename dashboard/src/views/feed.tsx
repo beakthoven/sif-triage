@@ -135,23 +135,32 @@ export function FeedView({
                             {r.site}
                           </span>
                           <span className="block truncate font-mono text-xs text-muted-foreground">
-                            {live ? t(lang, "liveChip") : `#${r.id}`} · {r.reported_at}
+                            {r.reported_at}
                           </span>
                         </span>
                         {live && (
-                          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-foreground">
+                          <span
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-foreground"
+                            title="Pasted just now in this session"
+                          >
                             <span className="status-dot bg-foreground" aria-hidden />
                             {t(lang, "liveChip")}
                           </span>
                         )}
                         {dup && !gated && (
-                          <span className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-verdict">
+                          <span
+                            className="inline-flex items-center gap-1.5 font-mono text-xs font-medium text-verdict"
+                            title="Possible duplicate of a training record"
+                          >
                             <span className="status-dot bg-verdict" aria-hidden />
                             DUP
                           </span>
                         )}
                         {gated ? (
-                          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-quiet">
+                          <span
+                            className="inline-flex items-center gap-1.5 font-mono text-xs text-quiet"
+                            title="Needs human review"
+                          >
                             <span className="status-dot bg-quiet" aria-hidden />
                             GATE
                           </span>

@@ -73,7 +73,7 @@ export function TriageCard({
             aria-label={t(lang, "triageScore")}
           >
             {t(lang, "triageScore")}
-            <span className="font-mono text-xl font-semibold text-foreground">
+            <span className="font-mono text-sm text-muted-foreground">
               {p.sif_score.toFixed(2)}
             </span>
           </p>
@@ -82,22 +82,27 @@ export function TriageCard({
           {reviewPriority ? t(lang, "flaggedFor") : "\u00a0"}
         </p>
 
-        {/* Meta row */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-muted-foreground">
-          <span>
-            {report.site} · {report.activity}
-          </span>
-          {p.latency_ms > 0 && <span>{p.latency_ms}ms</span>}
-          {chunked && (
-            <span
-              className="inline-flex items-center gap-1.5 font-sans font-medium text-quiet"
-              title={longInput?.detail}
-            >
-              <span className="status-dot bg-quiet" aria-hidden />
-              {t(lang, "chunkedBadge")}
-            </span>
-          )}
-        </div>
+        {/* Meta row — site/activity context for corpus rows; hidden for live
+            pastes (placeholder facets are noise). Latency is never a product
+            feature; the chunked note stays (it qualifies the score). */}
+        {(report.site !== "(live paste)" || chunked) && (
+          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            {report.site !== "(live paste)" && (
+              <span>
+                {report.site} · {report.activity}
+              </span>
+            )}
+            {chunked && (
+              <span
+                className="inline-flex items-center gap-1.5 font-medium text-quiet"
+                title={longInput?.detail}
+              >
+                <span className="status-dot bg-quiet" aria-hidden />
+                {t(lang, "chunkedBadge")}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Near-dup note: badge gate, amber left border, quiet. */}
         {nearDup && (
@@ -113,10 +118,10 @@ export function TriageCard({
           </div>
         )}
 
-        {/* Rule probabilities — thin quiet bars, top 3 in-scope */}
+        {/* Matching life-saving rules — thin quiet bars, top 3 in-scope */}
         {inScope.length > 0 && (
           <div className="mt-6 space-y-2" aria-label={t(lang, "ruleProbs")}>
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            <p className="text-sm font-medium text-muted-foreground">
               {t(lang, "ruleProbs")}
             </p>
             {inScope.slice(0, 3).map((r) => (
@@ -145,7 +150,7 @@ export function TriageCard({
         )}
         {oos.length > 0 && (
           <p className="mt-4 text-xs text-muted-foreground">
-            Declared out of scope (never scored): {oos.map((r) => r.name).join(" · ")}
+            {t(lang, "oosNote")}: {oos.map((r) => r.name).join(" · ")}
           </p>
         )}
 

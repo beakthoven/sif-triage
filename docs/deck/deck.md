@@ -2,7 +2,7 @@
 
 Slide-by-slide skeleton, 12 slides. Every non-gold number below is **verified against
 artifacts** (sources cited per slide in `> source:` lines — delete those lines in the
-rendered deck). Gold numbers FILLED 2026-09-10 03:50 IST from artifacts/gold/gold_metrics_all4.json (human-consensus headline, n=313 real pooled; supplementary variants in artifacts/gold/). Originally: Gold-dependent numbers are `{{PLACEHOLDERS}}` and fill in from
+rendered deck). Gold numbers FILLED 2026-09-10 03:50 IST from artifacts/gold/gold_metrics_final.json (human-consensus headline, n=318 real pooled, all 500 items labeled; supplementary variants in artifacts/gold/). Originally: Gold-dependent numbers are `{{PLACEHOLDERS}}` and fill in from
 `artifacts/gold/gold_metrics.json` / `gold_metrics.md` after labeling + adjudication
 (one command: `.venv/bin/python gold/compute_gold_metrics.py`).
 
@@ -161,9 +161,9 @@ Headline quadrant (tabular numerals, one number per quadrant):
 
 | | |
 |---|---|
-| **0.82** recall | 95% CI [0.773, 0.864] (n=266 positives) |
-| **0.98** precision | 95% CI [0.955, 0.993] (n=223 flagged) |
-| **0.55 ± 0.07** Fleiss' κ (human-vs-human) | n = 110 double-labeled |
+| **0.84** recall | 95% CI [0.788, 0.874] (n=286 positives) |
+| **0.98** precision | 95% CI [0.948, 0.989] (n=243 flagged) |
+| **0.51 ± 0.07** Fleiss' κ (human-vs-human) | n = 130 double-labeled |
 | **19.7 ms** p95 classify (measured, this machine) | <100 ms bar |
 
 Supporting row (smaller):
