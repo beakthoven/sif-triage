@@ -259,11 +259,10 @@ class RealOnnxClassifier:
     # flipped decisions). Stride 64 doubles window-start diversity (a hazard
     # at token N is re-read near-initial at N-64); measured on the reviewer's
     # position scan (app/tests/postreview_fix_check.py): decisive-safe
-    # valleys (<0.4) 12 -> 5, worst case 0.13 -> 0.25, and residual
-    # sub-threshold scores now cluster at 0.25-0.70 — mostly inside the
-    # confidence gray band (routed to review) instead of silently green.
-    # The residual positional discount is INHERENT to CLS pooling —
-    # documented, accepted; a full fix needs a window-initial second pass.
+    # valleys (<0.4) 12 -> 5 at fp32; the shipped int8 scan still shows deep
+    # valleys (min 0.03, 2026-09-11) — the residual positional discount is
+    # INHERENT to CLS pooling. Mitigation is the chunked_low_score gate (D29):
+    # every sub-0.40 chunked score routes to review, never silent green.
     STRIDE = 64
     MAX_INPUT_CHARS = MAX_INPUT_CHARS  # module-level cap, shared with gates
     SPAN_THRESHOLD = 0.5     # token-prob cutoff for evidence spans

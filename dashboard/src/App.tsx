@@ -5,13 +5,15 @@ import { getHealth, getOverrides, getReports, postReview } from "@/lib/api";
 import { OVERRIDES, REPORTS } from "@/lib/mock";
 import { t, type Lang } from "@/lib/phrasebook";
 import type { HealthOut, OverrideOut, Report } from "@/lib/types";
-import { DensityView } from "@/views/density";
 import { FeedView } from "@/views/feed";
-import { PatternsView } from "@/views/patterns";
+import { InsightsView } from "@/views/insights";
 import { ReviewView } from "@/views/review";
+
+type Workspace = "triage" | "insights" | "decision history";
 
 export default function App() {
   const [lang, setLang] = useState<Lang>("en");
+  const [workspace, setWorkspace] = useState<Workspace>("triage");
   // Mock data renders instantly; the live API swap lands when health + data
   // return (offline-demo doctrine: the UI never hard-fails).
   const [reports, setReports] = useState<Report[]>(REPORTS);
@@ -36,6 +38,10 @@ export default function App() {
       cancel = true;
     };
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
 
   const onOverride = useCallback(
     (reportId: number, decision: "confirm" | "not_sif") => {
@@ -76,8 +82,11 @@ export default function App() {
 
   // Only gray-action gates route to the review queue; badge gates
   // (near_dup, long_input) annotate the triage card in place.
-  const gated = reports.filter((r) =>
-    r.prediction.gate_states.some((g) => g.triggered && g.action !== "badge"),
+  const reviewedReportIds = new Set(overrides.map((override) => override.report_id));
+  const pendingDecisions = reports.filter(
+    (report) =>
+      !reviewedReportIds.has(report.id) &&
+      report.prediction.gate_states.some((gate) => gate.triggered && gate.action !== "badge"),
   );
 
   // Live paste-classify: the persisted result (?persist=1, real server id) is
@@ -98,15 +107,24 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-[1100px] items-center gap-4 px-6 py-5">
+      <a
+        href="#main-content"
+        className="fixed top-3 left-3 z-50 -translate-y-20 rounded-md bg-primary px-3 py-2 text-primary-foreground focus:translate-y-0"
+      >
+        {t(lang, "skipContent")}
+      </a>
+      <header className="border-b border-border bg-card/70">
+        <div className="page-shell flex items-center gap-4 py-4">
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-semibold tracking-tight text-foreground">
-              {t(lang, "appTitle")}
+            <h1 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
+              <span className="sm:hidden">{t(lang, "appTitleShort")}</span>
+              <span className="hidden sm:inline">{t(lang, "appTitle")}</span>
             </h1>
-            <p className="text-sm text-muted-foreground">{t(lang, "appSub")}</p>
+            <p className="hidden text-xs text-muted-foreground sm:block">
+              {t(lang, "appSub")} · {t(lang, "hseOperations")}
+            </p>
           </div>
-          <div className="ml-auto flex items-center gap-6">
+          <div className="ml-auto flex items-center gap-3 sm:gap-5">
             <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
               <span
                 className={health ? "status-dot bg-ok" : "status-dot bg-quiet"}
@@ -114,7 +132,7 @@ export default function App() {
               />
               {health ? t(lang, "statusOnline") : t(lang, "statusOffline")}
               {health && (
-                <span className="text-muted-foreground/70">
+                <span className="hidden text-muted-foreground/70 md:inline">
                   · {health.n_reports.toLocaleString("en-IN")} {t(lang, "reportsIndexed")}
                 </span>
               )}
@@ -124,69 +142,69 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1100px] px-6 py-8">
-        <Tabs defaultValue="feed">
+      <main id="main-content" className="page-shell py-6 sm:py-8">
+        <Tabs value={workspace} onValueChange={(value) => setWorkspace(value as Workspace)}>
           <TabsList
             variant="line"
-            className="mb-8 h-auto w-full justify-start gap-7 rounded-none border-b border-border p-0"
+            aria-label="Main workspace"
+            className="mb-7 h-auto w-full justify-start gap-7 overflow-x-auto rounded-none border-b border-border p-0"
           >
             <TabsTrigger
-              value="feed"
+              value="triage"
               className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
             >
-              {t(lang, "tabFeed")}
+              {t(lang, "tabTriage")}
+              {pendingDecisions.length > 0 && (
+                <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
+                  {pendingDecisions.length}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger
-              value="density"
+              value="insights"
               className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
             >
-              {t(lang, "tabDensity")}
+              {t(lang, "tabInsights")}
             </TabsTrigger>
             <TabsTrigger
-              value="patterns"
+              value="decisions"
               className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
             >
-              {t(lang, "tabPatterns")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="review"
-              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
-            >
-              {t(lang, "tabReview")}
-              {sessionOverrides > 0 && (
+              {t(lang, "tabHistory")}
+              {(sessionOverrides > 0 || overrides.length > 0) && (
                 <span className="ml-1.5 font-mono text-sm font-normal text-muted-foreground">
-                  ({sessionOverrides})
+                  {overrides.length}
                 </span>
               )}
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="feed">
-            <FeedView reports={reports} lang={lang} onOverride={onOverride} onClassified={onClassified} />
+          <TabsContent value="triage" forceMount className="data-[state=inactive]:hidden">
+            <FeedView
+              reports={reports}
+              reviewedReportIds={reviewedReportIds}
+              lang={lang}
+              onOverride={onOverride}
+              onClassified={onClassified}
+            />
           </TabsContent>
-          <TabsContent value="density">
-            <DensityView lang={lang} onIngested={refreshLive} />
+          <TabsContent value="insights" forceMount className="data-[state=inactive]:hidden">
+            <InsightsView lang={lang} onIngested={refreshLive} />
           </TabsContent>
-          <TabsContent value="patterns">
-            <PatternsView />
-          </TabsContent>
-          <TabsContent value="review">
-            <ReviewView gatedReports={gated} overrides={overrides} lang={lang} />
+          <TabsContent value="decisions" forceMount className="data-[state=inactive]:hidden">
+            <ReviewView overrides={overrides} lang={lang} />
           </TabsContent>
         </Tabs>
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-[1100px] flex-wrap items-center gap-3 px-6 py-4">
+        <div className="page-shell flex flex-wrap items-center gap-3 py-4">
           <p className="text-sm text-muted-foreground">
             {t(lang, "footer")}
           </p>
-          {/* Provenance disclosure (audit C6): the seeded corpus is synthetic
-              stand-in data — say so on-screen, not just in the deck. English-only
-              by design: a data label, not UI chrome (keeps the QA'd phrasebook frozen). */}
-          <span className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
+          <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
             <span className="status-dot bg-quiet" aria-hidden />
-            demo data: synthetic OIL-style reports
+            {t(lang, "demoDisclosure")}
           </span>
         </div>
       </footer>

@@ -280,7 +280,10 @@ export async function classify(
   try {
     const p = await req<ApiPredictionOut>(`/api/classify${query}`, {
       method: "POST",
-      body: JSON.stringify({ text, source: "live-paste" }),
+      body: JSON.stringify({
+        text,
+        source: "live-paste",
+      }),
     });
     return { ...adaptPrediction(p), latency_ms: Math.round(performance.now() - t0) };
   } catch {

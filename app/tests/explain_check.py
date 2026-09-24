@@ -107,6 +107,33 @@ def main() -> int:
           "rule display names rendered (anchors pushed energy_isolation + hot_work over threshold)")
     check(pred.well_control and "Well-control/barrier tag: raised." in template,
           "well-control line rendered")
+    spanless = pred.model_copy(update={"evidence_spans": []})
+    spanless_template, derived = render_template(spanless, SAMPLE)
+    check(bool(derived), "rule-aware evidence derived when model spans are empty")
+    check(all(phrase in SAMPLE for phrase in derived),
+          "derived evidence remains exact report text")
+    check("none extracted" not in spanless_template.lower(),
+          "spanless explanation no longer emits the unhelpful none-extracted line")
+
+    lof_text = (
+        "A spanner fell from the derrick above two roughnecks on the occupied drill floor."
+    )
+    lof_probs = {key: 0.01 for key in pred.rule_probs}
+    lof_probs["line_of_fire"] = 0.99
+    lof_pred = pred.model_copy(update={
+        "evidence_spans": [],
+        "rule_probs": lof_probs,
+        "well_control": False,
+    })
+    _, lof_evidence = render_template(lof_pred, lof_text)
+    check(lof_evidence and "fell" in lof_evidence[0].lower(),
+          "line-of-fire falling-object wording is surfaced")
+    trapped_text = (
+        "A heavy valve shifted unexpectedly and trapped his hand against a fixed structure."
+    )
+    _, trapped_evidence = render_template(lof_pred, trapped_text)
+    check(trapped_evidence and "trapped" in trapped_evidence[0].lower(),
+          "line-of-fire trapped-body-part wording is surfaced")
 
     print("[2] fallback when ollama is stopped (connection refused)")
     t0 = time.perf_counter()

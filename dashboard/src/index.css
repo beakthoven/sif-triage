@@ -59,13 +59,13 @@
  * pairing anywhere: band semantics are words + position, never hue alone.
  */
 :root {
-    --paper: #f8f7f4;
+    --paper: #f5f4f0;
     --verdict: #b45309;
     --ok: #047857;
     --quiet: #64748b;
-    --background: #f8f7f4;
-    --foreground: #1c1e21;
-    --card: #ffffff;
+    --background: #f5f4f0;
+    --foreground: #202226;
+    --card: #fdfdfb;
     --card-foreground: #1c1e21;
     --popover: #ffffff;
     --popover-foreground: #1c1e21;
@@ -78,15 +78,15 @@
     --accent: #edeae2;
     --accent-foreground: #1c1e21;
     --destructive: #b42318;
-    --border: #e4e2da;
-    --input: #e4e2da;
+    --border: #dedcd4;
+    --input: #d8d5cc;
     --ring: #1c1e21;
     --chart-1: #b45309;
     --chart-2: #5b6470;
     --chart-3: #64748b;
     --chart-4: #94a3b8;
     --chart-5: #cbd5e1;
-    --radius: 0.5rem;
+    --radius: 0.625rem;
     --sidebar: #f8f7f4;
     --sidebar-foreground: #1c1e21;
     --sidebar-primary: #1c1e21;
@@ -108,10 +108,21 @@
   body {
     @apply bg-background text-foreground;
     font-variant-numeric: tabular-nums;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
     }
 }
 
 @layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8;
+  }
+  .eyebrow {
+    @apply mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase;
+  }
+  .page-title {
+    @apply max-w-3xl text-2xl font-semibold tracking-tight text-foreground sm:text-3xl;
+  }
   /* Evidence-span highlight: quiet warm tint on paper, ink text, medium
    * weight — never color-only (weight + tint both carry the mark). */
   .span-highlight {
@@ -123,6 +134,11 @@
   .status-dot {
     @apply inline-block size-1.5 shrink-0 rounded-full;
   }
+}
+
+::selection {
+  background: #e8ddca;
+  color: var(--foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

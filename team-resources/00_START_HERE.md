@@ -36,7 +36,7 @@ Most important design choice: **the AI never has the final word.** Every flagged
 See `diagrams/01_how_it_works.html` for the picture version.
 
 ```
-Worker writes report → 9 automatic safety checks → AI model scores it
+Worker writes report → 10 automatic safety checks → AI model scores it
       → amber "review this" / gray "ask a human" / quiet green
       → safety officer confirms or corrects → correction becomes training data
 ```

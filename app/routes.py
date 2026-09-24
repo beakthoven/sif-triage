@@ -21,6 +21,7 @@ from .embedder import embed_texts
 from .explain import build_explanation
 from .gates import run_gates
 from .ingest import parse_records, text_hash, validate_rows
+from .report_metadata import extract_site
 from .schemas import (
     RULE_DISPLAY,
     DensityRow,
@@ -108,6 +109,8 @@ def classify(
     pred = _predict_with_gates(storage, clf, cfg, body.text)
     if persist:
         try:
+            if not body.site:
+                body = body.model_copy(update={"site": extract_site(body.text)})
             vec = embed_texts([body.text])[0]
             th = text_hash(body.text)
             ids, _skipped = storage.add_ingest_batch([(body, pred, vec, th)])

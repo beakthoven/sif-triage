@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { getExplanation } from "@/lib/api";
 import { t, type Lang } from "@/lib/phrasebook";
+import { reportActivityLabel, reportSiteLabel } from "@/lib/report-display";
 import type { ExplanationOut, Report } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -30,25 +31,38 @@ import { cn } from "@/lib/utils";
 export function TriageCard({
   report,
   lang,
+  reviewed = false,
   onOverride,
 }: {
   report: Report;
   lang: Lang;
+  reviewed?: boolean;
   onOverride?: (reportId: number, decision: "confirm" | "not_sif") => void;
 }) {
   const p = report.prediction;
+  const siteLabel = reportSiteLabel(report);
+  const activityLabel = reportActivityLabel(report);
+  const [decision, setDecision] = useState<"confirm" | "not_sif" | null>(null);
   const inScope = p.rules.filter((r) => r.in_scope);
-  const oos = p.rules.filter((r) => !r.in_scope);
   const nearDup = p.gate_states.find((g) => g.name === "near_dup" && g.triggered);
   const longInput = p.gate_states.find((g) => g.name === "long_input" && g.triggered);
   const chunked = p.chunked || longInput !== undefined;
   const reviewPriority = p.band !== "LOW";
   const verdict =
     p.band === "HIGH"
-      ? "High review priority"
+      ? t(lang, "highPriority")
       : p.band === "MODERATE"
-        ? "Moderate review priority"
+        ? t(lang, "moderatePriority")
         : t(lang, "noAction");
+
+  useEffect(() => {
+    setDecision(null);
+  }, [report.id]);
+
+  function decide(next: "confirm" | "not_sif") {
+    setDecision(next);
+    onOverride?.(report.id, next);
+  }
 
   return (
     <Card
@@ -78,31 +92,26 @@ export function TriageCard({
             </span>
           </p>
         </div>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          {reviewPriority ? t(lang, "flaggedFor") : "\u00a0"}
-        </p>
-
-        {/* Meta row — site/activity context for corpus rows; hidden for live
-            pastes (placeholder facets are noise). Latency is never a product
-            feature; the chunked note stays (it qualifies the score). */}
-        {(report.site !== "(live paste)" || chunked) && (
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            {report.site !== "(live paste)" && (
-              <span>
-                {report.site} · {report.activity}
-              </span>
-            )}
-            {chunked && (
-              <span
-                className="inline-flex items-center gap-1.5 font-medium text-quiet"
-                title={longInput?.detail}
-              >
-                <span className="status-dot bg-quiet" aria-hidden />
-                {t(lang, "chunkedBadge")}
-              </span>
-            )}
-          </div>
+        {reviewPriority && (
+          <p className="mt-1.5 text-sm text-muted-foreground">{t(lang, "flaggedFor")}</p>
         )}
+
+        {/* Show useful report context without leaking raw missing-value placeholders. */}
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <span>
+            {siteLabel}
+            {activityLabel ? ` · ${activityLabel}` : ""}
+          </span>
+          {chunked && (
+            <span
+              className="inline-flex items-center gap-1.5 font-medium text-quiet"
+              title={longInput?.detail}
+            >
+              <span className="status-dot bg-quiet" aria-hidden />
+              {t(lang, "chunkedBadge")}
+            </span>
+          )}
+        </div>
 
         {/* Near-dup note: badge gate, amber left border, quiet. */}
         {nearDup && (
@@ -143,17 +152,11 @@ export function TriageCard({
             {p.well_control && (
               <p className="inline-flex items-center gap-1.5 pt-1 text-xs font-medium text-quiet">
                 <span className="status-dot bg-quiet" aria-hidden />
-                Well-control / barrier tag
+                {t(lang, "wellControlTag")}
               </p>
             )}
           </div>
         )}
-        {oos.length > 0 && (
-          <p className="mt-4 text-xs text-muted-foreground">
-            {t(lang, "oosNote")}: {oos.map((r) => r.name).join(" · ")}
-          </p>
-        )}
-
         <div className="mt-5">
           <HighlightedText text={report.text} spans={p.evidence_spans} />
         </div>
@@ -161,26 +164,43 @@ export function TriageCard({
         <ExplanationSection report={report} lang={lang} />
       </CardContent>
 
-      <CardFooter className="flex flex-wrap items-center gap-3 border-t border-border px-6 py-4 [.border-t]:pt-4">
-        <div className="flex flex-wrap gap-3">
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => onOverride?.(report.id, "confirm")}
-            className="min-h-11"
-          >
-            {t(lang, "confirm")}
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => onOverride?.(report.id, "not_sif")}
-            className="min-h-11"
-          >
-            {t(lang, "notSif")}
-          </Button>
-        </div>
-        <p className="ml-auto text-xs text-muted-foreground">{t(lang, "footer")}</p>
+      <CardFooter className="border-t border-border px-6 py-4 [.border-t]:pt-4">
+        {reviewed ? (
+          <p className="inline-flex items-center gap-2 text-sm font-medium text-ok">
+            <span className="status-dot bg-ok" aria-hidden />
+            {t(lang, "alreadyReviewed")}
+          </p>
+        ) : (
+          <details className="w-full">
+            <summary className="cursor-pointer text-sm font-medium text-foreground">
+              {t(lang, "recordOutcome")}
+            </summary>
+            <p className="mt-2 text-xs text-muted-foreground">{t(lang, "optionalReview")}</p>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <Button
+                size="lg"
+                variant={decision === "confirm" ? "default" : "outline"}
+                onClick={() => decide("confirm")}
+                className="min-h-11"
+              >
+                {t(lang, "confirm")}
+              </Button>
+              <Button
+                size="lg"
+                variant={decision === "not_sif" ? "default" : "outline"}
+                onClick={() => decide("not_sif")}
+                className="min-h-11"
+              >
+                {t(lang, "notSif")}
+              </Button>
+              {decision && (
+                <p role="status" className="text-sm font-medium text-ok">
+                  {t(lang, "decisionSaved")}
+                </p>
+              )}
+            </div>
+          </details>
+        )}
       </CardFooter>
     </Card>
   );
@@ -241,31 +261,25 @@ function ExplanationSection({ report, lang }: { report: Report; lang: Lang }) {
           <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
             <span className="status-dot bg-quiet" aria-hidden />
             {t(lang, "llmPhrased")}
-            {explanation.cached ? " · cached" : ""}
+            {explanation.cached ? ` · ${t(lang, "cached")}` : ""}
           </span>
         )}
       </button>
       {open && (
         <div className="space-y-3 pb-2">
           {loading ? (
-            <div className="space-y-2" aria-busy="true" aria-label="loading explanation">
+            <div className="space-y-2" aria-busy="true" aria-label={t(lang, "loadingExplanation")}>
               <div className="h-3 w-3/4 animate-pulse rounded-sm bg-muted" />
               <div className="h-3 w-full animate-pulse rounded-sm bg-muted" />
               <div className="h-3 w-5/6 animate-pulse rounded-sm bg-muted" />
             </div>
           ) : explanation ? (
-            <>
-              {explanation.reworded && (
-                <p className="text-foreground">{explanation.reworded}</p>
-              )}
-              <p className="font-mono text-sm whitespace-pre-line text-muted-foreground">
-                {explanation.template}
-              </p>
-            </>
+            <p className="whitespace-pre-line text-foreground">
+              {explanation.reworded ?? explanation.template}
+            </p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Explanation unavailable — the deterministic template is produced
-              by the API when it is reachable.
+              {t(lang, "explanationUnavailable")}
             </p>
           )}
         </div>

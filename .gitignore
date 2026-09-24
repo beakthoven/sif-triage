@@ -16,3 +16,12 @@ packaging/sif-demo-usb-*.tar.gz
 
 app/runtime.db*
 .playwright-mcp/
+
+# pendrive build: binaries and intermediates (scripts + START files stay tracked)
+packaging/pendrive/dl/
+packaging/pendrive/staging/
+packaging/pendrive/stick/payload.tar.gz
+packaging/pendrive/stick/runtimes/
+packaging/pendrive/stick/extras/*.tar.gz
+packaging/pendrive/stick/extras/*.webm
+packaging/pendrive/*.log

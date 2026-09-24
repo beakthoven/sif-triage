@@ -13,7 +13,7 @@
  *  Derived client-side from sif_score (the API returns no band). */
 export type Band = "HIGH" | "MODERATE" | "LOW";
 
-/** The 8 Sentinel input gates (app/gates.py). action decides the UI:
+/** The 10 Sentinel input gates (app/gates.py). action decides the UI:
  *  "gray" routes to the review queue (gray-state card, never auto-cleared);
  *  "badge" annotates the triage card only (near_dup banner, chunked);
  *  "block" is reserved — no gate blocks today. */
@@ -26,7 +26,8 @@ export type GateKind =
   | "near_dup"
   | "long_input"
   | "well_control_watch"
-  | "chunked_low_score";
+  | "chunked_low_score"
+  | "severity_watch";
 
 export type GateAction = "badge" | "gray" | "block";
 

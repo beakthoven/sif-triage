@@ -1,3 +1,4 @@
+import { Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,7 +60,9 @@ export function DensityView({
   const [progress, setProgress] = useState(0);
   const [ingestNote, setIngestNote] = useState<string | null>(null);
   const [ingestError, setIngestError] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fileInput = useRef<HTMLInputElement | null>(null);
   const setRowRef = useFlip(rows);
 
   useEffect(() => {
@@ -76,6 +79,7 @@ export function DensityView({
   }, []);
 
   const topClimber = rows.find((r) => r.rank === 1 && r.prev_rank !== 1);
+  const visibleRows = showAll ? rows : rows.slice(0, 20);
 
   // The live 500-row ingest measures ~15 s at 37 rows/s: the bar paces to 92%
   // over 16 s, then snaps to 100 on the real response (never a fake finish).
@@ -91,9 +95,14 @@ export function DensityView({
     setProgress(100);
   }
 
-  async function runIngest() {
-    if (ingesting || ingestedOnce) return;
-    if (live && !window.confirm(t(lang, "ingestConfirm"))) return;
+  async function runIngest(csv?: string) {
+    const isDemo = csv === undefined;
+    if (ingesting || (isDemo && ingestedOnce)) return;
+    if (isDemo && live && !window.confirm(t(lang, "ingestConfirm"))) return;
+    if (!live && !isDemo) {
+      setIngestError(t(lang, "ingestFailed"));
+      return;
+    }
     setIngesting(true);
     setProgress(0);
     setIngestError(null);
@@ -103,10 +112,10 @@ export function DensityView({
       // the pre-ingest snapshot drive the FLIP re-sort.
       startProgress();
       try {
-        const result = await ingestCsv(await fetchDemoIngestCsv());
+        const result = await ingestCsv(csv ?? (await fetchDemoIngestCsv()));
         setIngestNote(`accepted ${result.accepted}/${result.received}`);
         setRows(await getDensity("site", rows));
-        setIngestedOnce(true);
+        if (isDemo) setIngestedOnce(true);
         // The ingest changed server state — header count + feed queue refetch.
         onIngested?.();
       } catch {
@@ -137,9 +146,30 @@ export function DensityView({
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">{t(lang, "densitySub")}</p>
       <div className="flex flex-wrap items-center gap-4">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".csv,text/csv"
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            if (file) void file.text().then((csv) => runIngest(csv));
+            event.target.value = "";
+          }}
+        />
         <Button
           size="lg"
-          onClick={runIngest}
+          onClick={() => fileInput.current?.click()}
+          disabled={ingesting}
+          className="min-h-11"
+        >
+          <Upload aria-hidden />
+          {t(lang, "importCsv")}
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          onClick={() => runIngest()}
           disabled={ingesting || (live && ingestedOnce)}
           className="min-h-11"
         >
@@ -174,7 +204,7 @@ export function DensityView({
         {topClimber && !ingesting && (
           <p className="inline-flex items-center gap-2 text-sm font-medium text-foreground">
             <span className="status-dot bg-verdict" aria-hidden />
-            {topClimber.key} just climbed to #1.
+            {topClimber.key} {t(lang, "climbedToFirst")}.
           </p>
         )}
       </div>
@@ -184,17 +214,16 @@ export function DensityView({
           <Table>
             <TableHeader>
               <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="w-16 text-muted-foreground">Rank</TableHead>
-                <TableHead className="text-muted-foreground">Site</TableHead>
-                <TableHead className="text-right text-muted-foreground">Reports</TableHead>
-                <TableHead className="text-right text-muted-foreground">Flagged</TableHead>
-                <TableHead className="text-right text-muted-foreground">Flag rate</TableHead>
-                <TableHead className="text-right text-muted-foreground">Mean score</TableHead>
-                <TableHead className="w-24 text-right text-muted-foreground">Δ rank</TableHead>
+                <TableHead className="w-16 text-muted-foreground">{t(lang, "rank")}</TableHead>
+                <TableHead className="text-muted-foreground">{t(lang, "site")}</TableHead>
+                <TableHead className="text-right text-muted-foreground">{t(lang, "reports")}</TableHead>
+                <TableHead className="text-right text-muted-foreground">{t(lang, "flagged")}</TableHead>
+                <TableHead className="text-right text-muted-foreground">{t(lang, "flagRate")}</TableHead>
+                <TableHead className="w-24 text-right text-muted-foreground">{t(lang, "movement")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {rows.map((r) => (
+              {visibleRows.map((r) => (
                 <TableRow
                   key={r.key}
                   ref={setRowRef(r.key)}
@@ -210,9 +239,6 @@ export function DensityView({
                     {(r.sif_rate * 100).toFixed(1)}
                     <span className="ml-1 text-muted-foreground">per 100</span>
                   </TableCell>
-                  <TableCell className="text-right font-mono">
-                    {r.mean_score.toFixed(2)}
-                  </TableCell>
                   <TableCell className="text-right">
                     <RankDelta delta={r.prev_rank - r.rank} />
                   </TableCell>
@@ -222,6 +248,13 @@ export function DensityView({
           </Table>
         </CardContent>
       </Card>
+      {rows.length > 20 && (
+        <Button variant="ghost" onClick={() => setShowAll((value) => !value)}>
+          {showAll
+            ? t(lang, "showTop20")
+            : `${t(lang, "showAllLocations")} (${rows.length})`}
+        </Button>
+      )}
     </div>
   );
 }

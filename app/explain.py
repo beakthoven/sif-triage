@@ -47,6 +47,51 @@ DEFAULT_TIMEOUT_S = float(os.environ.get("SIF_EXPLAIN_TIMEOUT", "8"))
 # Template-only cache entries (LLM down/slow at build time) are served this
 # long before the LLM gets one upgrade retry.
 FALLBACK_TTL_S = float(os.environ.get("SIF_EXPLAIN_FALLBACK_TTL", "300"))
+EXPLANATION_VERSION = "v3-rule-aware-evidence"
+
+# Explanation-only attribution cues. These do not change classification;
+# they select exact report substrings that help a reviewer understand which
+# wording supports the strongest rule signals when the model span head is
+# empty. The returned phrases are always validated against the source text.
+_RULE_EVIDENCE_RES: dict[str, tuple[re.Pattern[str], ...]] = {
+    "line_of_fire": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\b(?:drop(?:ped|ping)?|fell|falling)\b",
+        r"\bstruck\b", r"\bcaught\b", r"\btrap(?:ped|ping)?\b", r"\bcrush", r"\bpinch",
+        r"\bline of fire\b", r"\bsuspended load\b", r"\boverhead\b",
+        r"\b(?:near|above|below|beneath|toward|onto)\b.{0,45}\b(?:worker|crew|person|roughneck|operator|leg|hand)\b",
+    )),
+    "working_at_height": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bheight\b", r"\bscaffold", r"\bladder\b", r"\bharness\b",
+        r"\bfall arrest\b", r"\broof\b", r"\belevated\b", r"\bderrick\b",
+    )),
+    "driving": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bvehicle\b", r"\bdriv", r"\bfork\s?lift\b", r"\bspeed",
+        r"\bseat belt\b", r"\brevers", r"\broad\b", r"\bjourney\b",
+    )),
+    "energy_isolation": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bloto\b", r"\block\s?out\b", r"\btag\s?out\b",
+        r"\benergiz", r"\bde-?energiz", r"\bstored energy\b",
+        r"\bisolat", r"\barc flash\b",
+    )),
+    "hot_work": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bhot work\b", r"\bweld", r"\bgrind", r"\btorch\b",
+        r"\bspark", r"\bcutting\b",
+    )),
+    "safe_mechanical_lifting": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bcrane\b", r"\blift", r"\brigging\b", r"\bhoist",
+        r"\bsling\b", r"\bsuspended load\b", r"\boverhead load\b",
+    )),
+    "confined_space": tuple(re.compile(p, re.IGNORECASE) for p in (
+        r"\bconfined space\b", r"\bmanhole\b", r"\btank entry\b",
+        r"\bvessel entry\b", r"\binside (?:the |a )?(?:tank|vessel|silo)\b",
+        r"\bgas test\b", r"\bventilat",
+    )),
+}
+_WELL_CONTROL_EVIDENCE_RES = tuple(re.compile(p, re.IGNORECASE) for p in (
+    r"\bwell control\b", r"\bblowout\b", r"\bbop\b", r"\bwellhead\b",
+    r"\bh2s\b", r"\bgas migration\b", r"\blost circulation\b",
+    r"\bworkover\b", r"\bcoiled tubing\b",
+))
 
 REWORD_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -61,12 +106,12 @@ REWORD_SCHEMA: dict[str, Any] = {
 _SYSTEM_PROMPT = """You turn structured triage notes into short plain-English paragraphs for an HSE review board.
 
 Example input:
-Triage score 0.83 — flagged for HSE review.
-IOGP rules implicated: Hot Work (0.71), Energy Isolation (0.66).
-Evidence phrases: "grinding", "LOTO".
+Review trigger: triage score 0.83 crossed the 0.66 review threshold.
+Strongest IOGP rule signals: Hot Work (0.71), Energy Isolation (0.66).
+Report wording supporting those signals: "grinding near the live line", "LOTO was not applied".
 
 Example output:
-{"explanation": "This report is flagged for HSE review with a triage score of 0.83. The implicated IOGP rules are Hot Work (0.71) and Energy Isolation (0.66), supported by the evidence phrases \\"grinding\\" and \\"LOTO\\".", "spans_quoted": ["grinding", "LOTO"]}
+{"explanation": "This report entered HSE review because its triage score of 0.83 crossed the 0.66 threshold. Hot Work (0.71) and Energy Isolation (0.66) are the strongest rule signals, supported by \\"grinding near the live line\\" and \\"LOTO was not applied\\".", "spans_quoted": ["grinding near the live line", "LOTO was not applied"]}
 
 Rules: keep every number exactly as given; quote evidence phrases verbatim; do not add facts, severities, or recommendations; never say the event was predicted or prevented; 2-3 sentences. Output JSON only."""
 
@@ -91,9 +136,76 @@ def explain_key(text: str, model_version: str, threshold: float = REVIEW_THRESHO
     # "flagged / below the review threshold" wording, so cached entries from
     # the old threshold must not be served against the new one.
     digest = hashlib.sha256(
-        (text + "\x00" + model_version + "\x00" + repr(threshold)).encode("utf-8")
+        (
+            text
+            + "\x00"
+            + model_version
+            + "\x00"
+            + repr(threshold)
+            + "\x00"
+            + EXPLANATION_VERSION
+        ).encode("utf-8")
     ).hexdigest()
     return f"explain:{digest}"
+
+
+def _context_phrase(text: str, start: int, end: int, max_chars: int = 180) -> str:
+    """Return an exact sentence/clause around a cue, bounded for readability."""
+    left = max(text.rfind(".", 0, start), text.rfind(";", 0, start), text.rfind("\n", 0, start)) + 1
+    stops = [pos for pos in (text.find(".", end), text.find(";", end), text.find("\n", end)) if pos >= 0]
+    right = min(stops) + 1 if stops else len(text)
+    while left < right and text[left].isspace():
+        left += 1
+    while right > left and text[right - 1].isspace():
+        right -= 1
+    if right - left <= max_chars:
+        return text[left:right]
+
+    left = max(left, start - max_chars // 2)
+    right = min(right, end + max_chars // 2)
+    while left > 0 and left < start and not text[left - 1].isspace():
+        left += 1
+    while right < len(text) and right > end and not text[right].isspace():
+        right -= 1
+    return text[left:right].strip()
+
+
+def evidence_phrases(pred: PredictionOut, text: str, limit: int = 3) -> list[str]:
+    """Exact source phrases: model spans first, then rule-aware cue context."""
+    phrases = list(dict.fromkeys(
+        span.text.strip()
+        for span in pred.evidence_spans
+        if span.text.strip() and span.text in text
+    ))
+    if len(phrases) >= limit:
+        return phrases[:limit]
+
+    ranked_rules = sorted(
+        (
+            (key, prob)
+            for key, prob in pred.rule_probs.items()
+            if key in RULE_DISPLAY and RULE_DISPLAY[key]["in_scope"]
+        ),
+        key=lambda item: (-item[1], item[0]),
+    )
+    regex_groups = [
+        _RULE_EVIDENCE_RES[key]
+        for key, _ in ranked_rules
+        if key in _RULE_EVIDENCE_RES
+    ]
+    if pred.well_control:
+        regex_groups.append(_WELL_CONTROL_EVIDENCE_RES)
+
+    for regexes in regex_groups:
+        match = next((match for regex in regexes if (match := regex.search(text))), None)
+        if match is None:
+            continue
+        phrase = _context_phrase(text, match.start(), match.end())
+        if phrase and phrase in text and phrase not in phrases:
+            phrases.append(phrase)
+        if len(phrases) >= limit:
+            break
+    return phrases[:limit]
 
 
 def render_template(pred: PredictionOut, text: str,
@@ -105,8 +217,12 @@ def render_template(pred: PredictionOut, text: str,
     """
     flagged = pred.sif_score >= threshold
     lines = [
-        f"Triage score {pred.sif_score:.2f} — "
-        + ("flagged for HSE review." if flagged else "below the review threshold.")
+        (
+            f"Review trigger: triage score {pred.sif_score:.2f} crossed the "
+            f"{threshold:.2f} review threshold."
+            if flagged
+            else f"Triage score {pred.sif_score:.2f} is below the {threshold:.2f} review threshold."
+        )
     ]
     implicated = sorted(
         (
@@ -121,17 +237,17 @@ def render_template(pred: PredictionOut, text: str,
     )
     if implicated:
         shown = ", ".join(f"{RULE_DISPLAY[k]['display']} ({p:.2f})" for k, p in implicated)
-        lines.append(f"IOGP rules implicated: {shown}.")
+        lines.append(f"Strongest IOGP rule signals: {shown}.")
     else:
         lines.append("No IOGP rule crossed its display threshold.")
     if pred.well_control:
         lines.append("Well-control/barrier tag: raised.")
-    span_texts = [s.text for s in pred.evidence_spans[:5] if s.text and s.text in text]
+    span_texts = evidence_phrases(pred, text)
     if span_texts:
         quoted = ", ".join(f'"{s}"' for s in span_texts)
-        lines.append(f"Evidence phrases: {quoted}.")
+        lines.append(f"Report wording supporting those signals: {quoted}.")
     else:
-        lines.append("Evidence phrases: none extracted.")
+        lines.append("No reliable supporting phrase could be isolated; inspect the full report before disposition.")
     triggered = [g for g in pred.gate_states if g.triggered]
     if triggered:
         shown = "; ".join(f"{g.name} ({g.detail})" if g.detail else g.name for g in triggered)

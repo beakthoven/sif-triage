@@ -28,7 +28,7 @@ flowchart LR
         H --> K["onnxruntime INT8<br/>p95 ≈ 20 ms"]
         J --> K
         K --> L["Triage score (calibrated)<br/>rule probabilities · evidence spans<br/>well-control tag"]
-        L --> M["9 sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · well-control<br/>long-input · chunked-low-score"]
+        L --> M["10 sentinel gates:<br/>confidence · negation · language<br/>near-dup · drill · codes · well-control<br/>long-input · chunked-low-score · severity-watch"]
         M --> N["Deterministic explanations<br/>(optional local qwen3:4b rewording,<br/>template fallback on every call)"]
         N --> O["React dashboard:<br/>feed · density re-rank · patterns<br/>review queue · EN/हिं toggle"]
     end

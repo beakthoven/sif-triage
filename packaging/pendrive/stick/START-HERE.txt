@@ -1,0 +1,46 @@
+========================================================================
+ SIF-Precursor Detection Engine — offline demo (OIL India, SIH 2026 PS 26165)
+========================================================================
+
+WHAT THIS IS
+  A self-contained demo of our safety-report triage system. Everything it
+  needs is on this stick: the app, the AI model, the demo database, and a
+  private Python runtime. Nothing is installed on the host machine.
+  No internet required. No admin rights required.
+
+HOW TO RUN
+  Linux:    double-click START-LINUX.sh   (or:  bash START-LINUX.sh)
+  Windows:  double-click START-WINDOWS.bat
+
+  First run on a machine unpacks to a local cache folder (about 1 minute).
+  Every later run starts in seconds. Your browser opens automatically at:
+
+      http://127.0.0.1:8177
+
+  To stop: close the terminal window (Linux) or the minimized
+  "sif-demo-server" window (Windows).
+
+WHAT YOU SEE
+  The demo opens pre-loaded with 4,548 safety reports. Try:
+  - Feed:     live triage stream with SIF scores and evidence highlights
+  - Paste any incident text into the classify box and watch it score live
+  - Review:   reports the system deliberately refuses to auto-clear
+              (drills, negations, uncertain scores, well-control watch)
+  - Density / Patterns: precomputed analytics over the corpus
+  - extras/live_ingest_500.csv can be ingested live for the bulk beat
+
+IF SOMETHING GOES WRONG
+  - Full walkthrough video of this exact UI:  extras/fallback_recording.webm
+    (plays in any browser or VLC — usable as the entire fallback demo)
+  - Delete the cache folder and re-run the start script to reset:
+      Linux:    ~/.cache/sif-demo
+      Windows:  %LOCALAPPDATA%\sif-demo
+  - Port 8177 already in use? Linux: SIF_PORT=8181 bash START-LINUX.sh
+
+NOTES
+  - The AI model runs 100% locally (INT8-quantized transformer, CPU).
+  - Optional: if the host has Ollama installed, the stick auto-installs
+    qwen3:4b for LLM-reworded explanations. Without it, the built-in
+    explanation templates carry the demo (fully supported path).
+  - The stick itself is never written to; all state lives in the cache.
+========================================================================

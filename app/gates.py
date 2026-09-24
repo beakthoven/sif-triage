@@ -68,6 +68,22 @@ _OUTCOME_STEMS = (
 )
 _SEVER_TOKENS = {"sever", "severe", "severely", "severed", "severs", "severing"}
 
+# --- Severity watch (register-shift safety net) ------------------------------
+# The ship model (masked-v2) is trained on OSHA/synthetic narrative register;
+# terse out-of-register phrasing of a genuine high-severity event can score
+# ~0.01 while OSHA-register phrasing of the SAME event scores 0.99 (measured
+# 2026-09-11 on a live-pasted blast report: 0.006 vs 0.993). When outcome or
+# high-energy mechanism language is present UNNEGATED but the calibrated score
+# sits below the flag threshold, the model may have missed the event — defer
+# to human review, never auto-green. Negation-scoped anchors ("no injuries",
+# counterfactual-suppressed "could have") do not count. Measured corpus impact
+# 2026-09-11: 49/4557 rows (1.1%) newly gray, none of them auto-cleared today.
+_SEVERITY_MECH_TOKENS = {
+    "blast", "explosion", "explode", "exploded", "burst",
+    "collapse", "collapsed", "electrocuted", "electrocution",
+    "engulfed", "crushed",
+}
+
 # --- Drill/simulation filter --------------------------------------------------
 # Drills are not precursors (demo red-team SEV2-1). Post-review SEV2-3: the
 # cues must read drill/exercise as an EVENT noun, not OIL-register usage —
@@ -92,6 +108,12 @@ def _is_anchor_token(tok: str) -> bool:
     if tok in _SEVER_TOKENS:
         return True
     return tok.startswith(_OUTCOME_STEMS)
+
+
+def _is_severity_anchor_token(tok: str) -> bool:
+    if tok in _SEVERITY_MECH_TOKENS:
+        return True
+    return _is_anchor_token(tok)
 
 
 def gate_min_length(text: str, cfg: Settings) -> GateState:
@@ -295,6 +317,49 @@ def gate_chunked_low_score(chunked: bool, score: float) -> GateState:
     )
 
 
+def gate_severity_watch(text: str, score: float, flag_thr: float) -> GateState:
+    """Severity watch (register-shift safety net): outcome or high-energy
+    mechanism language present UNNEGATED, but the calibrated score sits below
+    the flag threshold — the register-bound model may have missed a real
+    high-severity event. Gray + routed to human review, never auto-green.
+    Negation-scoped anchors (cue within ±5 tokens, counterfactual-suppressed)
+    do not count — those are the negation gate's territory."""
+    tokens = _TOKEN_RE.findall(text.lower())
+    if not tokens or score >= flag_thr:
+        return GateState(name="severity_watch", triggered=False, action="gray")
+    anchor_idx = [i for i, tok in enumerate(tokens) if _is_severity_anchor_token(tok)]
+    if not anchor_idx:
+        return GateState(name="severity_watch", triggered=False, action="gray")
+    cue_starts = _match_token_starts(_NEGATION_RE, text)
+    suppress_idx = _match_token_starts(_COUNTERFACTUAL_RE, text)
+
+    def negated(a: int) -> bool:
+        return any(
+            abs(c - a) <= _NEG_WINDOW
+            and not any(
+                min(c, a) - _NEG_WINDOW <= s <= max(c, a) + _NEG_WINDOW
+                for s in suppress_idx
+            )
+            for c in cue_starts
+        )
+
+    live = [a for a in anchor_idx if not negated(a)]
+    if not live:
+        return GateState(name="severity_watch", triggered=False, action="gray")
+    shown = ", ".join(f"'{tokens[a]}'" for a in live[:3])
+    return GateState(
+        name="severity_watch",
+        triggered=True,
+        action="gray",
+        detail=(
+            f"severity watch: unnegated outcome/high-energy language ({shown}) "
+            f"but triage score {score:.3f} < flag threshold {flag_thr:.3f} — "
+            "model may have missed a high-severity event (register shift); "
+            "routed to human review"
+        ),
+    )
+
+
 def gate_long_input(text: str, cfg: Settings) -> GateState:
     """Long-input info badge: >120 words -> 'chunked' (sliding-window max-pool
     applies, score is length-OOD). Informational badge, never gray. Inputs
@@ -340,6 +405,7 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
         ("long_input", lambda: gate_long_input(text, cfg)),
         ("well_control_watch", lambda: gate_well_control_watch(well_control, score, flag_thr)),
         ("chunked_low_score", lambda: gate_chunked_low_score(chunked, score)),
+        ("severity_watch", lambda: gate_severity_watch(text, score, flag_thr)),
     )
     states: list[GateState] = []
     for name, fn in specs:

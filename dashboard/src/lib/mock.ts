@@ -59,6 +59,7 @@ const ALL_GATES: GateKind[] = [
   "long_input",
   "well_control_watch",
   "chunked_low_score",
+  "severity_watch",
 ];
 
 /** Mirrors app/gates.py: near_dup + long_input are badge-only (annotate the
@@ -73,6 +74,7 @@ const GATE_ACTIONS: Record<GateKind, GateAction> = {
   long_input: "badge",
   well_control_watch: "gray",
   chunked_low_score: "gray",
+  severity_watch: "gray",
 };
 
 function gateStates(...triggered: GateKind[]): GateState[] {
