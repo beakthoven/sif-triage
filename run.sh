@@ -12,12 +12,17 @@
 #   ./run.sh --stop       stop ONLY what run.sh started (pidfiles in .run/)
 #   ./run.sh --allow-mock start even when the ONNX artifact is missing
 #                         (loud MOCK banner — never acceptable on demo day)
+#   ./run.sh --fresh      reset the demo DB from the pristine seed
+#                         (artifacts/demo/demo_pre.db) before starting —
+#                         backs up the previous DB first. Use for demo day
+#                         so the register starts in the verified seed state
+#                         instead of whatever earlier testing left behind.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
 
-HOST="127.0.0.1"
+HOST="${SIF_HOST:-127.0.0.1}"
 PORT="${SIF_PORT:-8177}"
 OLLAMA_PORT="${OLLAMA_PORT:-11434}"
 OLLAMA_URL="http://127.0.0.1:${OLLAMA_PORT}"
@@ -26,13 +31,25 @@ RUN_DIR="$REPO_ROOT/.run"
 VENV_PY="$REPO_ROOT/.venv/bin/python"
 DASHBOARD_DIST="$REPO_ROOT/dashboard/dist"
 
+# Port-scoped so a selfcheck on another port can never collide with the live
+# demo's pidfile/log (bug seen 2026-09-25: shared uvicorn.pid made selfcheck
+# think the live server was its own child and fail the bring-up proof).
+UVICORN_PIDFILE="$RUN_DIR/uvicorn-$PORT.pid"
+UVICORN_LOG="$RUN_DIR/uvicorn-$PORT.log"
+# Demo DB: mirrors app/config.py's default so --fresh resets the DB the
+# server will actually open. The pristine seed is the demo-day source of truth.
+DB_PATH="${SIF_DB_PATH:-$REPO_ROOT/app/runtime.db}"
+DEMO_SEED_DB="$REPO_ROOT/artifacts/demo/demo_pre.db"
+
 ALLOW_MOCK=0
+FRESH=0
 ACTION="start"
 for arg in "$@"; do
     case "$arg" in
         --stop) ACTION="stop" ;;
         --allow-mock) ALLOW_MOCK=1 ;;
-        -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+        --fresh) FRESH=1 ;;
+        -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
         *) echo "unknown flag: $arg (try --help)" >&2; exit 2 ;;
     esac
 done
@@ -46,7 +63,7 @@ die()  { printf '[run.sh] ERROR: %s\n' "$*" >&2; exit 1; }
 # --------------------------------------------------------------------------
 if [ "$ACTION" = "stop" ]; then
     stopped=0
-    for name in uvicorn ollama; do
+    for name in "uvicorn-$PORT" ollama; do
         pidfile="$RUN_DIR/$name.pid"
         [ -f "$pidfile" ] || continue
         pid="$(cat "$pidfile")"
@@ -120,8 +137,8 @@ else
 fi
 
 # --- port sanity ------------------------------------------------------------
-if [ -f "$RUN_DIR/uvicorn.pid" ] && kill -0 "$(cat "$RUN_DIR/uvicorn.pid")" 2>/dev/null; then
-    say "already running (uvicorn pid $(cat "$RUN_DIR/uvicorn.pid")) — demo at $BASE_URL/"
+if [ -f "$UVICORN_PIDFILE" ] && kill -0 "$(cat "$UVICORN_PIDFILE")" 2>/dev/null; then
+    say "already running (uvicorn pid $(cat "$UVICORN_PIDFILE")) — demo at $BASE_URL/"
     exit 0
 fi
 if curl -sf --max-time 2 "$BASE_URL/api/health" >/dev/null 2>&1; then
@@ -129,6 +146,24 @@ if curl -sf --max-time 2 "$BASE_URL/api/health" >/dev/null 2>&1; then
 fi
 
 mkdir -p "$RUN_DIR"
+
+# --- demo DB reset (--fresh) -------------------------------------------------
+# Deterministic demo state: the register starts as the verified seed instead of
+# whatever earlier testing left behind (2026-09-25: the live DB carried ~600
+# e2e/smoke rows on top of the old seed). Previous DB is backed up, never
+# silently discarded.
+if [ "$FRESH" -eq 1 ]; then
+    [ -f "$DEMO_SEED_DB" ] || die "--fresh: seed DB not found: $DEMO_SEED_DB"
+    if [ -f "$DB_PATH" ]; then
+        backup="$DB_PATH.$(date +%Y%m%d-%H%M%S).bak"
+        cp "$DB_PATH" "$backup"
+        say "backed up previous demo DB -> $backup"
+    fi
+    rm -f "$DB_PATH" "$DB_PATH-wal" "$DB_PATH-shm"
+    cp "$DEMO_SEED_DB" "$DB_PATH"
+    say "fresh demo DB: $DEMO_SEED_DB -> $DB_PATH"
+fi
+export SIF_DB_PATH="$DB_PATH"
 
 # --- ollama: reuse a live server, never restart one we did not start --------
 if curl -sf --max-time 2 "$OLLAMA_URL/api/version" >/dev/null 2>&1; then
@@ -150,20 +185,20 @@ else
 fi
 
 # --- uvicorn: API + static dashboard in one process -------------------------
-say "starting uvicorn on $BASE_URL (workers 1; log: .run/uvicorn.log)"
+say "starting uvicorn on $BASE_URL (workers 1; db: $DB_PATH; log: $UVICORN_LOG)"
 nohup "$VENV_PY" -m uvicorn app.main:app --host "$HOST" --port "$PORT" --workers 1 \
-    >"$RUN_DIR/uvicorn.log" 2>&1 &
-echo $! > "$RUN_DIR/uvicorn.pid"
+    >"$UVICORN_LOG" 2>&1 &
+echo $! > "$UVICORN_PIDFILE"
 
 ok=0
 for _ in $(seq 1 120); do
     if health="$(curl -sf --max-time 2 "$BASE_URL/api/health" 2>/dev/null)"; then ok=1; break; fi
-    kill -0 "$(cat "$RUN_DIR/uvicorn.pid")" 2>/dev/null || break
+    kill -0 "$(cat "$UVICORN_PIDFILE")" 2>/dev/null || break
     sleep 0.5
 done
 if [ "$ok" -ne 1 ]; then
-    tail -n 20 "$RUN_DIR/uvicorn.log" >&2 || true
-    die "uvicorn did not become healthy in 60s — see .run/uvicorn.log"
+    tail -n 20 "$UVICORN_LOG" >&2 || true
+    die "uvicorn did not become healthy in 60s — see $UVICORN_LOG"
 fi
 
 classifier="$(printf '%s' "$health" | sed -n 's/.*"classifier":"\([^"]*\)".*/\1/p')"
@@ -172,4 +207,5 @@ say "healthy: $health"
 echo
 say "DEMO READY:  $BASE_URL/          (dashboard)"
 say "             $BASE_URL/api/health (health)  $BASE_URL/docs (OpenAPI)"
+say "DB:          $DB_PATH"
 say "Stop with:   ./run.sh --stop"

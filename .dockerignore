@@ -1,0 +1,17 @@
+# Build context for deploy/Dockerfile — only what the runtime image needs.
+# Weights are NOT baked in: the container pulls the runtime bundle from a
+# private HF dataset at cold start (deploy/entrypoint.sh + DEPLOY.md).
+*
+!requirements.txt
+!app
+!app/**
+app/*.db
+app/*.db-*
+app/**/__pycache__
+app/**/__pycache__/**
+!dashboard
+!dashboard/dist
+!dashboard/dist/**
+!deploy
+!deploy/entrypoint.sh
+!deploy/fetch_bundle.py

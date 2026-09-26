@@ -1,0 +1,27 @@
+name: Space keep-alive
+
+# Keeps the Hugging Face Space awake so judges can open the demo at any
+# time. Free CPU-basic Spaces sleep after 48h of no incoming HTTP requests;
+# a health ping every 20 minutes prevents that indefinitely.
+#
+# Setup (one-time): repo Settings → Secrets and variables → Actions →
+# Variables → new variable SPACE_URL = https://<hf-user>-sif-triage.hf.space
+#
+# Cost on GitHub Pro: 3 jobs/hour x 1 min = ~2,160 Actions minutes/month,
+# inside the 3,000 included. UptimeRobot (external, unlimited) is the
+# lighter alternative — either one suffices; running both is harmless.
+
+on:
+  schedule:
+    - cron: "13,33,53 * * * *" # every 20 min, off the :00/:30 herd
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping the Space health endpoint
+        run: |
+          curl -fsS -m 60 "${{ vars.SPACE_URL }}/api/health"
+          echo "space is awake"
