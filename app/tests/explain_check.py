@@ -28,7 +28,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 os.environ["SIF_EXPLAIN_LLM"] = "0"  # endpoints must never wait on ollama here
 
-from app.classifier import MockClassifier, validate_spans  # noqa: E402
+from app.classifier import MockClassifier, deterministic_cue_spans, validate_spans  # noqa: E402
 from app.config import Settings  # noqa: E402
 from app.explain import (  # noqa: E402
     build_explanation,
@@ -36,7 +36,7 @@ from app.explain import (  # noqa: E402
     ollama_reword,
     render_template,
 )
-from app.schemas import ExplanationOut  # noqa: E402
+from app.schemas import ExplanationOut, GateState  # noqa: E402
 from app.storage import SQLiteStorage  # noqa: E402
 
 PORT = int(os.environ.get("SIF_TEST_PORT", "8179"))  # override when :8179 is taken
@@ -58,6 +58,18 @@ def check(cond: bool, label: str) -> None:
 def _pred(text: str):
     pred = MockClassifier().predict(text)
     pred.evidence_spans = validate_spans(text, pred.evidence_spans)
+    if "LOTO was not applied" in text:
+        pred.sif_score = 0.8
+        pred.flag_threshold = 0.5
+        pred.gate_states = [
+            *pred.gate_states,
+            GateState(
+                name="energy_isolation_absent",
+                triggered=True,
+                detail="",
+                action="gray",
+            ),
+        ]
     return pred
 
 
@@ -98,15 +110,66 @@ def main() -> int:
     template, spans = render_template(pred, SAMPLE)
     template2, spans2 = render_template(pred, SAMPLE)
     check(template == template2 and spans == spans2, "deterministic: same pred -> same template")
-    check(f"{pred.sif_score:.2f}" in template, "triage score present")
-    check(all(s in template for s in spans), "every span quoted in the template")
-    check(all(s in SAMPLE for s in spans), "every span is an exact substring of the report")
+    check("score" not in template.lower() and "threshold" not in template.lower(),
+          "officer summary omits metrics already shown beside it")
+    check(all(s in SAMPLE for s in spans), "every cited phrase is an exact substring of the report")
+    check(all(s in template for s in spans), "cited report wording appears in the summary")
     implicated = [k for k, v in pred.rule_probs.items() if v >= 0.5]
     check(implicated, "mock anchors pushed at least one rule over threshold")
-    check("Energy Isolation" in template and "Hot Work" in template,
-          "rule display names rendered (anchors pushed energy_isolation + hot_work over threshold)")
-    check(pred.well_control and "Well-control/barrier tag: raised." in template,
-          "well-control line rendered")
+    check("Missing:" in template and "lock-out/tag-out" in template,
+          "barrier finding is stated in plain language")
+    check(pred.well_control and "well-control equipment is involved" in template.lower(),
+          "well-control is translated to a short human action")
+
+    mechanism_text = (
+        "A pressure valve ruptured and an explosion sent flying fragments into the area."
+    )
+    mechanism_pred = pred.model_copy(update={
+        "sif_score": 0.8,
+        "flag_threshold": 0.5,
+        "gray_band_low": 0.4,
+        "evidence_spans": [],
+        "well_control": False,
+        "gate_states": [],
+    })
+    serious, serious_spans = render_template(mechanism_pred, mechanism_text, threshold=0.5)
+    check("serious event" in serious.lower() and "should review" in serious.lower(),
+          "HIGH clear-mechanism report uses serious-event wording")
+    check(bool(serious_spans) and any("ruptured" in phrase.lower() for phrase in serious_spans),
+          "release-cue evidence quote appears on a HIGH clear-mechanism report")
+    cue_spans = deterministic_cue_spans(mechanism_text)
+    check(any(mechanism_text[s.start:s.end] == s.text and "explosion" in s.text.lower()
+              for s in cue_spans), "shared cue helper returns exact release spans")
+    check(not deterministic_cue_spans("Routine pump walkdown recorded a stable seal and no leak."),
+          "benign wording does not receive release-cue spans")
+    check(any(s.text.lower() == "burst" for s in deterministic_cue_spans("The burst pipe released pressure.")),
+          "burst pipe remains an annotation cue")
+    assertive_text = "The valve was rupturing and an explosion was occurring as debris flew."
+    assertive_spans = deterministic_cue_spans(assertive_text)
+    check(any("rupturing" in s.text.lower() for s in assertive_spans)
+          and any("explosion" in s.text.lower() for s in assertive_spans),
+          "release verb forms are present in anchors as well as regex cues")
+    gray_pred = mechanism_pred.model_copy(update={"sif_score": 0.45})
+    gray_template, _ = render_template(gray_pred, mechanism_text, threshold=0.5)
+    check("unclear" in gray_template.lower(), "gray-band report preserves unclear wording")
+    low_pred = mechanism_pred.model_copy(update={"sif_score": 0.2})
+    low_template, _ = render_template(low_pred, "Routine pump walkdown recorded a stable seal and no leak.",
+                                      threshold=0.5)
+    check("no clear high-energy exposure" in low_template.lower(),
+          "below-gray report retains no-exposure wording")
+    review_pred = low_pred.model_copy(update={
+        "gate_states": [GateState(name="severity_watch", triggered=True, action="gray")],
+    })
+    review_template, _ = render_template(review_pred, mechanism_text, threshold=0.5)
+    check("needs a review" in review_template.lower(),
+          "a fired review gate prevents reassuring low-score wording")
+    fall_pred = low_pred.model_copy(update={
+        "gate_states": [GateState(name="fall_protection_absent", triggered=True, action="gray")],
+    })
+    fall_template, _ = render_template(fall_pred, "Worker climbed the scaffold without a harness.", threshold=0.5)
+    check("fall protection" in fall_template.lower() and "reviewer" in fall_template.lower(),
+          "fall-protection absence is explained as a review item")
+
     spanless = pred.model_copy(update={"evidence_spans": []})
     spanless_template, derived = render_template(spanless, SAMPLE)
     check(bool(derived), "rule-aware evidence derived when model spans are empty")
@@ -177,41 +240,36 @@ def main() -> int:
     check(ollama_reword(SAMPLE, template, "0.28", transport=transport) is None,
           "in-prose quoted phrase not in the report rejected (spans_quoted valid)")
 
-    print("[4] cache round-trip (storage precomputed table)")
+    print("[4] template cache round-trip (LLM disabled in this deployment)")
     tmp = tempfile.TemporaryDirectory(prefix="sif-explain-")
     storage = SQLiteStorage(Path(tmp.name) / "t.db")
     key = explain_key(SAMPLE, pred.model_version)
     check(storage.load_precomputed(key) is None, "cache empty before first build")
-    transport, calls = fake_transport([good])
-    out4 = build_explanation(pred, SAMPLE, storage, use_llm=True, transport=transport)
-    check(out4.source == "ollama" and not out4.cached, "first build: live ollama path")
+    out4 = build_explanation(pred, SAMPLE, storage, use_llm=False)
+    check(out4.source == "template" and not out4.cached, "first build: deterministic template")
     hit = storage.load_precomputed(key)
-    check(hit is not None and hit["source"] == "ollama", "payload persisted under sha256 key")
-    def boom_transport(_payload): raise OSError("ollama must not be called on a cache hit")
-    out5 = build_explanation(pred, SAMPLE, storage, use_llm=True, transport=boom_transport)
-    check(out5.cached and out5.source == "ollama" and out5.reworded == out4.reworded,
-          "second build: served from cache, no LLM call")
+    check(hit is not None and hit["source"] == "template", "template persisted under sha256 key")
 
-    print("[4b] template-fallback TTL: fresh entry served, stale entry retried")
+    def forbidden_transport(_payload):
+        raise AssertionError("disabled explanation path must not call Ollama")
+
+    out5 = build_explanation(pred, SAMPLE, storage, use_llm=False, transport=forbidden_transport)
+    check(out5.cached and out5.source == "template" and out5.template == out4.template,
+          "second build: cached template served without an LLM call")
+
+    print("[4b] expired template cache refreshes without enabling the LLM")
     key2 = explain_key("TTL probe report about LOTO at height", pred.model_version)
     pred_ttl = _pred("TTL probe report about LOTO at height")
     out_ttl = build_explanation(pred_ttl, "TTL probe report about LOTO at height",
-                                storage, use_llm=True, url="http://127.0.0.1:9", timeout=1.0)
-    check(out_ttl.source == "template", "llm down -> template fallback built")
-    out_ttl2 = build_explanation(pred_ttl, "TTL probe report about LOTO at height",
-                                 storage, use_llm=True, transport=boom_transport)
-    check(out_ttl2.cached and out_ttl2.source == "template",
-          "fresh template fallback served without retrying the LLM")
+                                storage, use_llm=False)
+    check(out_ttl.source == "template", "template-only entry built")
     hit2 = storage.load_precomputed(key2)
-    hit2["created_epoch"] = 0.0  # force stale
+    hit2["created_epoch"] = 0.0
     storage.save_precomputed(key2, hit2)
-    good_ttl = ok_response(
-        f"The triage score is {pred_ttl.sif_score:.2f} with \"LOTO\" noted.", ["LOTO"])
-    transport3, calls3 = fake_transport([good_ttl])
-    out_ttl3 = build_explanation(pred_ttl, "TTL probe report about LOTO at height",
-                                 storage, use_llm=True, transport=transport3)
-    check(len(calls3) == 1 and out_ttl3.source == "ollama" and not out_ttl3.cached,
-          "stale template fallback retried the LLM and upgraded to ollama")
+    out_ttl2 = build_explanation(pred_ttl, "TTL probe report about LOTO at height",
+                                 storage, use_llm=False, transport=forbidden_transport)
+    check(out_ttl2.source == "template" and out_ttl2.cached,
+          "LLM-disabled deployment keeps the cached template without attempting Ollama")
     storage.close()
 
     print("[4c] precompute harness: gates under the _NullStorage stub produce no gate errors")

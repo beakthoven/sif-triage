@@ -50,8 +50,35 @@ def map_columns(row: dict[str, Any], override: dict[str, str] | None = None) -> 
 
 
 def parse_csv(content: str) -> list[dict[str, Any]]:
-    reader = csv.DictReader(io.StringIO(content))
-    return [dict(r) for r in reader]
+    reader = csv.reader(io.StringIO(content), strict=True)
+    try:
+        headers = next(reader)
+    except StopIteration as exc:
+        raise ValueError("CSV is empty; expected a header row") from exc
+    except csv.Error as exc:
+        raise ValueError(f"invalid CSV header near line {reader.line_num}: {exc}") from exc
+    normalized = [header.strip().casefold() for header in headers]
+    if any(not header for header in normalized):
+        raise ValueError("CSV header contains a blank column name")
+    if len(set(normalized)) != len(normalized):
+        raise ValueError("CSV header contains duplicate column names")
+
+    rows: list[dict[str, Any]] = []
+    while True:
+        try:
+            values = next(reader)
+        except StopIteration:
+            break
+        except csv.Error as exc:
+            raise ValueError(f"invalid CSV near line {reader.line_num}: {exc}") from exc
+        if not values:
+            continue
+        if len(values) != len(headers):
+            raise ValueError(
+                f"CSV row {reader.line_num} has {len(values)} fields; expected {len(headers)}"
+            )
+        rows.append(dict(zip(headers, values)))
+    return rows
 
 
 def normalize_text(text: str) -> str:

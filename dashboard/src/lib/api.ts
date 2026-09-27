@@ -1,11 +1,11 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { DENSITY_BEFORE, MOCK_EXPLANATIONS, OVERRIDES, PATTERNS, REPORTS } from "./mock";
 import type {
-  Band,
+  ClustersOut,
   DensityRow,
   ExplanationOut,
   GateState,
   HealthOut,
-  IngestResult,
   MetricsSummary,
   OverrideOut,
   PatternKind,
@@ -16,17 +16,33 @@ import type {
   RuleScore,
 } from "./types";
 
-/* Typed fetch client for the FastAPI runtime (app/routes.py + app/schemas.py).
- * Every getter falls back to the mock module when the API is unreachable —
- * the offline-demo doctrine: the UI never hard-fails.
+/* Typed fetch client for the FastAPI runtime (app/routes.py + app/schemas.py),
+ * consumed through @tanstack/react-query hooks.
+ *
+ * HONESTY CONTRACT (replaces the old "UI never hard-fails" fixture doctrine):
+ *  - A fetch failure THROWS. React Query surfaces the error and the surface
+ *    renders an ErrorState. No transient error may silently swap real rows
+ *    for invented model output on a safety-critical screen.
+ *  - Fixtures (lib/mock.ts) are reachable ONLY behind VITE_DEMO_MODE=1.
+ *    Default OFF. Mock row ids 2588–2619 collide with real server rows — they
+ *    must never render as live data.
+ *  - The fabricated offline classify fallback (score 0.5 + a fake
+ *    "confidence" gate) is DELETED. classify() throws when the API fails.
+ *  - The ingest money beat carries NO client path here: bulk CSV goes through
+ *    features/ingest/ingest-api.ts (startIngest 202/200 branch) and
+ *    use-ingest-job.ts (poll GET /api/ingest/{job_id}, verify via /api/health).
+ *    The old lib ingestCsv() rendered "accepted undefined" for the 202 shape —
+ *    deleted, not fixed, so no surface can re-import it.
  *
  * Base URL: import.meta.env.VITE_API_BASE, defaulting to "" (same-origin —
  * the FastAPI process serves this dist at /, so relative /api requests are
  * the path that works from a browser; the API has no CORS middleware).
  * The vite dev/preview proxy forwards /api → the API. */
 
+export const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === "1";
+
 const BASE = (import.meta.env.VITE_API_BASE ?? "").replace(/\/+$/, "");
-const TIMEOUT_MS = 3500;
+const TIMEOUT_MS = 3500; // plain fetches; getExplanation overrides below
 
 /* ---- Raw wire shapes (app/schemas.py — these names win) ---- */
 
@@ -41,6 +57,15 @@ interface ApiReportIn {
 
 interface ApiPredictionOut {
   sif_score: number;
+  score_spread?: number | null;
+  n_variants?: number | null;
+  variant_scores?: number[];
+  verdict_stability?: PredictionOut["verdict_stability"];
+  band?: PredictionOut["band"];
+  flag_threshold?: number | null;
+  gray_band_low?: number | null;
+  gray_band_high?: number | null;
+  rule_cue_hits?: Record<string, boolean> | null;
   rule_probs: Record<string, number>;
   well_control: boolean;
   evidence_spans: { start: number; end: number; text: string }[];
@@ -123,11 +148,13 @@ export function ruleDisplayName(code: string): string {
   return ruleMeta()[code]?.display ?? code;
 }
 
-/** Review-priority band (D14) derived from the calibrated score — the API
- *  contract carries no band. Thresholds match the server's gray band
- *  [0.40, 0.60] and the demo fixtures. */
-export function bandFor(score: number): Band {
-  return score >= 0.7 ? "HIGH" : score >= 0.4 ? "MODERATE" : "LOW";
+class HttpError extends Error {
+  readonly status: number;
+
+  constructor(status: number, statusText: string, path: string) {
+    super(`${status} ${statusText} on ${path}`);
+    this.status = status;
+  }
 }
 
 async function req<T>(path: string, init?: RequestInit, timeoutMs = TIMEOUT_MS): Promise<T> {
@@ -139,7 +166,7 @@ async function req<T>(path: string, init?: RequestInit, timeoutMs = TIMEOUT_MS):
       signal: ctl.signal,
       headers: { "Content-Type": "application/json", ...init?.headers },
     });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText} on ${path}`);
+    if (!res.ok) throw new HttpError(res.status, res.statusText, path);
     return (await res.json()) as T;
   } finally {
     clearTimeout(timer);
@@ -156,14 +183,22 @@ function adaptPrediction(p: ApiPredictionOut): PredictionOut {
       name: meta[code]?.display ?? code,
       prob,
       in_scope: meta[code]?.in_scope ?? true,
+      cue_hit: p.rule_cue_hits?.[code] ?? null,
     }))
     .sort((a, b) => b.prob - a.prob);
-  for (const [code, m] of Object.entries(meta)) {
-    if (!m.in_scope) rules.push({ code, name: m.display, prob: 0, in_scope: false });
-  }
+  // The two out-of-scope IOGP rules are no longer rendered anywhere: the
+  // report detail shows only what is scored. Their disclosure lives in the
+  // Data & limitations dialog, not on every report.
   return {
     sif_score: p.sif_score,
-    band: bandFor(p.sif_score),
+    score_spread: p.score_spread ?? null,
+    n_variants: p.n_variants ?? null,
+    variant_scores: p.variant_scores ?? null,
+    verdict_stability: p.verdict_stability ?? null,
+    band: p.band ?? null,
+    flag_threshold: p.flag_threshold ?? null,
+    gray_band_low: p.gray_band_low ?? null,
+    gray_band_high: p.gray_band_high ?? null,
     latency_ms: 0,
     rules,
     well_control: p.well_control,
@@ -197,6 +232,7 @@ function adaptOverride(o: ApiStoredOverride): OverrideOut {
     old_value: o.old_value,
     new_value: o.new_value,
     labeler: o.labeler,
+    rationale: o.rationale ?? null,
     source: o.source,
     ts: o.created_at,
   };
@@ -211,9 +247,14 @@ function withRanks(rows: ApiDensityRow[], prev: DensityRow[] | null): DensityRow
   }));
 }
 
-/* ---- Endpoints ---- */
+/* ---- Endpoints (plain fetchers; hooks below) ---- */
 
-/** GET /api/health — null when unreachable (badge + fallback trigger). */
+/** GET /api/clusters?min_cos=0.91 — server-owned star groups for queue compression. */
+export async function getClusters(): Promise<ClustersOut> {
+  return req<ClustersOut>("/api/clusters?min_cos=0.91");
+}
+
+/** GET /api/health — null when unreachable (the badge IS the error signal). */
 export async function getHealth(): Promise<HealthOut | null> {
   try {
     const h = await req<HealthOut>("/api/health");
@@ -223,7 +264,9 @@ export async function getHealth(): Promise<HealthOut | null> {
   }
 }
 
-/** GET /api/rules — all 9 IOGP rules; refreshes the live display metadata. */
+/** GET /api/rules — all 9 IOGP rules; refreshes the live display metadata.
+ *  Offline: the static mirror, not a fixture swap (it is declared metadata,
+ *  not model output). */
 export async function getRules(): Promise<RuleInfo[]> {
   try {
     const rs = await req<RuleInfo[]>("/api/rules");
@@ -241,124 +284,70 @@ export async function getRules(): Promise<RuleInfo[]> {
   }
 }
 
-/** GET /api/reports — the feed. Reports without predictions are dropped. */
-export async function getReports(limit = 200): Promise<Report[]> {
+/** GET /api/reports — the feed. Reports without predictions are dropped.
+ *  Offline + VITE_DEMO_MODE=1 only: fixture rows. Otherwise THROWS. */
+export async function getReports(params: { limit?: number; offset?: number } = {}): Promise<Report[]> {
+  const limit = params.limit ?? 200;
+  const offset = params.offset ?? 0;
   try {
     await getRules();
-    const rows = await req<ApiStoredReport[]>(`/api/reports?limit=${limit}`);
-    return rows
-      .map(adaptReport)
-      .filter((r): r is Report => r !== null);
-  } catch {
-    return REPORTS;
+    const rows = await req<ApiStoredReport[]>(`/api/reports?limit=${limit}&offset=${offset}`);
+    return rows.map(adaptReport).filter((r): r is Report => r !== null);
+  } catch (e) {
+    if (DEMO_MODE) return REPORTS;
+    throw e;
   }
 }
 
-/** GET /api/reports/{id}. */
+/** GET /api/reports/{id}. 404 is missing; other failures reach ErrorState. */
 export async function getReport(id: number): Promise<Report | null> {
   try {
     return adaptReport(await req<ApiStoredReport>(`/api/reports/${id}`));
-  } catch {
-    return REPORTS.find((r) => r.id === id) ?? null;
+  } catch (e) {
+    if (e instanceof HttpError && e.status === 404) return null;
+    if (DEMO_MODE) return REPORTS.find((r) => r.id === id) ?? null;
+    throw e;
   }
 }
 
 /** POST /api/classify?persist=1 — paste-flow triage that PERSISTS the report
- *  (latency measured client-side) and returns the real server row id, so the
- *  override buttons on the pasted card hit a stored report instead of 404-ing
- *  on an optimistic placeholder (final_audit_rehearsal F4). opts.explain
- *  bundles the deterministic explanation template (llm=0: a cold ollama
- *  reword on novel text would stall the card for seconds — the template is
- *  the demo-safe floor). Offline: an all-gray placeholder, never a fake
- *  score. */
+ *  (latency measured client-side) and returns the real server row id.
+ *  opts.explain bundles the deterministic explanation template (llm=0: a cold
+ *  ollama reword on novel text would stall the card for seconds).
+ *  THROWS when the API is unreachable — no fabricated score, no fake gate.
+ *  The surface shows an error state instead. */
 export async function classify(
   text: string,
   opts?: { explain?: boolean },
 ): Promise<PredictionOut> {
   const t0 = performance.now();
   const query = opts?.explain ? "?persist=1&explain=1&llm=0" : "?persist=1";
-  try {
-    const p = await req<ApiPredictionOut>(`/api/classify${query}`, {
-      method: "POST",
-      body: JSON.stringify({
-        text,
-        source: "live-paste",
-      }),
-    });
-    return { ...adaptPrediction(p), latency_ms: Math.round(performance.now() - t0) };
-  } catch {
-    return {
-      sif_score: 0.5,
-      band: "MODERATE",
-      latency_ms: 0,
-      rules: [],
-      well_control: false,
-      evidence_spans: [],
-      gate_states: [
-        {
-          name: "confidence",
-          triggered: true,
-          detail: "API unreachable — offline demo mode",
-          action: "gray",
-        },
-      ],
-      model_version: "offline",
-      chunked: false,
-      explanation: null,
-      report_id: null,
-    };
-  }
-}
-
-/** POST /api/ingest — persist + classify a batch of raw records. Throws when
- *  the API is unreachable (callers fall back to the scripted mock beat). */
-export async function ingest(
-  records: Record<string, unknown>[],
-): Promise<IngestResult> {
-  return req<IngestResult>("/api/ingest", {
+  const p = await req<ApiPredictionOut>(`/api/classify${query}`, {
     method: "POST",
-    body: JSON.stringify({ records, source: "dashboard" }),
+    body: JSON.stringify({
+      text,
+      source: "live-paste",
+    }),
   });
+  return { ...adaptPrediction(p), latency_ms: Math.round(performance.now() - t0) };
 }
 
-/** POST /api/ingest with a CSV body — the bulk-upload demo path (the server
- *  maps narrative/description/report aliases onto the text column). Throws
- *  when the API is unreachable. 90 s budget: the 500-row money beat takes
- *  ~15 s server-side at the measured 37 rows/s — the default 3.5 s timeout
- *  aborted the request client-side while the server kept ingesting. */
-export async function ingestCsv(csv: string): Promise<IngestResult> {
-  return req<IngestResult>("/api/ingest", {
-    method: "POST",
-    body: JSON.stringify({ csv, source: "dashboard" }),
-  }, 90_000);
-}
-
-/** GET the money-beat ingest file (static asset shipped in dist/ — vite copies
- *  dashboard/public verbatim). The density re-rank beat uploads THIS 500-row
- *  register extract through the real bulk-ingest path (~15 s at the measured
- *  37 rows/s); never a hardcoded batch. Throws when unreachable. */
-export async function fetchDemoIngestCsv(): Promise<string> {
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), TIMEOUT_MS);
-  try {
-    const res = await fetch(`${BASE}/live_ingest_500.csv`, { signal: ctl.signal });
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText} on /live_ingest_500.csv`);
-    return await res.text();
-  } finally {
-    clearTimeout(timer);
-  }
-}
+/* ---- Ingest has NO client path in lib — see the header comment above. The
+ * bulk-upload money beat belongs to features/ingest (startIngest +
+ * useIngestRun), which branches on the server's 202 job id and polls
+ * GET /api/ingest/{job_id} for truthful progress instead of guessing. ---- */
 
 /** GET /api/reports/{id}/explanation — fetched lazily when the triage-card
  *  expander opens (never blocks the card). A cold call pays one bounded
- *  ollama attempt server-side (8s cap), so the client waits up to 12s;
- *  cached/template answers return in ms. null when unreachable, missing,
- *  or the report has no prediction — the caller then hides the section. */
+ *  ollama attempt server-side (8s cap), so the client waits up to 12s.
+ *  null when unreachable, missing, or the report has no prediction — the
+ *  caller then hides the section (honest "unavailable", not fabricated). */
 export async function getExplanation(reportId: number): Promise<ExplanationOut | null> {
   try {
     return await req<ExplanationOut>(`/api/reports/${reportId}/explanation`, undefined, 12_000);
   } catch {
-    return MOCK_EXPLANATIONS[reportId] ?? null;
+    if (DEMO_MODE) return MOCK_EXPLANATIONS[reportId] ?? null;
+    return null;
   }
 }
 
@@ -370,8 +359,9 @@ export async function getDensity(
 ): Promise<DensityRow[]> {
   try {
     return withRanks(await req<ApiDensityRow[]>(`/api/density?by=${by}`), prev);
-  } catch {
-    return prev ?? DENSITY_BEFORE;
+  } catch (e) {
+    if (DEMO_MODE) return prev ?? DENSITY_BEFORE;
+    throw e;
   }
 }
 
@@ -384,23 +374,34 @@ export async function getPatterns(
   try {
     const rows = await req<ApiPatternRow[]>(`/api/patterns?kind=${kind}`);
     return rows.map((r, i) => ({ id: `${kind}-${i + 1}`, ...r }));
-  } catch {
-    return PATTERNS.filter((p) => p.kind === kind);
+  } catch (e) {
+    if (DEMO_MODE) return PATTERNS.filter((p) => p.kind === kind);
+    throw e;
   }
 }
 
-/** GET /api/review — the override queue (future gold labels). */
+/** GET /api/review — the override queue (future gold labels). Throws when
+ *  unreachable, unless VITE_DEMO_MODE=1. */
 export async function getOverrides(reportId?: number): Promise<OverrideOut[]> {
   try {
     const q = reportId === undefined ? "" : `?report_id=${reportId}`;
     const rows = await req<ApiStoredOverride[]>(`/api/review${q}`);
     return rows.map(adaptOverride);
-  } catch {
-    return OVERRIDES;
+  } catch (e) {
+    if (DEMO_MODE) return OVERRIDES;
+    throw e;
   }
 }
 
-/** POST /api/review — "model proposes, HSE disposes". Throws when offline. */
+/** POST /api/review — "model proposes, HSE disposes". Throws when offline;
+ *  callers must NOT record a local fake decision row (the audit trail is the
+ *  server's write path). The reviewer identity is whatever the caller passes
+ *  in `labeler` (decision-panel persists it under lib/identity.ts's
+ *  REVIEWER_KEY); when no reviewer is captured the server applies its own
+ *  "hse_reviewer" default (app/schemas.py OverrideIn) — a disclosed
+ *  anonymous fallback, not an invented name. `rationale` is the "why the
+ *  model was overruled" field and is REQUIRED by the UI form; it is stored
+ *  server-side and round-trips on read via adaptOverride above. */
 export async function postReview(input: {
   report_id: number;
   field: string;
@@ -411,12 +412,12 @@ export async function postReview(input: {
 }): Promise<OverrideOut> {
   const o = await req<ApiStoredOverride>("/api/review", {
     method: "POST",
-    body: JSON.stringify({ labeler: "hse_reviewer", ...input }),
+    body: JSON.stringify(input),
   });
   return adaptOverride(o);
 }
 
-/** GET /api/metrics/summary — null when unreachable. */
+/** GET /api/metrics/summary — null when unreachable (caller hides the card). */
 export async function getMetricsSummary(): Promise<MetricsSummary | null> {
   try {
     return await req<MetricsSummary>("/api/metrics/summary");
@@ -424,3 +425,108 @@ export async function getMetricsSummary(): Promise<MetricsSummary | null> {
     return null;
   }
 }
+
+/* ---- React Query layer ---- */
+
+/** Stable query keys. Filter state that must survive a shared link
+ *  ('queue?fsi=0.8&range=90d&page=3') lives in the URL (useSearchParams in
+ *  the feature); keys here carry only server-shaped params. */
+export const qk = {
+  health: ["health"] as const,
+  rules: ["rules"] as const,
+  clusters: ["clusters", 0.91] as const,
+  reports: (params: { limit?: number; offset?: number } = {}) =>
+    ["reports", params] as const,
+  report: (id: number) => ["report", id] as const,
+  overrides: (reportId?: number) =>
+    reportId === undefined
+      ? (["overrides"] as const)
+      : (["overrides", reportId] as const),
+  density: (by: "site" | "activity" | "contractor") => ["density", by] as const,
+  patterns: (kind: PatternKind) => ["patterns", kind] as const,
+  explanation: (reportId: number) => ["explanation", reportId] as const,
+  metrics: ["metrics-summary"] as const,
+};
+
+export function useHealth() {
+  return useQuery({ queryKey: qk.health, queryFn: getHealth, staleTime: 15_000, refetchInterval: 30_000 });
+}
+
+export function useRules() {
+  return useQuery({ queryKey: qk.rules, queryFn: getRules, staleTime: Infinity });
+}
+
+export function useReports(params: { limit?: number; offset?: number } = {}) {
+  return useQuery({ queryKey: qk.reports(params), queryFn: () => getReports(params) });
+}
+
+export function useClusters() {
+  return useQuery({ queryKey: qk.clusters, queryFn: getClusters, staleTime: 5 * 60_000 });
+}
+
+export function useReport(id: number | null) {
+  return useQuery({ queryKey: qk.report(id ?? -1), queryFn: () => getReport(id!), enabled: id !== null });
+}
+
+export function useOverrides(reportId?: number) {
+  return useQuery({ queryKey: qk.overrides(reportId), queryFn: () => getOverrides(reportId) });
+}
+
+export function useDensity(by: "site" | "activity" | "contractor" = "site", prev: DensityRow[] | null = null) {
+  return useQuery({ queryKey: qk.density(by), queryFn: () => getDensity(by, prev) });
+}
+
+export function usePatterns(kind: PatternKind = "site_activity") {
+  return useQuery({ queryKey: qk.patterns(kind), queryFn: () => getPatterns(kind) });
+}
+
+/** Lazily fetched explanation — never blocks the card. `enabled` is false
+ *  until the card's expander opens. */
+export function useExplanation(reportId: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: qk.explanation(reportId ?? -1),
+    queryFn: () => getExplanation(reportId!),
+    enabled: enabled && reportId !== null,
+    staleTime: Infinity,
+  });
+}
+
+export function useMetricsSummary() {
+  return useQuery({ queryKey: qk.metrics, queryFn: getMetricsSummary });
+}
+
+/** POST /api/review with rationale — invalidates the decisions audit trail. */
+export function usePostReview() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: postReview,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["overrides"] });
+      void qc.invalidateQueries({ queryKey: qk.clusters });
+      void qc.invalidateQueries({ queryKey: qk.metrics });
+    },
+  });
+}
+
+/** Paste-classify — persists on the server, then refreshes queue + metrics +
+ *  health counts. Errors propagate to the caller for the ErrorState card. */
+export function useClassify() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { text: string; explain?: boolean }) =>
+      classify(input.text, { explain: input.explain }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["reports"] });
+      void qc.invalidateQueries({ queryKey: qk.clusters });
+      void qc.invalidateQueries({ queryKey: qk.metrics });
+      void qc.invalidateQueries({ queryKey: qk.health });
+    },
+  });
+}
+
+/** Bulk CSV ingest — NOT here. The money beat is owned by features/ingest
+ *  (startIngest + useIngestRun): a 202 job id is polled on
+ *  GET /api/ingest/{job_id} and only server-reported counts are rendered;
+ *  a timeout aborts the wait, never the verdict (the outcome is verified
+ *  against /api/health's live report count). The old useIngestCsv() sat on
+ *  the fabricated "accepted undefined" outcome and is deleted. */

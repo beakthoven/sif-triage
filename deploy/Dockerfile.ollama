@@ -1,0 +1,91 @@
+# SIF Precursor Triage — FULL-FEATURE runtime container (SIH 2026 PS 26165).
+#
+# Same runtime as deploy/Dockerfile, plus the optional Ollama explanation
+# rewording (qwen3:4b) enabled and PRE-WARMED at build time:
+#   build stage: install Ollama, pull qwen3:4b, pre-generate explanations
+#     for every report in the demo seed into the DB's `precomputed` table,
+#     then tar the warmed DB into the image.
+#   runtime:     entrypoint-ollama.sh extracts the warmed DB in place of the
+#     pristine seed (same bundle, one file substituted), starts
+#     `ollama serve` (NUM_PARALLEL=1) + uvicorn.
+#
+# Judge experience: explanations on the 4,548-row demo register render the
+# cached LLM rewording INSTANTLY (cache keys include text + model_version +
+# threshold + EXPLANATION_VERSION — app/explain.py). Fresh pastes take the
+# live path (~30 s on 2 shared vCPU) and fall back to the deterministic
+# template at the 8 s timeout — identical semantics to the Ollama-off image.
+#
+# RAM: app ~0.6 GB + qwen3:4b ~6 GB << 16 GB (HF cpu-basic). Build from the
+# REPO ROOT:
+#   docker build -f deploy/Dockerfile.ollama -t sif-triage-ollama .
+
+FROM python:3.14-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl ca-certificates zstd \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 1000 user
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt huggingface_hub
+
+# --- Ollama binary + qwen3:4b (build-time bake) -----------------------------
+# VENDORED, not downloaded: release downloads of the 470 MB binary tarball
+# and the 2.5 GB model reset repeatedly on this network and on HF's build
+# farm (curl 56). deploy/vendor carries the locally verified binary (+ its
+# shared libs) and the locally verified qwen3:4b blobs + manifest — the same
+# bits that passed the live rewording probe on the dev machine.
+COPY deploy/vendor/ollama-bin/ /usr/lib/ollama/
+RUN mv /usr/lib/ollama/ollama /usr/bin/ollama \
+    && chmod +x /usr/bin/ollama \
+    && echo "/usr/lib/ollama" > /etc/ld.so.conf.d/ollama.conf && ldconfig
+
+COPY app/ app/
+COPY dashboard/dist/ dashboard/dist/
+COPY deploy/entrypoint.sh deploy/fetch_bundle.py /app/
+COPY deploy/entrypoint-ollama.sh deploy/precompute_explanations.py /app/
+
+# Pre-generate every demo-seed explanation through the app's own
+# build_explanation (identical cache keys to the serving path) and tar the
+# warmed DB for the entrypoint to substitute for the pristine seed. HF
+# injects Space secrets as build args (HF_TOKEN: read access to the private
+# dataset); the vendored model is pre-staged under /app-data-warm/ollama so
+# the runtime (non-root) user can read it — no pull needed at build or boot.
+ARG HF_TOKEN=""
+RUN mkdir -p /app-data-warm/ollama
+COPY deploy/vendor/ollama-models/blobs /app-data-warm/ollama/blobs
+COPY deploy/vendor/ollama-models/manifests /app-data-warm/ollama/manifests
+RUN OLLAMA_MODELS=/app-data-warm/ollama ollama serve & \
+    sleep 5 && \
+    ollama list && \
+    curl -fsSL -H "Authorization: Bearer ${HF_TOKEN}" -o /tmp/demo_pre.db \
+      "https://huggingface.co/datasets/${BUNDLE_REPO:-beakthoven/sih-echarikai}/resolve/main/demo_pre.db" || \
+      { echo "WARNING: build-time demo_pre.db download failed; explanations" \
+              "will be cold at runtime (template fallback — non-fatal)"; }; \
+    if [ -f /tmp/demo_pre.db ]; then \
+      SIF_DB_PATH=/tmp/demo_pre.db python /app/precompute_explanations.py \
+        && tar -czf /app-data-warm/demo_pre.db.tar.gz -C /tmp demo_pre.db; \
+    fi; \
+    pkill ollama || true
+
+RUN mkdir -p /app-data && chown -R user:user /app-data /app /app-data-warm
+
+ENV BUNDLE_DIR=/app-data/bundle \
+    SIF_DB_PATH=/app-data/runtime.db \
+    SIF_MODEL_PATH=/app-data/bundle/masked-v2/sif_multitask_int8.onnx \
+    SIF_EMBED_MODEL_DIR=/app-data/bundle/embeddings/minilm \
+    SIF_EMBED_INDEX_DIR=/app-data/bundle/embeddings \
+    SIF_EXPLAIN_LLM=1 \
+    SIF_OLLAMA_MODEL=qwen3:4b \
+    OLLAMA_MODELS=/app-data-warm/ollama \
+    PYTHONUNBUFFERED=1
+
+USER user
+EXPOSE 7860
+
+HEALTHCHECK --interval=60s --timeout=15s --start-period=180s \
+    CMD curl -fsS http://127.0.0.1:7860/api/health || exit 1
+
+ENTRYPOINT ["bash", "/app/entrypoint-ollama.sh"]

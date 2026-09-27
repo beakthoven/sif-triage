@@ -1,0 +1,27 @@
+/*
+ * Devanagari coverage for the EN/हिं toggle (design-system-spec §2 fonts,
+ * docs/redesign-plan.md ADD: real Devanagari face for brand consistency).
+ *
+ * IBM Plex Sans Devanagari (@fontsource, OFL) is loaded in exactly the
+ * weights the type scale uses: 400 (body), 500 (label/mono), 600 (headings).
+ * Only the Devanagari subsets are imported — Latin glyphs in mixed strings
+ * resolve from IBM Plex Sans, which sits earlier in --font-stack-sans.
+ *
+ * There is NO IBM Plex Mono Devanagari (upstream package does not exist —
+ * verified E404 during stack selection, docs/frontend-stack-decision.md),
+ * so mono contexts keep Plex Mono first and fall through to the Sans
+ * Devanagari face for Devanagari glyphs.
+ *
+ * Loading: imported once from dashboard/src/index.css (after tailwindcss).
+ * Consumption: --font-devanagari-stack is composed into --font-sans /
+ * --font-mono / --font-heading in index.css, and exposed directly as the
+ * --font-devanagari token (utility: font-devanagari) for explicitly
+ * Hindi-typed elements.
+ */
+@import "@fontsource/ibm-plex-sans-devanagari/devanagari-400.css";
+@import "@fontsource/ibm-plex-sans-devanagari/devanagari-500.css";
+@import "@fontsource/ibm-plex-sans-devanagari/devanagari-600.css";
+
+:root {
+    --font-devanagari-stack: "IBM Plex Sans Devanagari", "Noto Sans Devanagari", "Nirmala UI", sans-serif;
+}

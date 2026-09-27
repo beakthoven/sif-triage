@@ -7,6 +7,25 @@ gets the same prediction — regression tests and the demo rehearsal depend on i
 
 RealOnnxClassifier runs the ModernBERT INT8/FP32 multi-task artifact
 (heads: sif_logit, rule_logits[7], span_logits — see export_gate_report.md).
+Two serve-side fixes measured in docs/discovery/60-orchestrator-novel-probe.md
+both live here, not in the route layer:
+
+- A1 train/serve skew: the corpus is outcome-masked at TRAINING time
+  (data_pipeline/masking.py, build_corpus.py:209,274) but was never masked at
+  inference — a near-miss sentence ("Fortunately no injury occurred") read as
+  reassurance and COLLAPSED the score (measured -64% on a paired probe). The
+  masker is therefore vendored below (the USB tarball ships app/ without
+  data_pipeline — packaging/manifest.md) and applied to every inbound text.
+- A3 self-consistency: the verdict flipped under paraphrase (sd 0.31 across 8
+  phrasings of one scenario). sif_score is now the mean over n_variants
+  deterministic surface variants; score_spread / verdict_stability are
+  exposed so gates can gray unstable verdicts. Reliability only — a low
+  spread can still be a WRONG consensus (probe Result 5).
+- CLASSIFIER-BAND: the operating point is owned here. Every prediction
+  carries `band` (HIGH >= tuned flag threshold, MODERATE >= gray band floor,
+  LOW otherwise) plus the `flag_threshold` and gray-band bounds it was
+  banded against — the UI states the server's decision, never its own.
+
 onnxruntime/tokenizers are imported lazily so the API still boots with zero
 ML deps when no artifact is present (falls back to the mock).
 """
@@ -28,6 +47,249 @@ log = logging.getLogger(__name__)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
+# ---- outcome masker, SERVE SIDE (A1 train/serve skew fix) -------------------
+# The training corpus is outcome-masked (data_pipeline/masking.py; applied at
+# build_corpus.py:209,274) but inference never was — so a near-miss register
+# sentence the model never saw in training ("Fortunately no injury occurred")
+# collapsed the score by -64% on the paired probe. Vendored here, NOT
+# imported: the USB tarball ships app/ without data_pipeline
+# (packaging/manifest.md "Deliberately excluded"), and gates.py mirrors the
+# stems for the same reason.
+#
+# _OUTCOME_PATTERNS / _PATTERN / _COLLAPSE / mask_text are a VERBATIM copy of
+# the FROZEN data_pipeline/masking.py stem list. Drift between the two copies
+# is train/serve skew — the exact defect this block closes. The stem list may
+# only change together with a label_spec version bump (frozen at H2).
+
+MASK_TOKEN = "[OUTCOME]"
+
+_OUTCOME_PATTERNS: tuple[tuple[str, str], ...] = (
+    # multi-word phrases
+    ("crush_syndrome", r"\bcrush\s+syndrome\b"),
+    ("loss_of_eye", r"\b(?:loss\s+of|lost)\s+(?:\w+\s+){0,2}eyes?\b"),
+    ("degree_burn", r"\b(?:first|second|third|1st|2nd|3rd)[ -]degree\s+burns?\b"),
+    ("intensive_care", r"\bintensive\s+care(?:\s+unit)?\b"),
+    ("trauma_center", r"\btrauma\s+(?:center|centre)\b"),
+    ("life_flight", r"\blife[ -]?flight\b"),
+    # single-word stems
+    ("amputat", r"\bamputat\w*"),
+    ("fractur", r"\bfractur\w*"),
+    ("hospital", r"\bhospital\w*"),
+    ("kill", r"\bkill\w*"),
+    ("fatal", r"\bfatal\w*"),
+    ("death", r"\bdeaths?\b"),
+    ("died", r"\bdied\b"),
+    ("sever", r"\bsever(?:e|ely|ed|ing|s)?\b"),
+    ("unconscious", r"\bunconscious\w*"),
+    ("unresponsive", r"\bunresponsive\w*"),
+    ("resuscitat", r"\bresuscitat\w*"),
+    ("paraly", r"\bparaly\w*"),
+    ("coma", r"\bcoma\w*"),
+    ("icu", r"\bicu\b"),
+    ("airlift", r"\bairlift\w*"),
+    ("medevac", r"\bmedevac\w*"),
+    ("surgery", r"\bsurg(?:er(?:y|ies)|ical)\b"),
+    ("succumb", r"\bsuccumb\w*"),
+    ("injur", r"\binjur\w*"),
+)
+
+_PATTERN = re.compile(
+    "|".join(f"(?P<{name}>{fragment})" for name, fragment in _OUTCOME_PATTERNS),
+    re.IGNORECASE,
+)
+_COLLAPSE = re.compile(re.escape(MASK_TOKEN) + r"(?:\s+" + re.escape(MASK_TOKEN) + r")+")
+
+
+def mask_text(text: str) -> str:
+    """Neutralize outcome tokens in one narrative (verbatim data_pipeline
+    semantics; never returns empty for non-empty input)."""
+    if not text:
+        return text
+    return _COLLAPSE.sub(MASK_TOKEN, _PATTERN.sub(MASK_TOKEN, text))
+
+
+def mask_with_src(text: str, max_chars: int | None = None) -> tuple[str, list[int], list[int]]:
+    """mask_text + per-character maps back onto the ORIGINAL text.
+
+    Serving wrapper: caps at max_chars (MAX_INPUT_CHARS when None) AFTER
+    masking (masking can lengthen: "died" -> "[OUTCOME]" is +5), then returns
+    (masked, src_lo, src_end) where
+    for every char i of `masked`, src_lo[i]/src_end[i] bound the half-open
+    span of the original text it came from — verbatim chars map to
+    themselves, and each collapsed [OUTCOME] token maps to the union of the
+    original regions it replaced. Evidence spans are therefore extracted on
+    the masked text the model was trained on but re-anchored onto the
+    text the API must highlight (wire invariant text[start:end] == span.text).
+    """
+    if not text:
+        return text, [], []
+    cap = MAX_INPUT_CHARS if max_chars is None else max_chars
+    pieces: list[tuple[str, int, int]] = []  # (segment, src_lo, src_end)
+    pos = 0
+    for m in _PATTERN.finditer(text):
+        if m.start() > pos:
+            pieces.append((text[pos:m.start()], pos, m.start()))
+        pieces.append((MASK_TOKEN, m.start(), m.end()))
+        pos = m.end()
+    if pos < len(text):
+        pieces.append((text[pos:], pos, len(text)))
+    # _COLLAPSE step: merge [OUTCOME] runs separated only by whitespace into
+    # one token spanning the union of the replaced regions (identical output
+    # string to mask_text).
+    merged: list[tuple[str, int, int]] = []
+    i = 0
+    while i < len(pieces):
+        seg, lo, hi = pieces[i]
+        if seg == MASK_TOKEN:
+            j = i
+            while (j + 2 < len(pieces)
+                   and pieces[j + 1][0].isspace() and pieces[j + 2][0] == MASK_TOKEN):
+                j += 2
+            merged.append((MASK_TOKEN, lo, pieces[j][2]))
+            i = j + 1
+        else:
+            merged.append((seg, lo, hi))
+            i += 1
+    masked = "".join(seg for seg, _, _ in merged)
+    masked, lo_cut = masked[:cap], min(len(masked), cap)
+    src_lo: list[int] = []
+    src_end: list[int] = []
+    for seg, lo, hi in merged:
+        if seg == MASK_TOKEN:
+            src_lo.extend([lo] * len(seg))
+            src_end.extend([hi] * len(seg))
+        else:
+            src_lo.extend(range(lo, lo + len(seg)))
+            src_end.extend(range(lo + 1, lo + len(seg) + 1))
+    return masked, src_lo[:lo_cut], src_end[:lo_cut]
+
+
+# ---- self-consistency surface variants (A3; deterministic, stdlib-only) ----
+# N fixed transforms sampled across the axes the paraphrase probe measured:
+# clause position (leading<->trailing) and intra-sentence clause order. NOT
+# an LLM call — runtime stays offline. A transform that no-ops simply repeats
+# variant 0's text (deduped at scoring time), which honestly lowers that
+# report's measured surface instability.
+
+
+_LEADING_CLAUSE_RE = re.compile(r"^([^,.]{10,140}?),\s+(.{15,})$", re.DOTALL)
+_TRAILING_CLAUSE_RE = re.compile(r"^(.{15,}?),\s+([^,]{10,140}?)([.!?])$")
+_SEG_SPLIT_RE = re.compile(r",\s+|;\s*")
+
+
+def _variant_clause_move(text: str) -> str:
+    """'Without testing the air, staff entered the tank.' ->
+    'Staff entered the tank without testing the air.'"""
+    m = _LEADING_CLAUSE_RE.match(text)
+    if not m:
+        return text
+    clause, main = m.group(1), m.group(2)
+    clause = clause[0].lower() + clause[1:]
+    if main[-1] in ".!?":
+        return f"{main[:-1]} {clause}{main[-1]}"
+    return f"{main} {clause}"
+
+
+def _variant_clause_front(text: str) -> str:
+    """'Staff entered the tank, without testing the air.' ->
+    'Without testing the air, staff entered the tank.'"""
+    m = _TRAILING_CLAUSE_RE.match(text.strip())
+    if not m:
+        return text
+    main, tail, punct = m.group(1), m.group(2), m.group(3)
+    tail = tail[0].upper() + tail[1:]
+    return f"{tail}, {main[0].lower() + main[1:]}{punct}"
+
+
+def _variant_segment_reverse(text: str) -> str:
+    """Reverse comma/semicolon segment order WITHIN each sentence (position
+    jitter for the CLS-pooled head's documented positional discount). Sentence
+    boundaries are preserved on purpose: crossing them can move a
+    near-miss-reassurance sentence ahead of the incident description, which
+    re-creates the register penalty this ensemble exists to neutralize.
+    Scored text only — never displayed or stored."""
+    sents = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
+    out: list[str] = []
+    for sent in sents:
+        segs = [s for s in _SEG_SPLIT_RE.split(sent) if s]
+        out.append(" ".join(reversed(segs)) if len(segs) > 1 else sent)
+    return " ".join(out)
+
+
+_SURFACE_TRANSFORMS = (_variant_clause_move, _variant_clause_front, _variant_segment_reverse)
+
+
+def surface_variants(masked_text: str, n: int) -> list[str]:
+    """The fixed variant set, positional: [as-masked original] + the first
+    n-1 transforms applied. Length n (>=1)."""
+    return [masked_text] + [f(masked_text) for f in _SURFACE_TRANSFORMS[: max(n - 1, 0)]]
+
+
+def _env_variant_n() -> int:
+    """Ensemble size (SIF_SELF_CONSISTENCY_N, default 4, clamp 1..8). 1 =
+    single-shot scoring (the pre-A3 path, kept as a rollback/latency dial)."""
+    raw = os.environ.get("SIF_SELF_CONSISTENCY_N", "4")
+    try:
+        n = int(raw)
+    except ValueError:
+        return 4
+    return max(1, min(n, 8))
+
+
+def self_consistency(scores: list[float], flag_threshold: float) -> tuple[float, float, float]:
+    """(mean, spread, verdict_stability) for one report's variant scores.
+
+    mean -> the reported sif_score; spread -> population sd across variants;
+    stability -> fraction of variants whose flag verdict agrees with the
+    mean-score verdict (1.0 = unanimous)."""
+    n = len(scores)
+    mean = float(np.mean(scores))
+    spread = float(np.std(scores)) if n > 1 else 0.0
+    mean_verdict = mean >= flag_threshold
+    stability = sum(1.0 for s in scores if (s >= flag_threshold) == mean_verdict) / n
+    return mean, spread, stability
+
+
+# ---- CLASSIFIER-BAND: the server owns the operating point --------------------
+# Three band sources existed and disagreed: the (deleted) client bandFor
+# 0.7/0.4, the artifact's tuned operating point (~0.658) and the config gray
+# band [0.40, 0.60]. The classifier now owns band assignment: every fresh
+# PredictionOut carries band + the threshold and gray-band bounds it was
+# banded against, so the UI states the server's decision and can never
+# disagree with the metrics.
+
+def _env_gray_band() -> tuple[float, float]:
+    """(low, high) of the confidence gray band — the SAME SIF_-prefixed env
+    vars config.py Settings parses (gray_band_low/high, defaults 0.40/0.60),
+    read directly because build_classifier runs without a Settings instance.
+    Keep in sync with config.py:57-58; drift here re-creates the three-way
+    band disagreement this function closes."""
+    def _f(name: str, default: float) -> float:
+        raw = os.environ.get(name)
+        if raw is None:
+            return default
+        try:
+            v = float(raw)
+        except ValueError:
+            return default
+        return v if 0.0 < v < 1.0 else default
+    low = _f("SIF_GRAY_BAND_LOW", 0.40)
+    high = _f("SIF_GRAY_BAND_HIGH", 0.60)
+    return low, max(high, low)
+
+
+def band_for(score: float, flag_threshold: float, gray_band_low: float) -> str:
+    """The server's review-priority band for one score: HIGH clears the tuned
+    flag threshold, MODERATE reaches the gray band floor (routed to review),
+    LOW otherwise. band_for must be fed the SAME rounded score that is
+    reported as sif_score so the displayed number and its band never split."""
+    if score >= flag_threshold:
+        return "HIGH"
+    if score >= gray_band_low:
+        return "MODERATE"
+    return "LOW"
+
+
 # SEV1-1 (post-review): the ONNX rule_logits head emits columns in TRAINING
 # order — artifacts/models/masked-v1/train.py RULES, verbatim — NOT the
 # alphabetical RULE_KEYS the zip previously used (6/7 rules displayed under
@@ -38,41 +300,131 @@ RULE_HEAD_ORDER: tuple[str, ...] = (
     "hot_work", "safe_mechanical_lifting", "confined_space",
 )
 
-# Keyword-attribution span fallback (D2): the frozen spec/label_spec.yaml
-# keyword_lfs, mirrored from train.py's KEYWORD_LFS (working_at_height is
-# code-only by spec -> never anchors), plus '\bloto\b' — the corpus acronym
-# the spec only spells out as lock-out ("LOTO not applied" must still
-# highlight). Used when the span head yields nothing usable (post-review
-# SEV2: span garbage).
-_KEYWORD_LFS: dict[str, tuple[str, ...]] = {
-    "confined_space": (
-        r"\bconfined space\b", r"\bmanhole\b", r"\btank entry\b",
-        r"\bvessel entry\b",
-        r"\benter(?:ed|ing) (?:the |a )?(?:tank|vessel|silo|vault|pit|bin|hopper)\b",
-        r"\binside (?:the |a )?(?:tank|vessel|silo)\b",
-    ),
-    "energy_isolation": (
-        r"\block\s?out\b", r"\btag\s?out\b", r"\blockout\b", r"\btagout\b",
-        r"\bloto\b", r"\benergized\b", r"\bde-?energiz", r"\bstored energy\b",
-        r"\barc flash\b", r"\bunexpectedly (?:started|activated|energized)",
-    ),
-    "hot_work": (
-        r"\bhot work\b", r"\bweld", r"\btorch\b", r"\bgrind",
-        r"\bcutting (?:torch|metal|steel)", r"\bspark",
-    ),
-    "safe_mechanical_lifting": (
-        r"\bcrane\b", r"\brigging\b", r"\bhoist", r"\bsuspended load\b",
-        r"\boverhead load\b", r"\bsling\b", r"\bdropped load\b",
-    ),
-    "driving": (r"\bfork\s?lift\b", r"\bskid steer\b"),
-    "line_of_fire": (
-        r"\bstruck by\b", r"\bcaught (?:in|between)\b", r"\bcrushed\b",
-        r"\bpinch", r"\bran over\b",
-    ),
-}
-_KEYWORD_LF_RES: tuple[re.Pattern[str], ...] = tuple(
-    re.compile(p, re.IGNORECASE) for pats in _KEYWORD_LFS.values() for p in pats
+# Annotation-only cues share one per-rule source. Consumer groups preserve the
+# exact prior span, explanation, and mock-anchor matches; none affects routing
+# or scoring.
+_RELEASE_CUES = (
+    r"\bruptur(?:e|ed|ing|es)\b", r"\bexplod(?:e|ed|ing|es)\b",
+    r"\bexplosions?\b", r"\bblast(?:s|ed|ing)?\b", r"\bburst(?:s|ed|ing)?\b",
+    r"\bprojectiles?\b", r"\bflying debris\b", r"\bflying fragments\b",
+    r"\bthrown fragments\b", r"\breleased under pressure\b",
+    r"\bpressure release\b",
 )
+
+# D2 fallback, explanation evidence, mock anchors and cue hits all derive from
+# this source. Per-consumer pattern groups preserve their previous exact sets.
+RULE_CUE_PATTERNS: dict[str, dict[str, tuple[str, ...]]] = {
+    "confined_space": {
+        "span": (
+            r"\bconfined space\b", r"\bmanhole\b", r"\btank entry\b",
+            r"\bvessel entry\b",
+            r"\benter(?:ed|ing) (?:the |a )?(?:tank|vessel|silo|vault|pit|bin|hopper)\b",
+            r"\binside (?:the |a )?(?:tank|vessel|silo)\b",
+        ),
+        "evidence": (
+            r"\bconfined space\b", r"\bmanhole\b", r"\btank entry\b",
+            r"\bvessel entry\b", r"\binside (?:the |a )?(?:tank|vessel|silo)\b",
+            r"\bgas test\b", r"\bventilat",
+        ),
+        "anchor": ("confined space", "vessel entry", "tank entry", "manhole"),
+    },
+    "energy_isolation": {
+        "span": (
+            r"\block\s?out\b", r"\btag\s?out\b", r"\blockout\b", r"\btagout\b",
+            r"\bloto\b", r"\benergized\b", r"\bde-?energiz", r"\bstored energy\b",
+            r"\barc flash\b", r"\bunexpectedly (?:started|activated|energized)",
+        ),
+        "evidence": (
+            r"\bloto\b", r"\block\s?out\b", r"\btag\s?out\b",
+            r"\benergiz", r"\bde-?energiz", r"\bstored energy\b",
+            r"\bisolat", r"\barc flash\b",
+        ),
+        "anchor": ("loto", "lock-out", "lockout", "isolation", "de-energized", "energized"),
+    },
+    "hot_work": {
+        "span": (
+            r"\bhot work\b", r"\bweld", r"\btorch\b", r"\bgrind",
+            r"\bcutting (?:torch|metal|steel)", r"\bspark",
+        ),
+        "evidence": (r"\bhot work\b", r"\bweld", r"\bgrind", r"\btorch\b", r"\bspark", r"\bcutting\b"),
+        "anchor": ("hot work", "welding", "grinding", "grinder", "sparks", "cutting"),
+    },
+    "safe_mechanical_lifting": {
+        "span": (
+            r"\bcrane\b", r"\brigging\b", r"\bhoist", r"\bsuspended load\b",
+            r"\boverhead load\b", r"\bsling\b", r"\bdropped load\b",
+        ),
+        "evidence": (
+            r"\bcrane\b", r"\blift", r"\brigging\b", r"\bhoist",
+            r"\bsling\b", r"\bsuspended load\b", r"\boverhead load\b",
+        ),
+        "anchor": ("lifting", "crane", "rigging", "sling", "hoist"),
+    },
+    "driving": {
+        "span": (r"\bfork\s?lift\b", r"\bskid steer\b"),
+        "evidence": (
+            r"\bvehicle\b", r"\bdriv", r"\bfork\s?lift\b", r"\bspeed",
+            r"\bseat belt\b", r"\brevers", r"\broad\b", r"\bjourney\b",
+        ),
+        "anchor": ("driving", "vehicle", "speeding", "seat belt", "journey"),
+    },
+    "line_of_fire": {
+        "span": (
+            r"\bstruck by\b", r"\bcaught (?:in|between)\b", r"\bcrushed\b",
+            r"\bpinch", r"\bran over\b", *_RELEASE_CUES,
+        ),
+        "evidence": (
+            r"\b(?:drop(?:ped|ping)?|fell|falling)\b", r"\bstruck\b", r"\bcaught\b",
+            r"\btrap(?:ped|ping)?\b", r"\bcrush", r"\bpinch",
+            r"\bline of fire\b", r"\bsuspended load\b", r"\boverhead\b",
+            r"\b(?:near|above|below|beneath|toward|onto)\b.{0,45}\b(?:worker|crew|person|roughneck|operator|leg|hand)\b",
+            *_RELEASE_CUES,
+        ),
+        "anchor": (
+            "line of fire", "dropped object", "suspended load", "struck", "pinch",
+            "rupture", "ruptured", "rupturing", "explosion", "exploded", "exploding",
+            "blast", "blasted", "burst", "bursting", "projectile", "projectiles",
+            "flying debris", "flying fragments", "thrown fragments",
+            "released under pressure", "pressure release",
+        ),
+    },
+    "working_at_height": {
+        "span": (),
+        "evidence": (
+            r"\bheight\b", r"\bscaffold", r"\bladder\b", r"\bharness\b",
+            r"\bfall arrest\b", r"\broof\b", r"\belevated\b", r"\bderrick\b",
+        ),
+        "anchor": ("height", "harness", "scaffold", "ladder", "fall arrest"),
+    },
+}
+RULE_CUE_RES: dict[str, dict[str, tuple[re.Pattern[str], ...]]] = {
+    rule: {
+        group: tuple(re.compile(pattern, re.IGNORECASE) for pattern in patterns)
+        for group, patterns in groups.items()
+    }
+    for rule, groups in RULE_CUE_PATTERNS.items()
+}
+_SPAN_CUE_RULE_ORDER = (
+    "confined_space", "energy_isolation", "hot_work", "safe_mechanical_lifting",
+    "driving", "line_of_fire",
+)
+_MOCK_ANCHOR_RULE_ORDER = (
+    "energy_isolation", "hot_work", "working_at_height", "confined_space",
+    "line_of_fire", "safe_mechanical_lifting", "driving",
+)
+_KEYWORD_LF_RES = tuple(
+    regex for rule in _SPAN_CUE_RULE_ORDER for regex in RULE_CUE_RES[rule]["span"]
+)
+
+
+def rule_cue_hits(text: str) -> dict[str, bool]:
+    """Per-rule conservative text cues for annotation only, never a verdict."""
+    return {
+        rule: any(regex.search(text) for regex in RULE_CUE_RES[rule]["evidence"])
+        for rule in RULE_KEYS
+    }
+
+
 
 # Post-review SEV2-6: no cap -> one 200k-char paste = 501 windows = 15.9s.
 # Inputs are truncated to the first 10k chars (~2.4k tokens, <1s) and the
@@ -87,18 +439,6 @@ _SPAN_STOPWORDS = frozenset(
     "during per this that from for all next be been as are had has have he "
     "she his her their our we they hrs am pm".split()
 )
-
-# Keyword anchors the mock uses to place evidence spans. Mirrors the weak-
-# supervision anchors the real span head is trained from (DECISION_LOG D2).
-_SPAN_ANCHORS: dict[str, tuple[str, ...]] = {
-    "energy_isolation": ("loto", "lock-out", "lockout", "isolation", "de-energized", "energized"),
-    "hot_work": ("hot work", "welding", "grinding", "grinder", "sparks", "cutting"),
-    "working_at_height": ("height", "harness", "scaffold", "ladder", "fall arrest"),
-    "confined_space": ("confined space", "vessel entry", "tank entry", "manhole"),
-    "line_of_fire": ("line of fire", "dropped object", "suspended load", "struck", "pinch"),
-    "safe_mechanical_lifting": ("lifting", "crane", "rigging", "sling", "hoist"),
-    "driving": ("driving", "vehicle", "speeding", "seat belt", "journey"),
-}
 
 # FROZEN spec/label_spec.yaml wellcontrol_keywords (D23: app list synced to
 # the spec — christmas tree / h2s / wellhead / workover etc. were missing;
@@ -160,6 +500,19 @@ def pseudo_embed(text: str, dim: int = 384) -> np.ndarray:
     return vec
 
 
+def deterministic_cue_spans(text: str) -> list[EvidenceSpan]:
+    """Exact spans from deterministic attribution cues; annotation only."""
+    matches = sorted(
+        (match for regex in _KEYWORD_LF_RES for match in regex.finditer(text)),
+        key=lambda match: (match.start(), match.end()),
+    )
+    spans = [
+        EvidenceSpan(start=match.start(), end=match.end(), text=text[match.start():match.end()])
+        for match in matches
+    ]
+    return validate_spans(text, spans)[:5]
+
+
 def validate_spans(text: str, spans: list[EvidenceSpan]) -> list[EvidenceSpan]:
     """Server-side invariant from the architecture: only spans with
     text[start:end] == span.text may ever leave the API."""
@@ -193,37 +546,57 @@ class MockClassifier:
     def __init__(self, model_version: str = "mock-0.1.0") -> None:
         self.model_version = model_version
         self.sif_flag_threshold = 0.5  # a-priori cutoff; no artifact to tune from
+        self.n_variants = _env_variant_n()  # same ensemble contract as the real path
+        self.gray_band_low, self.gray_band_high = _env_gray_band()
 
     def classify_batch(self, texts: list[str], batch_size: int = 32) -> list[PredictionOut]:
         return [self.predict(t) for t in texts]
 
     def predict(self, text: str) -> PredictionOut:
-        text = text[:MAX_INPUT_CHARS]  # same graceful cap as the real path (SEV2-6)
-        rng = np.random.default_rng(_seed(text))
-        # Beta(2,5) skews low — realistic triage distribution (~20% flag rate).
-        sif_score = float(rng.beta(2.0, 5.0))
+        raw = text[:MAX_INPUT_CHARS]  # same graceful cap as the real path (SEV2-6)
+        # Contract parity with RealOnnxClassifier: serve-side outcome masking
+        # (A1) + surface-variant ensemble (A3) around the same seeded heads.
+        masked, _, _ = mask_with_src(raw)
+        variants = surface_variants(masked, self.n_variants)
+        # variant 0 draws first from its own seed — the pre-ensemble mock's
+        # exact draw order (sif, then rules, then span fallback) is preserved.
+        rng = np.random.default_rng(_seed(variants[0]))
+        scores = [float(rng.beta(2.0, 5.0))]
+        scores += [float(np.random.default_rng(_seed(v)).beta(2.0, 5.0)) for v in variants[1:]]
+        mean, spread, stability = self_consistency(scores, self.sif_flag_threshold)
         rule_probs = {k: float(rng.beta(1.5, 6.0)) for k in RULE_KEYS}
         # Anchor hits nudge the matching rule up so the mock looks coherent.
-        low = text.lower()
-        for rule, anchors in _SPAN_ANCHORS.items():
-            if any(a in low for a in anchors):
+        # Anchors are mechanism/barrier words and survive masking; rules are
+        # nudged on the masked text the real rule head would read.
+        low = masked.lower()
+        for rule in _MOCK_ANCHOR_RULE_ORDER:
+            if any(a in low for a in RULE_CUE_PATTERNS[rule]["anchor"]):
                 rule_probs[rule] = min(1.0, rule_probs[rule] + 0.35)
-        well_control = has_well_control(text)
-        spans = validate_spans(text, self._make_spans(text, rng))
+        well_control = has_well_control(raw)
+        spans = validate_spans(raw, self._make_spans(raw, rng))
+        score_r = round(mean, 4)  # the band must match the reported score
         return PredictionOut(
-            sif_score=round(sif_score, 4),
+            sif_score=score_r,
             rule_probs={k: round(v, 4) for k, v in rule_probs.items()},
             well_control=well_control,
             evidence_spans=spans,
             gate_states=[],  # filled in by the route layer after gates run
             model_version=self.model_version,
+            score_spread=round(spread, 4),
+            n_variants=len(scores),
+            variant_scores=[round(s, 4) for s in scores],
+            verdict_stability=round(stability, 4),
+            band=band_for(score_r, self.sif_flag_threshold, self.gray_band_low),
+            flag_threshold=self.sif_flag_threshold,
+            gray_band_low=self.gray_band_low,
+            gray_band_high=self.gray_band_high,
         )
 
     def _make_spans(self, text: str, rng: np.random.Generator) -> list[EvidenceSpan]:
         spans: list[EvidenceSpan] = []
         low = text.lower()
-        for anchors in _SPAN_ANCHORS.values():
-            for anchor in anchors:
+        for rule in _MOCK_ANCHOR_RULE_ORDER:
+            for anchor in RULE_CUE_PATTERNS[rule]["anchor"]:
                 i = low.find(anchor)
                 if i >= 0:
                     spans.append(EvidenceSpan(start=i, end=i + len(anchor), text=text[i : i + len(anchor)]))
@@ -281,6 +654,13 @@ class RealOnnxClassifier:
         self.temperature = self._load_temperature(self._onnx_path.parent)
         self.sif_flag_threshold = self._load_flag_threshold(self._onnx_path.parent, self.temperature)
         self.rule_thresholds = self._load_rule_thresholds(self._onnx_path.parent)
+        # A3 self-consistency: surface-variant ensemble size
+        # (SIF_SELF_CONSISTENCY_N, default 4, clamp 1..8; 1 = single-shot).
+        self.n_variants = _env_variant_n()
+        # CLASSIFIER-BAND: gray band bounds via the same env vars config.py
+        # Settings parses — the classifier owns the operating point, so the
+        # band it emits can never disagree with the metrics computed from it.
+        self.gray_band_low, self.gray_band_high = _env_gray_band()
         # Post-review SEV2-5: per-rule F1-tuned thresholds live in the
         # artifact's metrics.json; the app hardcoded 0.5 for every rule. One
         # classifier per process, so updating the shared RULE_DISPLAY table
@@ -432,18 +812,38 @@ class RealOnnxClassifier:
         return self.classify_batch([text])[0]
 
     def classify_batch(self, texts: list[str], batch_size: int = 32) -> list[PredictionOut]:
-        """Batched inference (D25 bulk-ingest SLA, fp32 only). Every text's
-        sliding windows are flattened into shared session.run calls of
-        <= batch_size rows, then max-pooled per text — identical semantics
-        to predict(). Inputs are capped at MAX_INPUT_CHARS (SEV2-6)."""
+        """Batched inference (D25 bulk-ingest SLA, fp32 only).
+
+        A1: every text is outcome-masked to match the training corpus before
+        tokenization (mask_with_src keeps the original-coordinates map for
+        span re-anchoring). A3: each text is scored as its n_variants
+        deterministic surface variants (variant 0 = as-masked original);
+        sif_score = mean, with score_spread / variant_scores /
+        verdict_stability in PredictionOut. rule_probs, evidence_spans and
+        well_control describe variant 0 (spans re-anchored onto the original
+        report text). Every variant's sliding windows are flattened into
+        shared session.run calls of <= batch_size rows, then max-pooled per
+        variant — identical semantics to predict(). Inputs are capped at
+        MAX_INPUT_CHARS (SEV2-6)."""
         if not texts:
             return []
         capped = [t[: self.MAX_INPUT_CHARS] for t in texts]
-        encs = [self._tokenizer.encode(t, add_special_tokens=False) for t in capped]
-        flat: list[tuple[int, tuple[int, int], list[int]]] = []  # (text_idx, window, body ids)
-        for ti, enc in enumerate(encs):
+        masked_src = [mask_with_src(t) for t in capped]
+        variant_lists = [surface_variants(m, self.n_variants) for m, _, _ in masked_src]
+        # No-op transforms repeat variant 0's text; score each distinct
+        # variant string once and let the positional list reuse the score.
+        uniq_idx: dict[str, int] = {}
+        uniq_texts: list[str] = []
+        for vs in variant_lists:
+            for v in vs:
+                if v not in uniq_idx:
+                    uniq_idx[v] = len(uniq_texts)
+                    uniq_texts.append(v)
+        encs = [self._tokenizer.encode(v, add_special_tokens=False) for v in uniq_texts]
+        flat: list[tuple[int, tuple[int, int], list[int]]] = []  # (variant_idx, window, body ids)
+        for ui, enc in enumerate(encs):
             for start, end in self._windows(len(enc.ids)):
-                flat.append((ti, (start, end), enc.ids[start:end]))
+                flat.append((ui, (start, end), enc.ids[start:end]))
         # D27 (post-review SEV2-1): int8 per-tensor dynamic quantization lets
         # batchmates shift each other's logits (measured Δ up to 0.26 prob
         # WITHIN one chunked predict), so every window of an int8 model runs
@@ -465,34 +865,50 @@ class RealOnnxClassifier:
             span_rows.extend(span_l)
         sif_logits = np.concatenate(sif_parts, axis=0)
         rule_logits = np.concatenate(rule_parts, axis=0)
-        rows_by_text: list[list[int]] = [[] for _ in capped]
-        for row_idx, (ti, _, _) in enumerate(flat):
-            rows_by_text[ti].append(row_idx)
+        rows_by_variant: list[list[int]] = [[] for _ in uniq_texts]
+        for row_idx, (ui, _, _) in enumerate(flat):
+            rows_by_variant[ui].append(row_idx)
         outs: list[PredictionOut] = []
         for ti, text in enumerate(capped):
-            rows = rows_by_text[ti]
-            windows = [flat[r][1] for r in rows]
-            # Max-pool per-head scores across windows (logit / T is monotonic
-            # in the logit, so pooling probabilities after scaling is
-            # equivalent).
-            sif_probs = _sigmoid(sif_logits[rows].astype(np.float64) / self.temperature)
-            sif_score = float(np.max(sif_probs))
-            rule_probs = np.max(_sigmoid(rule_logits[rows].astype(np.float64)), axis=0)
-            # Post-review SEV2-7: span candidates merge across ALL windows
-            # (not just the argmax-SIF window) before the top-3 cut.
+            masked, src_lo, src_end = masked_src[ti]
+            variants = variant_lists[ti]
+            # Per-variant SIF score = max-pooled probability over that
+            # variant's windows (logit/T is monotonic in the logit, so
+            # pooling probabilities after scaling is equivalent).
+            scores: list[float] = []
+            chunked = False
+            for v in variants:
+                rows = rows_by_variant[uniq_idx[v]]
+                chunked = chunked or len(rows) > 1
+                sif_probs = _sigmoid(sif_logits[rows].astype(np.float64) / self.temperature)
+                scores.append(float(np.max(sif_probs)))
+            mean, spread, stability = self_consistency(scores, self.sif_flag_threshold)
+            # Variant 0 (as-masked original) carries the deterministic heads.
+            v0 = uniq_idx[variants[0]]
+            rows0 = rows_by_variant[v0]
+            rule_probs = np.max(_sigmoid(rule_logits[rows0].astype(np.float64)), axis=0)
+            # SEV1-1: rule_logits columns are in TRAINING order
+            # (RULE_HEAD_ORDER), not alphabetical RULE_KEYS.
             spans = self._extract_spans(
-                text, encs[ti].offsets,
-                [(flat[r][1], span_rows[r]) for r in rows])
+                text, masked, src_lo, src_end, encs[v0].offsets,
+                [(flat[r][1], span_rows[r]) for r in rows0])
+            score_r = round(mean, 4)  # the band must match the reported score
             outs.append(PredictionOut(
-                sif_score=round(sif_score, 4),
-                # SEV1-1: rule_logits columns are in TRAINING order
-                # (RULE_HEAD_ORDER), not alphabetical RULE_KEYS.
+                sif_score=score_r,
                 rule_probs={k: round(float(p), 4) for k, p in zip(RULE_HEAD_ORDER, rule_probs)},
                 well_control=has_well_control(text),
                 evidence_spans=spans,
                 gate_states=[],  # filled in by the route layer after gates run
                 model_version=self.model_version,
-                chunked=len(windows) > 1,
+                chunked=chunked,
+                score_spread=round(spread, 4),
+                n_variants=len(scores),
+                variant_scores=[round(s, 4) for s in scores],
+                verdict_stability=round(stability, 4),
+                band=band_for(score_r, self.sif_flag_threshold, self.gray_band_low),
+                flag_threshold=self.sif_flag_threshold,
+                gray_band_low=self.gray_band_low,
+                gray_band_high=self.gray_band_high,
             ))
         return outs
 
@@ -522,12 +938,17 @@ class RealOnnxClassifier:
             mask[row, : n + 2] = 1
         return ids, mask
 
-    def _extract_spans(self, text: str, offsets: list[tuple[int, int]],
+    def _extract_spans(self, raw: str, masked: str, src_lo: list[int], src_end: list[int],
+                       offsets: list[tuple[int, int]],
                        rows: list[tuple[tuple[int, int], np.ndarray]]) -> list[EvidenceSpan]:
-        """Span-head candidates from EVERY window -> merge -> usability
-        filter -> top-3 by mean prob. Fallback when the head yields nothing
-        usable: keyword-attribution over the frozen spec keyword LFs (D2),
-        scored by the head's mean token prob over the matched chars.
+        """Span-head candidates from EVERY window of the AS-MASKED text (the
+        corpus register — A1) -> merge -> usability filter -> re-anchor onto
+        the ORIGINAL report text -> top-3 by mean prob. Fallback when the
+        head yields nothing usable: annotation-only deterministic cue spans are
+        extracted from the original report. Otherwise candidates are re-anchored
+        onto the original report text. A head run crossing a masked region
+        re-anchors to the original outcome words it replaced.
+        `raw` is only ever displayed/validated — nothing is scored on it.
 
         Usability filter (post-review SEV2 — the real head's spans were
         punctuation/fragments): drop spans <3 chars, without any alphabetic
@@ -535,9 +956,10 @@ class RealOnnxClassifier:
         leading-space artifacts); merge runs separated only by a short
         punctuation/whitespace gap; drop spans contained in a higher-scored
         span. Char offsets come from the offset_mapping, then the invariant
-        text[start:end] == span.text is re-checked before anything leaves."""
-        char_prob = np.zeros(len(text), dtype=np.float64)
-        candidates: list[tuple[float, int, int]] = []  # (mean prob, c0, c1)
+        text[start:end] == span.text is re-checked against the ORIGINAL text
+        before anything leaves."""
+        char_prob = np.zeros(len(masked), dtype=np.float64)
+        candidates: list[tuple[float, int, int]] = []  # (mean prob, c0, c1) in masked coords
         for (start, end), span_logits_row in rows:
             n = end - start
             probs = _sigmoid(span_logits_row[1 : n + 1].astype(np.float64))
@@ -553,7 +975,7 @@ class RealOnnxClassifier:
             for j in hot:
                 if runs:
                     prev = runs[-1]
-                    gap = text[offsets[start + prev[-1]][1] : offsets[start + j][0]]
+                    gap = masked[offsets[start + prev[-1]][1] : offsets[start + j][0]]
                     if j == prev[-1] + 1 or (len(gap) <= 3 and not _ALPHA_RE.search(gap)):
                         prev.append(j)
                         continue
@@ -561,25 +983,26 @@ class RealOnnxClassifier:
             for run in runs:
                 g0, g1 = start + run[0], start + run[-1]
                 c0, c1 = offsets[g0][0], offsets[g1][1]
-                if 0 <= c0 < c1 <= len(text):
+                if 0 <= c0 < c1 <= len(masked):
                     candidates.append((float(np.mean(probs[run[0] : run[-1] + 1])), c0, c1))
-        usable = self._usable_spans(text, candidates)
-        if not usable and len(text.strip()) >= 3:
-            kw: list[tuple[float, int, int]] = []
-            for rx in _KEYWORD_LF_RES:
-                for m in rx.finditer(text):
-                    mean = float(char_prob[m.start() : m.end()].mean())
-                    kw.append((mean, m.start(), m.end()))
-            usable = self._usable_spans(text, kw)
+        usable = self._usable_spans(masked, candidates)
+        if not usable:
+            return deterministic_cue_spans(raw)[: self.TOP_SPANS]
+        # A1 re-anchor: masked coords -> original-report coords (mask_with_src
+        # map). src_end[c1-1] bounds the original span the last masked char
+        # came from (a verbatim char maps to itself+1; a [OUTCOME] token maps
+        # to the union of the replaced regions).
+        usable = [(score, src_lo[c0], src_end[c1 - 1])
+                  for score, c0, c1 in usable if src_lo[c0] < src_end[c1 - 1]]
         usable.sort(key=lambda c: (-c[0], c[1]))
         spans: list[EvidenceSpan] = []
         for _, c0, c1 in usable:
             if any(c0 >= s.start and c1 <= s.end for s in spans):
                 continue  # contained in a higher-scored span already chosen
-            spans.append(EvidenceSpan(start=c0, end=c1, text=text[c0:c1]))
+            spans.append(EvidenceSpan(start=c0, end=c1, text=raw[c0:c1]))
             if len(spans) == self.TOP_SPANS:
                 break
-        valid = validate_spans(text, spans)
+        valid = validate_spans(raw, spans)
         self.dropped_spans += len(spans) - len(valid)
         if len(valid) < len(spans):
             log.warning("dropped %d invalid span(s); total dropped=%d",

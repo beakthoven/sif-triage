@@ -1,213 +1,189 @@
-import { useCallback, useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { Link, NavLink, useLocation } from "react-router";
+import { Info, Menu, ShieldCheck } from "lucide-react";
+import { MotionProvider, Sheet, Toaster } from "@/components/ui";
 import { LangToggle } from "@/components/lang-toggle";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getHealth, getOverrides, getReports, postReview } from "@/lib/api";
-import { OVERRIDES, REPORTS } from "@/lib/mock";
-import { t, type Lang } from "@/lib/phrasebook";
-import type { HealthOut, OverrideOut, Report } from "@/lib/types";
-import { FeedView } from "@/views/feed";
-import { InsightsView } from "@/views/insights";
-import { ReviewView } from "@/views/review";
+import { ThemeMenu, ThemeSegmented } from "@/components/theme-menu";
+import { LimitationsDialog } from "@/features/limitations/limitations-dialog";
+import { useLang } from "@/lib/lang";
+import { t } from "@/lib/phrasebook";
+import { useTheme } from "@/lib/theme";
+import { cn } from "@/lib/utils";
+import { AppRoutes, NAV_ITEMS } from "@/routes";
 
-type Workspace = "triage" | "insights" | "decision history";
+/* Application shell: sticky deep-blue header (identity, primary navigation,
+ * theme + language), routed content, and the honest data disclosure footer.
+ * No data logic lives here — surfaces fetch through @/lib/api hooks and own
+ * their own states.
+ *
+ * MotionProvider wraps the shell so every motion/react animation honours
+ * prefers-reduced-motion; the CSS media block in index.css covers CSS
+ * transitions/animations. */
 
 export default function App() {
-  const [lang, setLang] = useState<Lang>("en");
-  const [workspace, setWorkspace] = useState<Workspace>("triage");
-  // Mock data renders instantly; the live API swap lands when health + data
-  // return (offline-demo doctrine: the UI never hard-fails).
-  const [reports, setReports] = useState<Report[]>(REPORTS);
-  const [overrides, setOverrides] = useState<OverrideOut[]>(OVERRIDES);
-  const [health, setHealth] = useState<HealthOut | null>(null);
-  const [sessionOverrides, setSessionOverrides] = useState(0);
-
-  useEffect(() => {
-    let cancel = false;
-    (async () => {
-      const [h, reps, ovs] = await Promise.all([
-        getHealth(),
-        getReports(),
-        getOverrides(),
-      ]);
-      if (cancel) return;
-      setHealth(h);
-      setReports(reps);
-      setOverrides(ovs);
-    })();
-    return () => {
-      cancel = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    document.documentElement.lang = lang;
-  }, [lang]);
-
-  const onOverride = useCallback(
-    (reportId: number, decision: "confirm" | "not_sif") => {
-      const newValue =
-        decision === "confirm" ? "sif_potential" : "not_sif_potential";
-      const current = reports.find((r) => r.id === reportId);
-      setSessionOverrides((n) => n + 1);
-      void (async () => {
-        try {
-          // Model proposes, HSE disposes — the POST is the real write.
-          await postReview({
-            report_id: reportId,
-            field: "sif_label",
-            old_value: current ? current.prediction.band : null,
-            new_value: newValue,
-          });
-          setOverrides(await getOverrides());
-        } catch {
-          // Offline: record the decision locally so the queue still moves.
-          setOverrides((cur) => [
-            ...cur,
-            {
-              id: -(cur.length + 1),
-              report_id: reportId,
-              field: "sif_label",
-              old_value: current ? current.prediction.band : null,
-              new_value: newValue,
-              labeler: "hse_reviewer",
-              source: "override",
-              ts: new Date().toISOString(),
-            },
-          ]);
-        }
-      })();
-    },
-    [reports],
-  );
-
-  // Only gray-action gates route to the review queue; badge gates
-  // (near_dup, long_input) annotate the triage card in place.
-  const reviewedReportIds = new Set(overrides.map((override) => override.report_id));
-  const pendingDecisions = reports.filter(
-    (report) =>
-      !reviewedReportIds.has(report.id) &&
-      report.prediction.gate_states.some((gate) => gate.triggered && gate.action !== "badge"),
-  );
-
-  // Live paste-classify: the persisted result (?persist=1, real server id) is
-  // prepended to the queue; offline falls back to a negative-id LIVE row.
-  // The server dedups exact repeat pastes and returns the same row id — drop
-  // the stale copy so the queue never holds duplicate keys.
-  const onClassified = useCallback((report: Report) => {
-    setReports((cur) => [report, ...cur.filter((r) => r.id !== report.id)]);
-  }, []);
-
-  // B3: the density ingest beat changes server state — refetch the header
-  // count + feed queue. Optimistic LIVE rows (negative ids) survive the swap.
-  const refreshLive = useCallback(async () => {
-    const [h, reps] = await Promise.all([getHealth(), getReports()]);
-    setHealth(h);
-    setReports((cur) => [...cur.filter((r) => r.id < 0), ...reps]);
-  }, []);
+  const { lang, setLang } = useLang();
+  const { resolved } = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [limitsOpen, setLimitsOpen] = useState(false);
+  const mainRef = useRef<HTMLElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const { pathname } = useLocation();
+  const inReport = pathname.startsWith("/report/");
 
   return (
-    <div className="min-h-screen bg-background">
-      <a
-        href="#main-content"
-        className="fixed top-3 left-3 z-50 -translate-y-20 rounded-md bg-primary px-3 py-2 text-primary-foreground focus:translate-y-0"
-      >
-        {t(lang, "skipContent")}
-      </a>
-      <header className="border-b border-border bg-card/70">
-        <div className="page-shell flex items-center gap-4 py-4">
-          <div className="min-w-0">
-            <h1 className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
-              <span className="sm:hidden">{t(lang, "appTitleShort")}</span>
-              <span className="hidden sm:inline">{t(lang, "appTitle")}</span>
-            </h1>
-            <p className="hidden text-xs text-muted-foreground sm:block">
-              {t(lang, "appSub")} · {t(lang, "hseOperations")}
+    <MotionProvider>
+      <div className="flex min-h-dvh flex-col bg-surface-canvas text-content-primary">
+        <a
+          href="#main-content"
+          onClick={(event) => {
+            event.preventDefault();
+            mainRef.current?.focus({ preventScroll: true });
+            mainRef.current?.scrollIntoView({ block: "start" });
+          }}
+          className="fixed top-2 left-2 z-[60] -translate-y-24 rounded-md bg-action-primary px-4 py-3 text-sm font-semibold text-action-primary-fg shadow-lg transition-transform duration-150 focus:translate-y-0"
+        >
+          {t(lang, "skipContent")}
+        </a>
+
+        <header className="sticky top-0 z-40 border-b border-chrome-border bg-chrome-bg text-chrome-fg">
+          <div className="page-shell flex h-14 items-center gap-4 lg:h-16 lg:gap-6">
+            <Link
+              to="/ingest"
+              className="flex min-h-11 shrink-0 items-center gap-3 rounded-md"
+              aria-label={t(lang, "appTitle")}
+            >
+              <span
+                aria-hidden="true"
+                className="grid size-9 place-items-center rounded-md bg-chrome-bg-hover ring-1 ring-chrome-border ring-inset"
+              >
+                <ShieldCheck className="size-5 text-chrome-fg" strokeWidth={2.25} />
+              </span>
+              <span className="hidden min-w-0 flex-col leading-tight xl:flex">
+                <span className="text-base font-semibold">{t(lang, "appTitle")}</span>
+                <span className="text-xs text-chrome-fg-muted">
+                  {t(lang, "appSub")} · {t(lang, "hseOperations")}
+                </span>
+              </span>
+              <span className="text-base font-semibold xl:hidden">{t(lang, "appTitleShort")}</span>
+            </Link>
+
+            <nav aria-label={t(lang, "mainNav")} className="hidden h-full lg:block">
+              <ul className="flex h-full items-stretch gap-1">
+                {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => (
+                  <li key={to} className="flex">
+                    <NavLink
+                      to={to}
+                      className={({ isActive }) => {
+                        const active = isActive || (inReport && to === "/queue");
+                        return cn(
+                          "relative flex items-center gap-2 px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-150",
+                          "after:absolute after:inset-x-3 after:bottom-0 after:h-0.5 after:rounded-full after:transition-colors after:duration-150",
+                          active
+                            ? "text-chrome-fg after:bg-action-primary"
+                            : "text-chrome-fg-muted after:bg-transparent hover:text-chrome-fg",
+                        );
+                      }}
+                    >
+                      <Icon aria-hidden="true" className="hidden size-4 xl:block" />
+                      {t(lang, labelKey)}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              <div className="hidden items-center gap-2 lg:flex">
+                <ThemeMenu lang={lang} />
+                <LangToggle lang={lang} onChange={setLang} />
+              </div>
+              <button
+                ref={menuButtonRef}
+                type="button"
+                aria-label={t(lang, "openMenu")}
+                aria-haspopup="dialog"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+                className="grid size-11 place-items-center rounded-md text-chrome-fg transition-colors duration-150 hover:bg-chrome-bg-hover lg:hidden"
+              >
+                <Menu aria-hidden="true" className="size-6" />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <Sheet
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          side="right"
+          title={t(lang, "menuTitle")}
+          closeLabel={t(lang, "close")}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            menuButtonRef.current?.focus({ preventScroll: true });
+          }}
+        >
+          <nav aria-label={t(lang, "mainNav")}>
+            <ul className="flex flex-col gap-1">
+              {NAV_ITEMS.map(({ to, labelKey, icon: Icon }) => (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    onClick={() => setMenuOpen(false)}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex min-h-12 items-center gap-3 rounded-md border-l-2 px-4 text-base font-semibold transition-colors duration-150",
+                        isActive || (inReport && to === "/queue")
+                          ? "border-action-primary bg-action-secondary text-content-primary"
+                          : "border-transparent text-content-secondary hover:bg-action-ghost-hover hover:text-content-primary",
+                      )
+                    }
+                  >
+                    <Icon aria-hidden="true" className="size-5 shrink-0" />
+                    {t(lang, labelKey)}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <div className="mt-8 space-y-6 border-t border-border-subtle pt-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-content-secondary">{t(lang, "themeLabel")}</p>
+              <ThemeSegmented lang={lang} />
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-content-secondary">{t(lang, "langLabel")}</p>
+              <LangToggle lang={lang} onChange={setLang} tone="surface" />
+            </div>
+          </div>
+        </Sheet>
+
+        <main ref={mainRef} id="main-content" tabIndex={-1} className="page-shell min-w-0 flex-1 scroll-mt-20 py-6 outline-none md:py-8">
+          <AppRoutes />
+        </main>
+
+        <footer className="border-t border-border-subtle bg-surface-card">
+          <div className="page-shell flex flex-col gap-3 py-4 lg:flex-row lg:items-start lg:gap-6">
+            <p className="text-sm font-medium text-content-primary">{t(lang, "footer")}</p>
+            <p className="flex min-w-0 items-start gap-2 text-sm text-content-secondary lg:ml-auto">
+              <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+              <span>
+                {t(lang, "footerDisclosure")}{" "}
+                <button
+                  type="button"
+                  onClick={() => setLimitsOpen(true)}
+                  className="font-semibold text-content-link underline underline-offset-2"
+                >
+                  {t(lang, "viewLimitations")}
+                </button>
+              </span>
             </p>
           </div>
-          <div className="ml-auto flex items-center gap-3 sm:gap-5">
-            <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-              <span
-                className={health ? "status-dot bg-ok" : "status-dot bg-quiet"}
-                aria-hidden
-              />
-              {health ? t(lang, "statusOnline") : t(lang, "statusOffline")}
-              {health && (
-                <span className="hidden text-muted-foreground/70 md:inline">
-                  · {health.n_reports.toLocaleString("en-IN")} {t(lang, "reportsIndexed")}
-                </span>
-              )}
-            </span>
-            <LangToggle lang={lang} onChange={setLang} />
-          </div>
-        </div>
-      </header>
+        </footer>
 
-      <main id="main-content" className="page-shell py-6 sm:py-8">
-        <Tabs value={workspace} onValueChange={(value) => setWorkspace(value as Workspace)}>
-          <TabsList
-            variant="line"
-            aria-label="Main workspace"
-            className="mb-7 h-auto w-full justify-start gap-7 overflow-x-auto rounded-none border-b border-border p-0"
-          >
-            <TabsTrigger
-              value="triage"
-              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
-            >
-              {t(lang, "tabTriage")}
-              {pendingDecisions.length > 0 && (
-                <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground">
-                  {pendingDecisions.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger
-              value="insights"
-              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
-            >
-              {t(lang, "tabInsights")}
-            </TabsTrigger>
-            <TabsTrigger
-              value="decisions"
-              className="min-h-11 flex-none rounded-none px-1 text-base text-muted-foreground transition-colors after:bottom-[-1px] after:h-[2px] hover:text-foreground data-[state=active]:font-semibold data-[state=active]:text-foreground"
-            >
-              {t(lang, "tabHistory")}
-              {(sessionOverrides > 0 || overrides.length > 0) && (
-                <span className="ml-1.5 font-mono text-sm font-normal text-muted-foreground">
-                  {overrides.length}
-                </span>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="triage" forceMount className="data-[state=inactive]:hidden">
-            <FeedView
-              reports={reports}
-              reviewedReportIds={reviewedReportIds}
-              lang={lang}
-              onOverride={onOverride}
-              onClassified={onClassified}
-            />
-          </TabsContent>
-          <TabsContent value="insights" forceMount className="data-[state=inactive]:hidden">
-            <InsightsView lang={lang} onIngested={refreshLive} />
-          </TabsContent>
-          <TabsContent value="decisions" forceMount className="data-[state=inactive]:hidden">
-            <ReviewView overrides={overrides} lang={lang} />
-          </TabsContent>
-        </Tabs>
-      </main>
-
-      <footer className="border-t border-border">
-        <div className="page-shell flex flex-wrap items-center gap-3 py-4">
-          <p className="text-sm text-muted-foreground">
-            {t(lang, "footer")}
-          </p>
-          <span className="ml-auto inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground">
-            <span className="status-dot bg-quiet" aria-hidden />
-            {t(lang, "demoDisclosure")}
-          </span>
-        </div>
-      </footer>
-    </div>
+        <LimitationsDialog lang={lang} open={limitsOpen} onOpenChange={setLimitsOpen} />
+        <Toaster theme={resolved} />
+      </div>
+    </MotionProvider>
   );
 }

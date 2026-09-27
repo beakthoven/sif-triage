@@ -11,12 +11,16 @@ import type {
   RuleScore,
 } from "./types";
 
-/* Offline-demo fallback data (the "UI never hard-fails" doctrine). Shapes
- * match the reconciled API contract in types.ts — api.ts falls back to this
- * module whenever the API is unreachable.
+/* Demo fixtures — DECLARED SYNTHETIC DATA, reachable ONLY behind
+ * VITE_DEMO_MODE=1 (build-time flag; default OFF, see DEMO_MODE in api.ts).
+ * Every fallback in api.ts is gated on DEMO_MODE; with it unset a failed
+ * fetch THROWS and the surface shows an error state — nothing here can be
+ * swapped onto a live row. Mock report ids sit in 2588–2619, a range that
+ * COLLIDES with real server rows: that is exactly why the gate is mandatory.
  *
- * Span offsets are computed by construction (indexOf) and validated below —
- * the UI only slices, never computes offsets (server contract). */
+ * Shapes match the API contract in types.ts. Span offsets are computed by
+ * construction (indexOf) and validated below — the UI only slices, never
+ * computes offsets (server contract). */
 
 function spanify(text: string, needles: string[]): EvidenceSpan[] {
   return needles
@@ -34,12 +38,14 @@ function rules(top: [string, string, number][], ...outOfScope: string[]): RuleSc
     name,
     prob,
     in_scope: true,
+    cue_hit: null,
   }));
   const oos = outOfScope.map((name) => ({
     code: "OOS",
     name,
     prob: 0,
     in_scope: false,
+    cue_hit: null,
   }));
   return [...scoped, ...oos];
 }
@@ -60,10 +66,11 @@ const ALL_GATES: GateKind[] = [
   "well_control_watch",
   "chunked_low_score",
   "severity_watch",
+  "verdict_stability",
 ];
 
 /** Mirrors app/gates.py: near_dup + long_input are badge-only (annotate the
- *  triage card); the rest route to the gray review queue when triggered. */
+ *  triage card); the rest route to human review when triggered. */
 const GATE_ACTIONS: Record<GateKind, GateAction> = {
   min_length: "gray",
   negation: "gray",
@@ -75,6 +82,7 @@ const GATE_ACTIONS: Record<GateKind, GateAction> = {
   well_control_watch: "gray",
   chunked_low_score: "gray",
   severity_watch: "gray",
+  verdict_stability: "gray",
 };
 
 function gateStates(...triggered: GateKind[]): GateState[] {
@@ -525,6 +533,7 @@ export const OVERRIDES: OverrideOut[] = [
     old_value: "not_sif_potential",
     new_value: "sif_potential",
     labeler: "hse.kgohain",
+    rationale: null,
     source: "override",
     ts: "2026-09-05T14:22:10+05:30",
   },
@@ -535,6 +544,7 @@ export const OVERRIDES: OverrideOut[] = [
     old_value: "MODERATE",
     new_value: "HIGH",
     labeler: "hse.rbora",
+    rationale: null,
     source: "override",
     ts: "2026-09-06T09:41:03+05:30",
   },
@@ -545,6 +555,7 @@ export const OVERRIDES: OverrideOut[] = [
     old_value: "Safe Mechanical Lifting",
     new_value: "Line of Fire",
     labeler: "hse.kgohain",
+    rationale: null,
     source: "override",
     ts: "2026-09-06T11:07:55+05:30",
   },

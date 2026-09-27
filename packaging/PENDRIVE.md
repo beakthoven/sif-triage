@@ -70,6 +70,11 @@ the repo (D20/D27; tarball doctrine).
 
 ## Verification
 
+- Bring-up proof (repo): `packaging/selfcheck.sh` — 2 full start→health→
+  classify→stop cycles against the real `run.sh` (accepts `SIF_PORT`; the
+  dashboard assertion is title-free: `id="root"` + served JS bundle +
+  `/api/health` status=ok with a real classifier name; it never kills a
+  server on a different port).
 - Linux path: fully tested — extract with `SIF_DEMO_HOME=<tmp>`, boot on
   `SIF_PORT=8179`, health + classify + dashboard 200, stop. Also tested
   directly off the vfat stick (`bash START-LINUX.sh` from the mount).

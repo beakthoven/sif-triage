@@ -3,12 +3,12 @@
 export type Lang = "en" | "hi";
 
 const STRINGS = {
-  appTitle: { en: "Safety Report Triage", hi: "सुरक्षा रिपोर्ट ट्रायाज" },
-  appTitleShort: { en: "Safety Triage", hi: "सुरक्षा ट्रायाज" },
+  appTitle: { en: "EcharikAI", hi: "EcharikAI" },
+  appTitleShort: { en: "EcharikAI", hi: "EcharikAI" },
   appSub: { en: "OIL India", hi: "OIL इंडिया" },
-  tabTriage: { en: "Triage", hi: "ट्रायाज" },
-  tabInsights: { en: "Insights", hi: "इनसाइट्स" },
-  tabDecisions: { en: "Decisions", hi: "निर्णय" },
+  tabTriage: { en: "Reports History", hi: "रिपोर्ट इतिहास" },
+  tabInsights: { en: "Risk Trends", hi: "जोखिम रुझान" },
+  tabDecisions: { en: "Decision Log", hi: "निर्णय लॉग" },
   tabHistory: { en: "Decision history", hi: "निर्णय इतिहास" },
   workspaceTriage: { en: "Review the reports that need attention", hi: "ध्यान देने योग्य रिपोर्टों की समीक्षा करें" },
   workspaceTriageSub: {
@@ -25,8 +25,8 @@ const STRINGS = {
   moderatePriority: { en: "Moderate review priority", hi: "मध्यम समीक्षा प्राथमिकता" },
   ruleProbs: { en: "Matching life-saving rules", hi: "मेल खाते जीवन-रक्षक नियम" },
   footer: {
-    en: "Model proposes, HSE disposes. Your decision becomes a training label.",
-    hi: "मॉडल प्रस्तावित करता है — HSE निपटान करता है। आपका निर्णय प्रशिक्षण लेबल बनता है।",
+    en: "AI supports review. HSE makes the final decision.",
+    hi: "AI समीक्षा में सहायता करता है। अंतिम निर्णय HSE लेता है।",
   },
   triageScore: { en: "triage score", hi: "ट्रायाज स्कोर" },
   rerank: { en: "Run demo batch", hi: "डेमो बैच चलाएँ" },
@@ -44,20 +44,20 @@ const STRINGS = {
   awaiting: { en: "Needs review", hi: "समीक्षा आवश्यक" },
   overrides: { en: "Recorded decisions", hi: "दर्ज निर्णय" },
   reportQueue: { en: "Work queue", hi: "कार्य कतार" },
-  whyScore: { en: "Why this score?", hi: "यह स्कोर क्यों?" },
+  whyScore: { en: "What this means", hi: "इसका मतलब" },
   nearDupBanner: {
-    en: "Matches a training record — memory, not generalization",
-    hi: "प्रशिक्षण रिकॉर्ड से मेल — सामान्यीकरण नहीं, स्मृति",
+    en: "Possible training-report match",
+    hi: "प्रशिक्षण रिपोर्ट से संभावित मेल",
   },
   chunkedBadge: { en: "Scored in sections — long report", hi: "खंडों में स्कोर — लंबी रिपोर्ट" },
   llmPhrased: { en: "phrased by local LLM", hi: "स्थानीय LLM द्वारा पुनर्लिखित" },
   pasteTitle: { en: "Classify a report", hi: "रिपोर्ट वर्गीकृत करें" },
   pastePlaceholder: {
-    en: "Paste a UA/UC or near-miss report here…",
-    hi: "UA/UC या नियर-मिस रिपोर्ट यहाँ पेस्ट करें…",
+    en: "Describe the event, what was observed and any immediate action taken…",
+    hi: "घटना, जो देखा गया और की गई तत्काल कार्रवाई का विवरण दें…",
   },
-  pasteButton: { en: "Classify", hi: "वर्गीकृत करें" },
-  pasteBusy: { en: "Classifying…", hi: "वर्गीकरण जारी…" },
+  pasteButton: { en: "Review Report", hi: "रिपोर्ट की समीक्षा करें" },
+  pasteBusy: { en: "Reviewing…", hi: "समीक्षा जारी…" },
   pasteHint: { en: "Ctrl+Enter to classify", hi: "Ctrl+Enter से वर्गीकृत करें" },
   liveChip: { en: "LIVE", hi: "लाइव" },
   offlineNote: {
@@ -157,7 +157,254 @@ const STRINGS = {
   flagRate: { en: "Flag rate", hi: "चिह्नित दर" },
   movement: { en: "Movement", hi: "बदलाव" },
   climbedToFirst: { en: "just climbed to #1", hi: "अभी #1 पर पहुँचा" },
+  // ---- shell (routes.tsx / App.tsx) ----
+  tabIngest: { en: "Add Reports", hi: "रिपोर्ट जोड़ें" },
+  mainNav: { en: "Main navigation", hi: "मुख्य नेविगेशन" },
+  openMenu: { en: "Open menu", hi: "मेनू खोलें" },
+  menuTitle: { en: "Menu", hi: "मेनू" },
+  themeLabel: { en: "Color theme", hi: "रंग थीम" },
+  themeLight: { en: "Light", hi: "लाइट" },
+  themeDark: { en: "Dark", hi: "डार्क" },
+  themeSystem: { en: "System", hi: "सिस्टम" },
+  langLabel: { en: "Language", hi: "भाषा" },
+  viewLimitations: { en: "Data & limitations", hi: "डेटा और सीमाएँ" },
+  footerDisclosure: {
+    en: "Synthetic demo data, not OIL incident records.",
+    hi: "कृत्रिम डेमो डेटा, OIL की वास्तविक घटना रिपोर्ट नहीं।",
+  },
+  errorTitle: { en: "Could not load this data", hi: "यह डेटा लोड नहीं हो सका" },
+  errorBody: {
+    en: "This page could not be loaded. Reload the page to try again.",
+    hi: "यह पेज लोड नहीं हो सका। पुनः प्रयास के लिए पेज फिर से लोड करें।",
+  },
+  retry: { en: "Retry", hi: "पुनः प्रयास" },
+  tryAgain: { en: "Try Again", hi: "पुनः प्रयास" },
+  clearDates: { en: "Clear dates", hi: "तारीखें हटाएँ" },
+  close: { en: "Close", hi: "बंद करें" },
+  reloadPage: { en: "Reload page", hi: "पेज पुनः लोड करें" },
+  routePending: { en: "This surface is being rebuilt", hi: "यह सतह फिर से बनाई जा रही है" },
+  routePendingBody: {
+    en: "This screen has not landed in this build yet. No placeholder data is shown.",
+    hi: "यह स्क्रीन इस बिल्ड में अभी नहीं आई है। कोई प्लेसहोल्डर डेटा नहीं दिखाया जाता।",
+  },
+  routeNotFound: { en: "Page not found", hi: "पेज नहीं मिला" },
+  routeNotFoundBody: {
+    en: "That address is not part of this dashboard.",
+    hi: "वह पता इस डैशबोर्ड का हिस्सा नहीं है।",
+  },
+  // ---- decisions / rationale (Workstream C: audit trail) ----
+  rationale: { en: "Rationale", hi: "कारण" },
+  rationalePlaceholder: {
+    en: "Why this decision? Recorded in the audit trail.",
+    hi: "यह निर्णय क्यों? ऑडिट रिकॉर्ड में दर्ज होता है।",
+  },
+  rationaleMissing: { en: "No rationale recorded", hi: "कोई कारण दर्ज नहीं" },
+  // ---- ingest job progress (INGEST workstream) ----
+  statusQueued: { en: "Queued", hi: "कतार में" },
+  statusRunning: { en: "Running", hi: "चल रहा है" },
+  statusDone: { en: "Done", hi: "पूर्ण" },
+  statusFailed: { en: "Failed", hi: "विफल" },
+  statusCancelled: { en: "Cancelled", hi: "रद्द" },
+  // ---- verdict stability (Workstream A3 self-consistency) ----
+  stabilityStable: { en: "Stable verdict", hi: "स्थिर निर्णय" },
+  stabilityUnstable: {
+    en: "Unstable wording — routed to review",
+    hi: "अस्थिर शब्दावली — समीक्षा में भेजा गया",
+  },
+  // ---- review-priority band words (server-owned operating point) ----
+  bandHigh: { en: "HIGH", hi: "उच्च" },
+  bandModerate: { en: "MODERATE", hi: "मध्यम" },
+  bandLow: { en: "LOW", hi: "कम" },
+  bandClear: { en: "CLEAR", hi: "स्पष्ट" },
+  bandReview: { en: "REVIEW", hi: "समीक्षा" },
 } as const;
+
+/* ---- Gate copy — the single source for the whole gate system ----
+ * Merged here from components/gray-state-card.tsx (legacy 10 gates, EN/HI
+ * text kept verbatim) and extended with the barrier-failure gate family
+ * (Workstream A2). UI components render gate names only through
+ * gateCopyFor() — never via an exhaustive Record<GateKind, …> lookup, because
+ * the wire field is a free string and unknown names must
+ * degrade to the honest fallback, not crash. */
+
+export interface GateCopyEntry {
+  name: { en: string; hi: string };
+  sentence: { en: string; hi: string };
+}
+
+export const GATE_COPY: Record<string, GateCopyEntry> = {
+  min_length: {
+    name: { en: "Very short report", hi: "बहुत छोटी रिपोर्ट" },
+    sentence: {
+      en: "Very short text with no recognized safety short code — not enough signal to score reliably. Routed to review, never auto-cleared.",
+      hi: "विश्वसनीय स्कोर के लिए पर्याप्त जानकारी नहीं है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  negation: {
+    name: { en: "Negation detected", hi: "नकारात्मक वाक्य मिला" },
+    sentence: {
+      en: "\u2018No injury\u2019 phrasing detected — the model may be reading outcome words, not mechanism. Routed to review, never auto-cleared.",
+      hi: "मॉडल घटना के कारण के बजाय परिणाम के शब्द पढ़ सकता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  language: {
+    name: { en: "Language not currently scored", hi: "यह भाषा अभी स्कोर नहीं की जाती" },
+    sentence: {
+      en: "Language beyond current scoring support — the original text is preserved and routed to review, never silently mis-scored.",
+      hi: "मूल पाठ सुरक्षित रखा गया है और गलत स्कोर देने के बजाय मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  confidence: {
+    name: { en: "Uncertain score", hi: "अनिश्चित स्कोर" },
+    sentence: {
+      en: "The score sits in the uncertain band — not enough signal to rank confidently. Routed to review, never auto-cleared.",
+      hi: "विश्वसनीय प्राथमिकता तय करने के लिए संकेत पर्याप्त नहीं है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  drill: {
+    name: { en: "Report mentions a drill or test", hi: "रिपोर्ट में ड्रिल या परीक्षण का उल्लेख है" },
+    sentence: {
+      en: "Drill or exercise language detected — a rehearsal is not a precursor. Routed to review, never auto-cleared.",
+      hi: "अभ्यास वास्तविक घटना नहीं है। रिपोर्ट को मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  near_dup: {
+    name: { en: "Possible duplicate of a training record", hi: "प्रशिक्षण रिकॉर्ड का संभावित डुप्लिकेट" },
+    sentence: {
+      en: "Matches a training record — memory, not generalization. Shown as a banner on the triage card.",
+      hi: "यह प्रशिक्षण रिकॉर्ड से मेल खाता है — सामान्यीकरण नहीं, स्मृति।",
+    },
+  },
+  long_input: {
+    name: { en: "Long report, scored in sections", hi: "लंबी रिपोर्ट, खंडों में स्कोर" },
+    sentence: {
+      en: "Over 120 words — scored section by section, since very long reports are rare in training. Marked as \u2018scored in sections\u2019 on the card.",
+      hi: "लंबी रिपोर्ट को अधिक विश्वसनीय परिणाम के लिए खंडों में स्कोर किया गया है।",
+    },
+  },
+  well_control_watch: {
+    name: { en: "Possible well-control concern", hi: "संभावित वेल-कंट्रोल चिंता" },
+    sentence: {
+      en: "Well-control/barrier language detected, but the triage score is below the flag threshold — a rare, high-consequence domain where automated screening defers. Routed to human review, never auto-cleared.",
+      hi: "वेल-कंट्रोल या अवरोध भाषा मिली है। दुर्लभ और गंभीर जोखिम के कारण इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  chunked_low_score: {
+    name: { en: "Long report with uncertain score", hi: "अनिश्चित स्कोर वाली लंबी रिपोर्ट" },
+    sentence: {
+      en: "A long report scored in sections landed in the uncertain band — section scoring can discount mid-text hazards. Routed to human review, never auto-cleared.",
+      hi: "खंडों में स्कोर की गई रिपोर्ट अनिश्चित श्रेणी में है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  severity_watch: {
+    name: { en: "Serious-event language, low score", hi: "गंभीर घटना की भाषा, कम स्कोर" },
+    sentence: {
+      en: "The report mentions an injury or high-energy event, but the score is low — the model may have missed it. Routed to human review, never auto-cleared.",
+      hi: "रिपोर्ट में चोट या उच्च-ऊर्जा घटना का उल्लेख है, पर स्कोर कम है — मॉडल इसे चूक सकता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  verdict_stability: {
+    name: { en: "Verdict changes with wording", hi: "शब्द बदलने पर निर्णय बदलता है" },
+    sentence: {
+      en: "Fewer than 75% of the scored surface variants agree with the ensemble verdict — the result is sensitive to rephrasing. Routed to human review; the score and operating point are unchanged.",
+      hi: "स्कोर किए गए वाक्य-विन्यासों में 75% से कम, संयुक्त निर्णय से सहमत हैं — परिणाम दोबारा लिखने पर बदल सकता है। स्कोर और ऑपरेटिंग पॉइंट बदले बिना मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  // Barrier-failure gate family (Workstream A2) — fire on explicit ABSENCE of
+  // control language; a bare mention is advisory, "LOTO applied and verified"
+  // must not fire. Copy mirrors the semantic, not the regex.
+  energy_isolation_absent: {
+    name: { en: "Energy isolation not verified", hi: "ऊर्जा अवरोधन सत्यापित नहीं" },
+    sentence: {
+      en: "No lockout/tagout or verified isolation of energised equipment is described — the energy-isolation barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "लॉकआउट/टैगआउट या ऊर्जायुक्त उपकरण का सत्यापित अवरोधन वर्णित नहीं है — ऊर्जा-अवरोधन अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  gas_test_absent: {
+    name: { en: "Gas test not performed", hi: "गैस टेस्ट नहीं हुआ" },
+    sentence: {
+      en: "No gas test or atmospheric reading before entry into a confined or suspect atmosphere — the gas-testing barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "संपीड़ित या संदिग्ध वातावरण में प्रवेश से पहले कोई गैस परीक्षण या वायुमंडलीय रीडिंग वर्णित नहीं है — गैस-परीक्षण अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  permit_absent: {
+    name: { en: "Permit to work not raised", hi: "परमिट जारी नहीं हुआ" },
+    sentence: {
+      en: "Work proceeds with no permit to work described — the work-authorisation barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "कार्य बिना परमिट के वर्णित है — कार्य-अधिकृति अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  fire_watch_absent: {
+    name: { en: "Fire watch absent", hi: "फायर वॉच अनुपस्थित" },
+    sentence: {
+      en: "Hot-work report with no fire watch posted, or the watch left — the fire-watch barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "हॉट-वर्क रिपोर्ट में कोई फायर वॉच तैनात नहीं है, या वह छोड़ गया — फायर-वॉच अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  standby_absent: {
+    name: { en: "Standby man not posted", hi: "स्टैंडबाय व्यक्ति तैनात नहीं" },
+    sentence: {
+      en: "Confined-space work with no standby man or attendant described — the standby barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "कॉन्फाइंड-स्पेस कार्य में कोई स्टैंडबाय व्यक्ति या पर्यवेक्षक वर्णित नहीं है — स्टैंडबाय अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  atmosphere_unmonitored: {
+    name: { en: "Atmosphere unmonitored", hi: "वातावरण पर निगरानी नहीं" },
+    sentence: {
+      en: "Purging or entry in progress with no continuous atmospheric monitoring described — the monitoring barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "पर्जिंग या प्रवेश जारी है, पर निरंतर वायुमंडलीय निगरानी वर्णित नहीं है — निगरानी अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+  fall_protection_absent: {
+    name: { en: "Fall protection absent", hi: "गिरने से बचाव अनुपस्थित" },
+    sentence: {
+      en: "Work at height is described without fall-protection anchorage or a harness — the fall-protection barrier appears absent. Routed to human review, never auto-cleared.",
+      hi: "ऊँचाई पर काम का वर्णन है, पर गिरने से बचाव का एंकर या हार्नेस नहीं बताया गया — गिरने से बचाव का अवरोध अनुपस्थित प्रतीत होता है। इसे मानवीय समीक्षा में भेजा गया है।",
+    },
+  },
+};
+
+/** Legend/ordering list: general gates, then the barrier-failure family. */
+export const KNOWN_GATE_NAMES: string[] = [
+  "min_length",
+  "negation",
+  "language",
+  "confidence",
+  "drill",
+  "near_dup",
+  "long_input",
+  "well_control_watch",
+  "chunked_low_score",
+  "severity_watch",
+  "verdict_stability",
+  "energy_isolation_absent",
+  "gas_test_absent",
+  "permit_absent",
+  "fire_watch_absent",
+  "standby_absent",
+  "atmosphere_unmonitored",
+  "fall_protection_absent",
+];
+
+/** Gate display copy for ANY wire name — falls back to the raw name + a
+ *  generic honest sentence when the gate is unknown to this build. */
+export function gateCopyFor(
+  lang: Lang,
+  name: string,
+): { name: string; sentence: string; known: boolean } {
+  const entry = GATE_COPY[name];
+  if (!entry) {
+    return {
+      name,
+      sentence:
+        lang === "hi"
+          ? "इस रिपोर्ट को गेट सिस्टम ने मानवीय समीक्षा के लिए भेजा है।"
+          : "The gate system routed this report to human review.",
+      known: false,
+    };
+  }
+  return { name: entry.name[lang], sentence: entry.sentence[lang], known: true };
+}
 
 export type StringKey = keyof typeof STRINGS;
 

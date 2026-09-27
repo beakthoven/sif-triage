@@ -1,0 +1,415 @@
+{
+ "note": "Frozen 2026-09-27 on masked-v2 int8 after barrier-gate expansion. Labels are expert-judgement seeds from docs/discovery/60-orchestrator-novel-probe.md, not human gold.",
+ "model_version": "onnx:masked-v2/sif_multitask_int8.onnx",
+ "classifier": "RealOnnxClassifier",
+ "flag_threshold": 0.5647,
+ "cases": {
+  "M1": {
+   "score": 0.8701,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M2": {
+   "score": 0.9209,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M3": {
+   "score": 0.8924,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "atmosphere_unmonitored"
+   ],
+   "badge": []
+  },
+  "M4": {
+   "score": 0.8962,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M5": {
+   "score": 0.8249,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M6": {
+   "score": 0.9818,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M7": {
+   "score": 0.0324,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "M8": {
+   "score": 0.2134,
+   "band": "LOW",
+   "well_control": true,
+   "gray": [
+    "well_control_watch"
+   ],
+   "badge": []
+  },
+  "B1": {
+   "score": 0.6246,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent",
+    "gas_test_absent",
+    "standby_absent"
+   ],
+   "badge": []
+  },
+  "B2": {
+   "score": 0.8761,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "B3": {
+   "score": 0.1192,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "fire_watch_absent"
+   ],
+   "badge": []
+  },
+  "B4": {
+   "score": 0.1758,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "B5": {
+   "score": 0.9831,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "fall_protection_absent"
+   ],
+   "badge": []
+  },
+  "B6": {
+   "score": 0.016,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "B7": {
+   "score": 0.0727,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "permit_absent"
+   ],
+   "badge": []
+  },
+  "B8": {
+   "score": 0.0325,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "B9": {
+   "score": 0.0391,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent",
+    "gas_test_absent"
+   ],
+   "badge": []
+  },
+  "B10": {
+   "score": 0.2775,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "B11": {
+   "score": 0.8467,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "permit_absent"
+   ],
+   "badge": []
+  },
+  "B12": {
+   "score": 0.9282,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "B13": {
+   "score": 0.4688,
+   "band": "MODERATE",
+   "well_control": false,
+   "gray": [
+    "confidence",
+    "standby_absent"
+   ],
+   "badge": []
+  },
+  "B14": {
+   "score": 0.4429,
+   "band": "MODERATE",
+   "well_control": false,
+   "gray": [
+    "confidence"
+   ],
+   "badge": []
+  },
+  "B15": {
+   "score": 0.0171,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "B16": {
+   "score": 0.1642,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "permit_absent"
+   ],
+   "badge": []
+  },
+  "B17": {
+   "score": 0.0138,
+   "band": "LOW",
+   "well_control": true,
+   "gray": [
+    "well_control_watch"
+   ],
+   "badge": []
+  },
+  "B18": {
+   "score": 0.0415,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "G1": {
+   "score": 0.0221,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G2": {
+   "score": 0.0165,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G3": {
+   "score": 0.0068,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G4": {
+   "score": 0.0096,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G5": {
+   "score": 0.0077,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G6": {
+   "score": 0.0137,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G7": {
+   "score": 0.9238,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G8": {
+   "score": 0.0093,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "drill"
+   ],
+   "badge": []
+  },
+  "G9": {
+   "score": 0.0057,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G10": {
+   "score": 0.0291,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G11": {
+   "score": 0.0089,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "G12": {
+   "score": 0.0129,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "P1": {
+   "score": 0.6945,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent",
+    "gas_test_absent",
+    "standby_absent"
+   ],
+   "badge": []
+  },
+  "P2": {
+   "score": 0.9685,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "gas_test_absent"
+   ],
+   "badge": []
+  },
+  "P3": {
+   "score": 0.1452,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "gas_test_absent"
+   ],
+   "badge": []
+  },
+  "P4": {
+   "score": 0.1191,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "P5": {
+   "score": 0.1573,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "P6": {
+   "score": 0.3423,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "P7": {
+   "score": 0.946,
+   "band": "HIGH",
+   "well_control": false,
+   "gray": [
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "P8": {
+   "score": 0.4199,
+   "band": "MODERATE",
+   "well_control": false,
+   "gray": [
+    "confidence",
+    "energy_isolation_absent"
+   ],
+   "badge": []
+  },
+  "P9": {
+   "score": 0.1592,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "severity_watch"
+   ],
+   "badge": []
+  },
+  "P10": {
+   "score": 0.0482,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [
+    "severity_watch"
+   ],
+   "badge": []
+  },
+  "P11": {
+   "score": 0.0481,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  },
+  "P12": {
+   "score": 0.0382,
+   "band": "LOW",
+   "well_control": false,
+   "gray": [],
+   "badge": []
+  }
+ }
+}

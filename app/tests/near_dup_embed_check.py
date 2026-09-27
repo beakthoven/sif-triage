@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import sys
 import tempfile
+from itertools import islice
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -31,6 +32,14 @@ CORPUS = REPO_ROOT / "artifacts" / "corpus" / "train_final_v2.jsonl"
 INDEX_DIR = REPO_ROOT / "artifacts" / "embeddings"
 
 
+def require_research_corpus() -> None:
+    if not CORPUS.is_file():
+        raise SystemExit(
+            f"requires unavailable research artifact {CORPUS.relative_to(REPO_ROOT)} "
+            "— see docs/architecture.md and packaging/manifest.md"
+        )
+
+
 def check(cond: bool, label: str) -> None:
     if not cond:
         raise AssertionError(f"FAIL: {label}")
@@ -38,6 +47,7 @@ def check(cond: bool, label: str) -> None:
 
 
 def main() -> int:
+    require_research_corpus()
     cfg = Settings()
     tau = cfg.near_dup_threshold
     print(f"threshold: {tau} (artifacts/embeddings/threshold_report.md)")
@@ -48,9 +58,7 @@ def main() -> int:
 
     rows = []
     with open(CORPUS, encoding="utf-8") as fh:
-        for i, line in enumerate(fh):
-            if i > 5000:  # a slice is enough for scenario texts
-                break
+        for line in islice(fh, 5001):  # a slice is enough for scenario texts
             rows.append(json.loads(line))
     train_row = rows[1234]["text"]
     check(len(train_row) >= 20, "sampled train row is non-trivial")

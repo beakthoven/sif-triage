@@ -2,21 +2,28 @@
  * TS mirrors of the FastAPI pydantic models in app/schemas.py — the runtime
  * contract. Field names follow the API (sif_score, rule_probs, well_control,
  * evidence_spans, gate_states, model_version). Presentation-only additions
- * (band, latency_ms, explanation, rank/prev_rank) are derived client-side in
- * api.ts. Endpoints: POST /api/classify, POST /api/ingest, GET /api/reports,
- * GET /api/reports/{id}, GET /api/reports/{id}/explanation, GET /api/density,
- * GET /api/rules, GET /api/patterns?kind=, GET|POST /api/review,
- * GET /api/metrics/summary, GET /api/health.
+ * (latency_ms, explanation, rank/prev_rank) are derived client-side in api.ts.
+ * Endpoints: POST /api/classify, POST /api/ingest, GET /api/ingest/{job_id},
+ * GET /api/reports, GET /api/reports/{id}, GET /api/reports/{id}/explanation,
+ * GET /api/density, GET /api/rules, GET /api/patterns?kind=, GET|POST
+ * /api/review, GET /api/metrics/summary, GET /api/health.
+ *
+ * Workstream A additions (self-consistency + barrier gates + operating point)
+ * are OPTIONAL fields on PredictionOut: absence means "not measured", never
+ * fabricate a value. The ingest job endpoints LANDED (verified in
+ * app/routes.py this session): POST /api/ingest answers 202 IngestJobAccepted
+ * above INGEST_SYNC_MAX_ROWS (100) and GET /api/ingest/{job_id} serves
+ * IngestJobStatus — IngestJob below mirrors that poll body.
  */
 
-/** Band semantics per D14: "review priority" band, never "%", never red.
- *  Derived client-side from sif_score (the API returns no band). */
+/** Review-priority band. The SERVER owns the operating point (Workstream A4):
+ *  the client-side bandFor() derivation was deleted — band arrives from the
+ *  API when the server contract carries it, and is undefined otherwise. */
 export type Band = "HIGH" | "MODERATE" | "LOW";
 
-/** The 10 Sentinel input gates (app/gates.py). action decides the UI:
- *  "gray" routes to the review queue (gray-state card, never auto-cleared);
- *  "badge" annotates the triage card only (near_dup banner, chunked);
- *  "block" is reserved — no gate blocks today. */
+/** General input gates (app/gates.py). action decides the UI: "gray" routes
+ *  to human review (never auto-cleared); "badge" annotates the triage card
+ *  only (near_dup banner, chunked); "block" is reserved. */
 export type GateKind =
   | "min_length"
   | "negation"
@@ -27,16 +34,59 @@ export type GateKind =
   | "long_input"
   | "well_control_watch"
   | "chunked_low_score"
-  | "severity_watch";
+  | "severity_watch"
+  | "verdict_stability";
+
+/** Barrier-failure gate family (Workstream A2). These fire on explicit
+ *  ABSENCE of control language (LOTO not applied, no gas test, no permit…). */
+export type BarrierGateKind =
+  | "energy_isolation_absent"
+  | "gas_test_absent"
+  | "permit_absent"
+  | "fire_watch_absent"
+  | "standby_absent"
+  | "atmosphere_unmonitored"
+  | "fall_protection_absent";
+
+/** GET /api/clusters?min_cos=0.91 — server-owned star groups. */
+export interface ClusterOut {
+  exemplar_id: number;
+  member_ids: number[];
+  n: number;
+  reviewed_member_ids: number[];
+  max_cos: number;
+}
+
+export interface ClustersOut {
+  threshold: number;
+  n_scored: number;
+  n_skipped: number;
+  dim: number;
+  n_clusters: number;
+  n_members: number;
+  clusters: ClusterOut[];
+}
 
 export type GateAction = "badge" | "gray" | "block";
 
 export interface GateState {
-  name: GateKind;
+  /** Wire: a free string (app/schemas.py GateState.name: str). The union
+   *  covers every gate the runtime emits today — 11 general gates plus the
+   *  seven barrier-failure gates (app/gates.py dispatch) — so
+   *  barrier names type-check. UNKNOWN future names
+   *  can still arrive on the wire: render gate names only via gateCopyFor()
+   *  (lib/phrasebook.ts, safe fallback), never via an exhaustive
+   *  Record<GateKind, …> lookup, and never crash on an unseen name. */
+  name: GateKind | BarrierGateKind;
   triggered: boolean;
   detail: string;
   action: GateAction;
 }
+
+/** Server agreement fraction (Workstream A3): the fraction of scored
+ *  variants whose verdict agrees with the mean-score verdict (0..1). UI
+ *  stability words are derived from this number where needed. */
+export type VerdictStability = number;
 
 /** Char offsets are computed server-side against canonical text and
  *  self-validated (text[start:end] === span text) before render. UI only slices. */
@@ -54,6 +104,7 @@ export interface RuleScore {
   name: string;
   prob: number;
   in_scope: boolean;
+  cue_hit: boolean | null;
 }
 
 /** GET /api/reports/{id}/explanation (app/explain.py). The template is
@@ -68,13 +119,22 @@ export interface ExplanationOut {
   model_version: string;
 }
 
-/** API PredictionOut (app/schemas.py) + client-derived presentation fields. */
+/** API PredictionOut (app/schemas.py) + client-measured latency only. The
+ *  optional A-series fields are server-owned; absence means not measured. */
 export interface PredictionOut {
   sif_score: number; // calibrated triage score; labeled "triage score"
-  band: Band; // derived in api.ts — the API contract carries no band
+  score_spread?: number | null; // spread across variant scores (A3)
+  n_variants?: number | null; // N scored surface variants (A3)
+  variant_scores?: number[] | null; // per-variant raw scores (A3)
+  verdict_stability?: VerdictStability | null; // fraction of variant verdicts in agreement (A3)
+  band?: Band | null; // server-owned review-priority band (A4); never derived client-side
+  flag_threshold?: number | null; // server-owned operating point (A4)
+  gray_band_low?: number | null; // server-owned review band floor (A4)
+  gray_band_high?: number | null; // server-owned review band ceiling (A4)
+  rule_cue_hits?: Record<string, boolean> | null; // conservative text cue matches, when computed
   latency_ms: number; // measured around POST /classify; 0 for stored reports
   rules: RuleScore[]; // 7 in-scope from rule_probs + 2 declared out-of-scope
-  well_control: boolean; // deterministic Baghjan-class barrier tag
+  well_control: boolean; // deterministic well-control barrier tag
   evidence_spans: EvidenceSpan[];
   gate_states: GateState[];
   model_version: string;
@@ -128,7 +188,9 @@ export interface PatternOut {
 }
 
 /** POST /api/review payload / review-queue row (StoredOverride).
- *  Overrides become future gold labels. ts mirrors created_at. */
+ *  Overrides become future gold labels. ts mirrors created_at. rationale is
+ *  part of the wire contract (OverrideIn) and must survive the round trip —
+ *  it is the audit-trail answer to "why was the model overruled". */
 export interface OverrideOut {
   id: number;
   report_id: number;
@@ -136,6 +198,7 @@ export interface OverrideOut {
   old_value: string | null;
   new_value: string;
   labeler: string;
+  rationale: string | null;
   source: "override" | "blind_gold";
   ts: string;
 }
@@ -153,12 +216,42 @@ export interface IngestError {
   error: string;
 }
 
+/** POST /api/ingest, 200 shape (app/routes.py IngestResult): payloads up to
+ *  INGEST_SYNC_MAX_ROWS (100 unique rows) and every idempotent replay finish
+ *  synchronously. Larger payloads answer 202 + an IngestJob id instead —
+ *  poll GET /api/ingest/{job_id} (IngestJob below). */
 export interface IngestResult {
   received: number;
   accepted: number;
   rejected: number;
   report_ids: number[];
   errors: IngestError[];
+  skipped_duplicates: number;
+  idempotent_replay: boolean;
+}
+
+/** GET /api/ingest/{job_id} poll body — exact mirror of app/routes.py's
+ *  IngestJobStatus (verified in routes.py this session). status walks
+ *  queued → running → done | error; done/total are the truthful classify
+ *  progress; accepted/rejected/skipped_duplicates/errors/report_ids carry
+ *  the honest final outcome (populated at status=done). detail is non-null
+ *  ONLY on error — the whole batch rolled back and NOTHING was stored, so a
+ *  retry is safe (payload-hash replay dedups). 404 on poll = unknown id /
+ *  TTL eviction / server restart; re-POSTing the payload is safe either way.
+ *  The ingest wire is owned by features/ingest/ingest-api.ts +
+ *  use-ingest-job.ts; lib carries only this type mirror. */
+export interface IngestJob {
+  job_id: string;
+  status: "queued" | "running" | "done" | "error";
+  received: number;
+  total: number;
+  done: number;
+  accepted: number;
+  rejected: number;
+  skipped_duplicates: number;
+  errors: IngestError[];
+  report_ids: number[] | null;
+  detail: string | null;
 }
 
 export interface MetricsSummary {
@@ -170,6 +263,13 @@ export interface MetricsSummary {
   gate_trigger_counts: Record<string, number>;
   model_version: string;
   classifier: string;
+  ece?: number | null;
+  brier?: number | null;
+  calibration_n?: number | null;
+  calibration_split?: string | null;
+  flag_threshold?: number | null;
+  gray_band_low?: number | null;
+  gray_band_high?: number | null;
 }
 
 export interface HealthOut {

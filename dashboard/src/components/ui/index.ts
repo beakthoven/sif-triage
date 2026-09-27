@@ -1,0 +1,22 @@
+// Astryx-adapted primitives — the only sanctioned component vocabulary.
+// Tokens come from src/index.css (@theme); feature files must import from
+// "@/components/ui" or "@/components/domain", never hand-roll these.
+export { MotionProvider } from "./motion"
+export { PageHeader } from "./page-header"
+export { Button, buttonVariants } from "./button"
+export { Chip, chipVariants } from "./chip"
+export { Card, CardHeader, CardGrid } from "./card"
+export { Field } from "./field"
+export { Input, Textarea } from "./input"
+export { Select, type SelectOption } from "./select"
+export { Table, type TableSort, type ColumnDef, type TableProps } from "./table"
+export { Tabs, type TabItem } from "./tabs"
+export { Dialog } from "./dialog"
+export { Sheet } from "./sheet"
+export { Command, type CommandGroupDef, type CommandItemDef } from "./command"
+export { notify, Toaster, type NotifyOptions } from "./toast"
+export { Progress } from "./progress"
+export { Tooltip } from "./tooltip"
+export { Skeleton } from "./skeleton"
+export { EmptyState, ErrorState } from "./states"
+export { DateRangePicker, type DateRangeValue } from "./date-range-picker"

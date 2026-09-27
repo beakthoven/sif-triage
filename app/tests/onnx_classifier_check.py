@@ -1,7 +1,6 @@
 """Runnable self-check for RealOnnxClassifier against the shipped trained
-artifact (artifacts/models/masked-v2 — int8 default, fp32 fallback; D19/D20;
-masked-v1 remains the one-env-var fallback). Override with
-SIF_MODEL_PATH=<dir-or-file>. This checks the CONTRACT, not model quality.
+artifact (artifacts/models/masked-v2 — int8 default, fp32 fallback; D19/D20).
+Override with SIF_MODEL_PATH=<dir-or-file>. This checks the CONTRACT, not model quality.
 Exits 0 on pass.
 
 Run: .venv/bin/python app/tests/onnx_classifier_check.py
@@ -29,7 +28,7 @@ from app.classifier import (  # noqa: E402
 )
 from app.schemas import RULE_KEYS, PredictionOut  # noqa: E402
 
-# Ship artifact (masked-v2 since the D21 retrain; masked-v1 = fallback).
+# Ship artifact (masked-v2 since the D21 retrain).
 MODEL_DIR = Path(os.environ.get(
     "SIF_MODEL_PATH", REPO_ROOT / "artifacts" / "models" / "masked-v2"))
 if not MODEL_DIR.is_absolute():
@@ -61,12 +60,13 @@ def main() -> int:
     print("[1] factory resolution")
     clf = build_classifier(REPO_ROOT / "artifacts" / "models" / "no-such-dir", "mock-0.1.0")
     check(isinstance(clf, MockClassifier), "missing model dir -> MockClassifier fallback")
-    clf = build_classifier(REPO_ROOT / "artifacts" / "models" / "masked-v1", "mock-0.1.0")
-    check(isinstance(clf, RealOnnxClassifier), "masked-v1 ship artifact -> RealOnnxClassifier")
+    ship_model = REPO_ROOT / "artifacts" / "models" / "masked-v2"
+    clf = build_classifier(ship_model, "mock-0.1.0")
+    check(isinstance(clf, RealOnnxClassifier), "masked-v2 ship artifact -> RealOnnxClassifier")
 
     print(f"[2] real load ({MODEL_DIR.relative_to(REPO_ROOT)})")
     clf = build_classifier(MODEL_DIR, "mock-0.1.0")
-    check(isinstance(clf, RealOnnxClassifier), "masked-v1 dir -> RealOnnxClassifier")
+    check(isinstance(clf, RealOnnxClassifier), "masked-v2 dir -> RealOnnxClassifier")
     print(f"      quant={clf.quant} version={clf.model_version} T={clf.temperature}")
 
     print("[3] contract on sample report")
@@ -117,6 +117,7 @@ def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="sif-temp-"))
     try:
         shutil.copy2(MODEL_DIR / "sif_multitask_int8.onnx", tmp / "sif_multitask_int8.onnx")
+        shutil.copytree(MODEL_DIR / "tokenizer", tmp / "tokenizer")
         (tmp / "metrics.json").write_text(json.dumps({"temperature": 2.5}))
         hot = RealOnnxClassifier(tmp)
         check(hot.temperature == 2.5, "T read from metrics.json")

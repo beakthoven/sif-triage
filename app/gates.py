@@ -10,6 +10,7 @@ Gate order is load-bearing: app/tests/api_smoke.py addresses drill by position.
 """
 from __future__ import annotations
 
+from bisect import bisect_left, bisect_right
 import re
 from typing import TYPE_CHECKING
 
@@ -148,15 +149,17 @@ def gate_min_length(text: str, cfg: Settings) -> GateState:
     )
 
 
-def _match_token_starts(rx: "re.Pattern[str]", text: str) -> list[int]:
+def _match_token_starts(rx: "re.Pattern[str]", text: str,
+                        tok_starts: "list[int] | None" = None) -> list[int]:
     """char offset -> token index, so cue/suppressor phrase matches map to
-    token positions."""
-    starts: list[int] = []
-    for m in rx.finditer(text):
-        char_pos = m.start()
-        tok_idx = sum(1 for tm in _TOKEN_RE.finditer(text) if tm.start() <= char_pos) - 1
-        starts.append(max(tok_idx, 0))
-    return starts
+    token positions. The token-start table is built once per call (O(n)) and
+    each match is placed by binary search — the previous per-match full token
+    rescan was O(matches x tokens) and measured 30.9s at 100k chars
+    (2026-09-25, /tmp/gates_timing.py)."""
+    if tok_starts is None:
+        tok_starts = [tm.start() for tm in _TOKEN_RE.finditer(text)]
+    return [max(bisect_right(tok_starts, m.start()) - 1, 0)
+            for m in rx.finditer(text)]
 
 
 def gate_negation(text: str) -> GateState:
@@ -174,14 +177,19 @@ def gate_negation(text: str) -> GateState:
         return GateState(name="negation", triggered=False, action="gray")
     anchor_idx = [i for i, tok in enumerate(tokens) if _is_anchor_token(tok)]
     suppress_idx = _match_token_starts(_COUNTERFACTUAL_RE, text)
-    pairs = [
-        (c, a) for c in cue_starts for a in anchor_idx
-        if abs(c - a) <= _NEG_WINDOW
-        and not any(
-            min(c, a) - _NEG_WINDOW <= s <= max(c, a) + _NEG_WINDOW
-            for s in suppress_idx
-        )
-    ]
+    # Bisect over the ascending cue/anchor/suppressor index lists: the naive
+    # cue x anchor cross product (with a linear suppressor scan per pair) was
+    # a second quadratic trap on long cue-dense pastes.
+    pairs: list[tuple[int, int]] = []
+    for c in cue_starts:
+        for a in anchor_idx[bisect_left(anchor_idx, c - _NEG_WINDOW):
+                            bisect_right(anchor_idx, c + _NEG_WINDOW)]:
+            lo = min(c, a) - _NEG_WINDOW
+            hi = max(c, a) + _NEG_WINDOW
+            s = bisect_left(suppress_idx, lo)
+            if s < len(suppress_idx) and suppress_idx[s] <= hi:
+                continue
+            pairs.append((c, a))
     if not pairs:
         return GateState(name="negation", triggered=False, action="gray")
     shown = ", ".join(f"'{tokens[c]}'~'{tokens[a]}'" for c, a in pairs[:3])
@@ -334,14 +342,13 @@ def gate_severity_watch(text: str, score: float, flag_thr: float) -> GateState:
     suppress_idx = _match_token_starts(_COUNTERFACTUAL_RE, text)
 
     def negated(a: int) -> bool:
-        return any(
-            abs(c - a) <= _NEG_WINDOW
-            and not any(
-                min(c, a) - _NEG_WINDOW <= s <= max(c, a) + _NEG_WINDOW
-                for s in suppress_idx
-            )
-            for c in cue_starts
-        )
+        for c in cue_starts[bisect_left(cue_starts, a - _NEG_WINDOW):
+                            bisect_right(cue_starts, a + _NEG_WINDOW)]:
+            s = bisect_left(suppress_idx, min(c, a) - _NEG_WINDOW)
+            if not (s < len(suppress_idx)
+                    and suppress_idx[s] <= max(c, a) + _NEG_WINDOW):
+                return True
+        return False
 
     live = [a for a in anchor_idx if not negated(a)]
     if not live:
@@ -357,6 +364,188 @@ def gate_severity_watch(text: str, score: float, flag_thr: float) -> GateState:
             "model may have missed a high-severity event (register shift); "
             "routed to human review"
         ),
+    )
+
+
+# --- Barrier-failure gate family (D3 fix) --------------------------------------
+# The ship model detects physical MECHANISM, not barrier state: OIICS training
+# labels encode what happened to an injured person, never the absent control
+# (docs/discovery/60-orchestrator-novel-probe.md Result 2 — no gas test 0.29,
+# no LOTO 0.28, fire watch gone 0.13, all below the 0.658 flag threshold, 3/6
+# novel precursors missed). The problem statement explicitly asks for barrier
+# failures / IOGP Life-Saving-Rule violations, so this family generalises the
+# well-control-watch idea — a deterministic barrier signal the neural model
+# can miss, forced to gray review, never auto-greened — into text-only gates
+# for specific barrier types.
+#
+# Firing rule: an explicit ABSENCE cue token within +/- _BARRIER_WINDOW tokens
+# of the barrier's control term, or a narrowly scoped direct absence sequence.
+# Positive statements ("LOTO applied and verified", "gas test conducted,
+# readings normal") carry no adjacent absence cue and never fire. Every triggered
+# state is action="gray" — routed to review, never auto-cleared.
+#
+# Scope boundary: no trip/bypass gate because bypass language needs equipment
+# state and time scope to distinguish an active defeat from a restored/tested
+# bypass. Inspection-tag-removal mentions need equipment state to distinguish
+# active defeat from authorized removal. Driving violations (speeding, fatigue,
+# phone use) are affirmative behaviors, not negated missing controls; a reliable
+# gate needs driver-behavior context to avoid flagging policy or training text.
+#
+# Known ceiling (ponytail: token-window keyword matching, no syntactic parse):
+# absence idioms near a control term can gray a positive report ("isolated
+# without exception", "no isolation breach"), and double negatives fire
+# ("LOTO was not omitted"). Every error direction is toward review, never
+# toward auto-green — the safe side for an advisory gate.
+_BARRIER_WINDOW = 3
+
+_ABSENCE_CUE_RE = re.compile(
+    r"\b(?:no\s+one\s+was\s+assigned|nobody\s+was\s+posted\s+as|"
+    r"the\s+atmosphere\s+was\s+unchecked|was\s+not\s+tested\s+for|"
+    r"no\s+one|nobody|not|no|none|without|absent|never|omitted|missed|"
+    r"skipped|missing|left|gone|withdrew|unverified|untested|unchecked|"
+    r"unconfirmed|unattended|unavailable|unlatched|failed|forgotten|"
+    r"lacked|lacking)\b",
+    re.IGNORECASE,
+)
+
+# Deliberately not generalized into this token-window table: trip/bypass and
+# inspection-tag-removal mentions need equipment state and time scope to
+# distinguish active defeats from restored/tested or authorized removal.
+# Driving-violation mentions are affirmative behaviors, not absence cues; a
+# reliable gate needs driver-behavior context to avoid flagging policy/training.
+_BARRIER_CONTROLS: dict[str, "re.Pattern[str]"] = {
+    "energy_isolation_absent": re.compile(
+        r"\b(?:loto|lock[\s/-]?out(?:[\s/-]?tag[\s/-]?out)?|tag[\s/-]?out"
+        r"|isolation(?:s)?|isolat(?:e|ed|es|ing)|de-?energi[sz]\w*"
+        r"|energi[sz]\w*|prov(?:e|ed|ing)\s+dead|test(?:ed|ing)?\s+dead"
+        r"|absence\s+of\s+voltage|zero[\s-]+voltage)\b",
+        re.IGNORECASE,
+    ),
+    "gas_test_absent": re.compile(
+        r"\b(?:gas test\w*|gas detect\w*|atmospher\w* test\w*|air test\w*"
+        r"|o2 test\w*|oxygen test\w*|gas reading\w*|tested for gas"
+        r"|gas reading taken|atmospher\w*\s+was\s+not\s+tested|"
+        r"atmospher\w*\s+was\s+unchecked|atmospher\w*\s+unchecked)\b",
+        re.IGNORECASE,
+    ),
+    "permit_absent": re.compile(
+        r"\b(?:permit to (?:work|enter)|work permit|ptw|entry permit"
+        r"|hot[\s-]?work permit|confined space permit|cold work permit"
+        r"|permit system)\b",
+        re.IGNORECASE,
+    ),
+    "fall_protection_absent": re.compile(
+        r"\b(?:anchor(?:age)?(?:\s+point)?s?|full[\s-]?body harness(?:es)?"
+        r"|harness(?:es)?|double[\s-]?lanyards?|lanyards?"
+        r"|rope grabs?|fall[\s-]?arrest(?:\s+devices?)?|lifelines?"
+        r"|tied[\s-]?off|tie[\s-]?off)\b",
+        re.IGNORECASE,
+    ),
+    "fire_watch_absent": re.compile(
+        r"\bfire ?watch(?:er|ers|ing|man|men)?\b",
+        re.IGNORECASE,
+    ),
+    "standby_absent": re.compile(
+        r"\b(?:stand ?by|attendant|hole watch(?:es)?|bottle watch|safety watch|"
+        r"banksman|spotter|lookout|sentinel|unattended)\b",
+        re.IGNORECASE,
+    ),
+    "atmosphere_unmonitored": re.compile(
+        r"\b(?:monitor\w*|purg\w*|sweep\w*)\b", re.IGNORECASE,
+    ),
+}
+
+# atmosphere_unmonitored also fires on an inert purge DURING work ("purging in
+# progress" while entry is under way) — the absent control there is a
+# breathable, monitored atmosphere itself. Suppressors cover purges that are
+# over or that had not started ("purge completed", "purge before entry",
+# "no nitrogen purge"); an ongoing inert purge is a hard hazard and staying
+# silent on it would be the dangerous direction.
+_BARRIER_DIRECT: dict[str, "re.Pattern[str]"] = {
+    "atmosphere_unmonitored": re.compile(
+        r"\b(?:(?:nitrogen|n2|inert)\s+(?:gas\s+)?(?:purg\w*|sweep\w*)"
+        r"|(?:purg\w*|sweep\w*)\b.{0,24}?\b(?:in[\s-]?progress|ongoing|underway))\b",
+        re.IGNORECASE,
+    ),
+    "permit_absent": re.compile(
+        r"\b(?:began|started|commenced|proceeded|carried\s+out)\b"
+        r".{0,48}?\bbefore\b.{0,24}?\b(?:permit\s+to\s+work|ptw)\b"
+        r".{0,24}?\b(?:signed|approved|authori[sz]ed|issued)\b",
+        re.IGNORECASE,
+    ),
+    "fall_protection_absent": re.compile(
+        r"\b(?:started|began|commenced|proceeded)\b.{0,48}?\bbefore\b"
+        r".{0,24}?\b(?:anyone|anybody|someone)\s+confirmed\b"
+        r".{0,24}?\b(?:anchor(?:age)?(?:\s+point)?|tie[\s-]?off)\b",
+        re.IGNORECASE,
+    ),
+}
+_BARRIER_DIRECT_SUPPRESS_RE = re.compile(
+    r"\b(?:complet\w*|finish\w*|stopp\w*|halt\w*|abort\w*|cancel\w*|suspend\w*"
+    r"|before|prior|preced\w*)\b",
+    re.IGNORECASE,
+)
+
+
+def gate_barrier_absence(text: str, name: str) -> GateState:
+    """One barrier-failure gate (D3 fix): fires on a nearby explicit ABSENCE cue
+    or a targeted direct absence sequence. The atmosphere gate also detects an
+    inert purge in progress. Shared engine; never auto-cleared (action="gray")."""
+    tok_starts = [tm.start() for tm in _TOKEN_RE.finditer(text)]
+    if not tok_starts:
+        return GateState(name=name, triggered=False, action="gray")
+    # Measure multiword cues from their final token: "no one" is the absence
+    # phrase, so its distance to "spotter" is one token shorter than from "no".
+    cue_idx = sorted({
+        max(bisect_right(tok_starts, m.end() - 1) - 1, 0)
+        for m in _ABSENCE_CUE_RE.finditer(text)
+    })
+    pairs: list[tuple[int, str]] = []
+    direct = _BARRIER_DIRECT.get(name)
+    if direct is not None:
+        suppress_spans = [
+            (max(bisect_right(tok_starts, m.start()) - 1, 0),
+             max(bisect_right(tok_starts, m.end() - 1) - 1, 0))
+            for m in _BARRIER_DIRECT_SUPPRESS_RE.finditer(text)
+        ]
+        for m in direct.finditer(text):
+            i0 = max(bisect_right(tok_starts, m.start()) - 1, 0)
+            i1 = max(bisect_right(tok_starts, m.end() - 1) - 1, 0)
+            if name == "atmosphere_unmonitored":
+                if any(s <= i1 + _BARRIER_WINDOW and e >= i0 - _BARRIER_WINDOW
+                       for (s, e) in suppress_spans):
+                    continue  # "purge completed", "purge before entry"
+                if any(i0 - 2 <= c < i0 for c in cue_idx):
+                    continue  # "no nitrogen purge" — the cue negates the purge
+            pairs.append((i0, m.group(0).lower()))
+    if cue_idx:
+        spans: list[tuple[int, int, str]] = []
+        for m in _BARRIER_CONTROLS[name].finditer(text):
+            i0 = max(bisect_right(tok_starts, m.start()) - 1, 0)
+            i1 = max(bisect_right(tok_starts, m.end() - 1) - 1, 0)
+            spans.append((i0, i1, m.group(0).lower()))
+        # cue x control-span scan via two-pointer merge over the ascending
+        # spans (same quadratic-trap avoidance as gate_negation); spans expire
+        # permanently once their last token falls behind the cue window
+        si = 0
+        active: list[tuple[int, int, str]] = []
+        for c in cue_idx:
+            while si < len(spans) and spans[si][0] <= c + _BARRIER_WINDOW:
+                active.append(spans[si])
+                si += 1
+            active = [sp for sp in active if sp[1] >= c - _BARRIER_WINDOW]
+            pairs.extend((c, phrase) for (_, _, phrase) in active)
+    if not pairs:
+        return GateState(name=name, triggered=False, action="gray")
+    tokens = _TOKEN_RE.findall(text.lower())
+    shown = ", ".join(f"'{tokens[c]}'~'{phrase}'" for c, phrase in pairs[:3])
+    label = name.removesuffix("_absent").replace("_", " ")
+    return GateState(
+        name=name,
+        triggered=True,
+        action="gray",
+        detail=f"barrier failure: absence or direct violation signal for "
+        f"{label} control ({shown}) — routed to human review, never auto-cleared",
     )
 
 
@@ -380,21 +569,43 @@ def gate_long_input(text: str, cfg: Settings) -> GateState:
                      detail="; ".join(parts))
 
 
+def gate_verdict_stability(stability: float, n_variants: int) -> GateState:
+    """Route an ensemble verdict to review when fewer than 75% of scored
+    surface variants agree with the ensemble verdict. Reliability routing only:
+    this gate never changes the score or operating point."""
+    triggered = n_variants >= 2 and stability < 0.75
+    if not triggered:
+        return GateState(name="verdict_stability", triggered=False, action="gray")
+    disagree = n_variants - round(stability * n_variants)
+    return GateState(
+        name="verdict_stability",
+        triggered=True,
+        action="gray",
+        detail=(f"verdict flips on rephrasing: {disagree} of {n_variants} variants "
+                f"disagree (stability {stability:.2f}) — routed to human review"),
+    )
+
+
 def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
               vec: "np.ndarray | None" = None,
               base_hit: "tuple[int | str, float] | None" = None,
               well_control: bool = False,
               flag_thr: float = 0.5,
-              chunked: bool = False) -> list[GateState]:
+              chunked: bool = False,
+              verdict_stability: float = 1.0,
+              n_variants: int = 1) -> list[GateState]:
     # vec/base_hit (optional) are the bulk-ingest path's batch-computed
     # embedding + corpus-tier top-1 (D25); None = compute per row (the
     # /classify path, unchanged). well_control is the classifier's
     # deterministic barrier tag; flag_thr is its calibrated flag threshold
     # (flag_threshold(clf)) — both feed the well-control watch gate.
-    # chunked feeds the chunked-low-score humility gate.
+    # chunked feeds the chunked-low-score humility gate; stability and variant
+    # count feed the final ensemble reliability gate.
     # Order is load-bearing (smoke test addresses drill by index 4);
-    # well_control_watch / chunked_low_score are appended LAST so existing
-    # positions hold.
+    # newer general gates, barrier-failure gates and verdict_stability are
+    # appended LAST so existing positions hold.
+    # NOTE for the api_smoke owner: app/tests/api_smoke.py asserts the exact
+    # gate-name set and must track additions here.
     specs = (
         ("min_length", lambda: gate_min_length(text, cfg)),
         ("negation", lambda: gate_negation(text)),
@@ -406,6 +617,18 @@ def run_gates(text: str, score: float, storage: "Storage", cfg: Settings,
         ("well_control_watch", lambda: gate_well_control_watch(well_control, score, flag_thr)),
         ("chunked_low_score", lambda: gate_chunked_low_score(chunked, score)),
         ("severity_watch", lambda: gate_severity_watch(text, score, flag_thr)),
+        ("energy_isolation_absent",
+         lambda: gate_barrier_absence(text, "energy_isolation_absent")),
+        ("gas_test_absent", lambda: gate_barrier_absence(text, "gas_test_absent")),
+        ("permit_absent", lambda: gate_barrier_absence(text, "permit_absent")),
+        ("fire_watch_absent", lambda: gate_barrier_absence(text, "fire_watch_absent")),
+        ("standby_absent", lambda: gate_barrier_absence(text, "standby_absent")),
+        ("atmosphere_unmonitored",
+         lambda: gate_barrier_absence(text, "atmosphere_unmonitored")),
+        ("verdict_stability",
+         lambda: gate_verdict_stability(verdict_stability, n_variants)),
+        ("fall_protection_absent",
+         lambda: gate_barrier_absence(text, "fall_protection_absent")),
     )
     states: list[GateState] = []
     for name, fn in specs:

@@ -109,6 +109,11 @@ def main() -> int:
         check(status == 200, "classify 200")
         pred = PredictionOut(**pred_raw)
         check(0.0 <= pred.sif_score <= 1.0, "score in [0,1]")
+        check(pred.band in {"HIGH", "MODERATE", "LOW"}
+              and pred.flag_threshold is not None
+              and pred.gray_band_low is not None
+              and pred.gray_band_high is not None,
+              "prediction includes server operating point and band")
         check(set(pred.rule_probs) == {
             "confined_space", "driving", "energy_isolation", "hot_work",
             "line_of_fire", "safe_mechanical_lifting", "working_at_height",
@@ -120,7 +125,10 @@ def main() -> int:
         check({g.name for g in pred.gate_states} == {
             "min_length", "negation", "language", "confidence", "drill", "near_dup",
             "long_input", "well_control_watch", "chunked_low_score", "severity_watch",
-        }, "all 10 gates reported")
+            "energy_isolation_absent", "gas_test_absent", "permit_absent",
+            "fire_watch_absent", "standby_absent", "atmosphere_unmonitored",
+            "verdict_stability", "fall_protection_absent",
+        }, "all 18 gates reported")
         _, pred2_raw = req("POST", "/classify", {"text": SAMPLE_REPORT})
         check(pred_raw == pred2_raw, "deterministic: same text -> same prediction")
 
@@ -160,6 +168,11 @@ def main() -> int:
         _, reports_raw = req("GET", "/reports?limit=10")
         reports = [StoredReport(**r) for r in reports_raw]
         check(len(reports) == 5 and all(r.prediction for r in reports), "reports stored with predictions")
+        check(all(r.prediction.band in {"HIGH", "MODERATE", "LOW"}
+                  and all(getattr(r.prediction, key) is not None for key in
+                          ("flag_threshold", "gray_band_low", "gray_band_high"))
+                  for r in reports if r.prediction),
+              "stored predictions include reconstituted operating point and band")
         short_stored = next(r for r in reports if r.report.text == "LOTO not applied")
         ml = next(g for g in short_stored.prediction.gate_states if g.name == "min_length")
         check(not ml.triggered, "stored short-code report not gated by min-length")
@@ -172,8 +185,16 @@ def main() -> int:
               "PTW + Bypassing declared out-of-scope")
         _, patterns_raw = req("GET", "/patterns?min_n=1")
         patterns = [PatternRow(**p) for p in patterns_raw]
+        check(sum(p.n for p in patterns) == 5,
+              "live patterns cover the 5 scored reports, not a stale artifact")
         check(all(0.0 <= p.ci_low <= p.sif_rate <= p.ci_high <= 1.0 for p in patterns),
               "pattern Wilson CIs bracket the rate")
+        _, barriers_raw = req("GET", "/patterns?kind=activity_barrier&min_n=1")
+        barriers = [PatternRow(**p) for p in barriers_raw]
+        check(any(p.barrier == "fall_protection_absent" for p in barriers)
+              and any(p.barrier == "gas_test_absent" for p in barriers)
+              and any(p.barrier == "energy_isolation_absent" for p in barriers),
+              "live barrier patterns use canonical absence-gate signals")
         _, metrics_raw = req("GET", "/metrics/summary")
         metrics = MetricsSummary(**metrics_raw)
         check(metrics.n_reports == 5, "metrics count")
@@ -227,6 +248,10 @@ def main() -> int:
                              {"text": paste_text, "source": "live-paste"})
         check(status == 200 and isinstance(pasted.get("report_id"), int),
               "persist=1 returns a real server report id")
+        check(pasted.get("band") in {"HIGH", "MODERATE", "LOW"}
+              and all(pasted.get(key) is not None for key in
+                      ("flag_threshold", "gray_band_low", "gray_band_high")),
+              "persisted classify response includes server operating point and band")
         rid = pasted["report_id"]
         status, stored = req("GET", f"/reports/{rid}")
         check(status == 200 and stored["report"]["text"] == paste_text

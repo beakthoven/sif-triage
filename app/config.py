@@ -1,9 +1,12 @@
-"""Runtime configuration. Defaults are demo-safe; everything overridable via env."""
+"""Runtime configuration. Defaults are demo-safe; everything overridable via
+SIF_-prefixed env vars. pydantic-settings does the parsing (A5: replaces the
+hand-rolled bool/float os.environ coercion; backend-stack-decision §4)."""
 from __future__ import annotations
 
-import os
-from dataclasses import dataclass, field
 from pathlib import Path
+
+from pydantic import AliasChoices, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 APP_DIR = Path(__file__).resolve().parent
 REPO_ROOT = APP_DIR.parent
@@ -33,29 +36,21 @@ DEFAULT_SHORT_CODES = (
 )
 
 
-@dataclass(frozen=True)
-class Settings:
-    db_path: Path = field(
-        default_factory=lambda: Path(os.environ.get("SIF_DB_PATH", APP_DIR / "runtime.db"))
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="SIF_", frozen=True, extra="ignore", populate_by_name=True
     )
-    model_path: Path = field(
-        default_factory=lambda: Path(
-            os.environ.get("SIF_MODEL_PATH", APP_DIR / "artifacts" / "model.onnx")
-        )
-    )
+
+    db_path: Path = APP_DIR / "runtime.db"
+    model_path: Path = APP_DIR / "artifacts" / "model.onnx"
     # Near-dup embedding index (MiniLM, artifacts/embeddings/).
-    embed_model_dir: Path = field(
-        default_factory=lambda: Path(
-            os.environ.get("SIF_EMBED_MODEL_DIR", REPO_ROOT / "artifacts" / "embeddings" / "minilm")
-        )
-    )
-    embed_index_dir: Path = field(
-        default_factory=lambda: Path(
-            os.environ.get("SIF_EMBED_INDEX_DIR", REPO_ROOT / "artifacts" / "embeddings")
-        )
-    )
-    host: str = os.environ.get("SIF_HOST", "127.0.0.1")
-    port: int = int(os.environ.get("SIF_PORT", "8177"))
+    embed_model_dir: Path = REPO_ROOT / "artifacts" / "embeddings" / "minilm"
+    embed_index_dir: Path = REPO_ROOT / "artifacts" / "embeddings"
+    host: str = "127.0.0.1"
+    port: int = 8177
+    # SQLite busy_timeout (ms) paces each lock acquisition in the write path;
+    # app/storage.py _write adds the bounded retry on top.
+    db_busy_timeout_ms: int = 5000
     min_text_length: int = 20
     short_codes: tuple[str, ...] = DEFAULT_SHORT_CODES
     # Confidence gray band: scores inside are routed to the review queue.
@@ -76,8 +71,15 @@ class Settings:
     api_version: str = "0.1.0"
     # Optional Ollama rewording for explanations (app/explain.py). The
     # deterministic template always ships; SIF_EXPLAIN_LLM=0 disables live
-    # LLM attempts (demo-reliability switch).
-    ollama_url: str = os.environ.get("SIF_OLLAMA_URL", "http://localhost:11434")
-    ollama_model: str = os.environ.get("SIF_OLLAMA_MODEL", "qwen3:4b")
-    explain_timeout_s: float = float(os.environ.get("SIF_EXPLAIN_TIMEOUT", "8"))
-    explain_llm: bool = os.environ.get("SIF_EXPLAIN_LLM", "1").lower() not in ("0", "false", "no")
+    # LLM attempts (demo-reliability switch). Default is now 0 (A5 flip): the
+    # reworder adds no information by construction, stalls 17.5 s when Ollama
+    # is down [measured], and its cache hit rate measured 0% — the template
+    # is the product and the LLM is opt-in.
+    ollama_url: str = "http://localhost:11434"
+    ollama_model: str = "qwen3:4b"
+    # Legacy env name kept via alias (was read directly from os.environ).
+    explain_timeout_s: float = Field(
+        default=8.0,
+        validation_alias=AliasChoices("SIF_EXPLAIN_TIMEOUT", "SIF_EXPLAIN_TIMEOUT_S"),
+    )
+    explain_llm: bool = False

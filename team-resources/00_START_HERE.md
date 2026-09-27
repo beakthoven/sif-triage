@@ -62,7 +62,7 @@ Two key tricks: we **hid the outcome words** ("fracture", "hospital") from the A
 
 **Day 2 — The honesty exam.** This is the part we're proudest of. The team **hand-labeled 500 reports without ever seeing the AI's answers** (a "blind gold set" — the rubric everyone used is in `gold/RUBRIC.md`). Two people independently labeled 130 of the same reports so we could measure human agreement. One labeler's work failed our quality checks (measured: 2 seconds per report — impossible to read that fast) — we documented it and had the queue re-labeled carefully. *That's* how you get numbers you can defend.
 
-**Day 3 — Proof.** Final testing: 18/18 hostile trick-inputs handled safely, the demo rehearsed end-to-end, and the signature move rehearsed for real: **unplugging the network mid-demo while everything keeps working.**
+**Day 3 — Proof.** The adversarial suite passed 18/18 cases plus #10b with `RealOnnxClassifier` on 2026-09-26 (`tests/adversarial_suite.py`). A network-unplug demo beat is described in the earlier rehearsal material (`docs/deck/qa_prep.md`, audit snapshot 2026-09-25); treat it as a dated historical rehearsal, not a current verification claim.
 
 ---
 
@@ -94,10 +94,11 @@ See `diagrams/03_model_journey.html` for the picture.
 
 **What it was fed:** the three data sources from §4 (real US injuries + real aviation near-misses + OIL-style practice reports), with outcome words masked.
 
-**How it was tested (the honest way):** against the 500 blind human-labeled reports it had never seen:
-- **Precision 0.98** — when it flags a report, it's right ~98% of the time
-- **Recall 0.84** — it catches ~84% of the reports humans call dangerous
-- Humans agreed with each other at κ = 0.51 (judging "danger potential" is genuinely hard — even trained people disagree a third of the time; the AI lands inside the human disagreement range)
+**How it was tested (the honest way):** at the historical single-text threshold 0.658108, the blind pooled-consensus human-gold evaluation had n=318 and 89.9% positive prevalence:
+- **Precision 0.976 [0.948, 0.989]**; **recall 0.836 [0.788, 0.874]**
+- These high-prevalence results do not transfer to deployment traffic or represent the current serving N=4 ensemble. Source: [`artifacts/gold/gold_metrics_final.md`](../artifacts/gold/gold_metrics_final.md).
+- At the current threshold 0.5647, a single-text re-evaluation (not the N=4 ensemble; OSHA gold overlaps the threshold-tuning temporal split) reports precision 0.972 [0.943, 0.986] and recall 0.843 [0.796, 0.880]. Source: [`artifacts/gold/gold_metrics_current_point_20260926.md`](../artifacts/gold/gold_metrics_current_point_20260926.md). This is not a fully held-out result.
+- Human agreement was measured separately on a double-labeled subset; it is not a model-validity guarantee.
 - It **beats an 8-billion-parameter LLM** (Qwen3-8B zero-shot) on the same test — while running **1,000× faster and free, offline**
 
 **What it honestly can't do (we say this out loud):** it can't judge two of the nine Life-Saving Rules from injury text (Permit to Work and Bypassing Safety Controls are paperwork violations — invisible in the text), it doesn't understand aviation language (out of its territory), and it never predicts accidents — it prioritizes human attention. That distinction is deliberate and it's our answer to the toughest judge question.
@@ -111,7 +112,7 @@ See `diagrams/03_model_journey.html` for the picture.
 | "What does it do?" | "It reads safety near-miss reports and puts the dangerous ones at the top of the pile for a human officer." |
 | "Is it predicting accidents?" | "No — it triages. It flags reports with fatal-accident-shaped mechanisms so humans look at them first." |
 | "Where's the data from?" | "Public US injury reports + NASA near-misses + clearly-labeled AI-generated practice reports in OIL's style. OIL's real reports stay private." |
-| "How accurate?" | "On 500 reports labeled blind by our team: 98% of its flags are right, it catches 84% of what humans flag." |
+| "How did it perform on the blind human-gold sample?" | "At the historical single-text threshold 0.658108, blind pooled consensus n=318 (89.9% positive prevalence) had precision 0.976 [0.948, 0.989] and recall 0.836 [0.788, 0.874]. That is not the serving N=4 ensemble or a deployment estimate. At the current threshold 0.5647, a single-text re-evaluation reports P 0.972 [0.943, 0.986], R 0.843 [0.796, 0.880]; its OSHA cases overlap tuning data, so it is not fully held out. Sources: `artifacts/gold/gold_metrics_final.md` and `artifacts/gold/gold_metrics_current_point_20260926.md`." |
 | "Does it need internet?" | "No — watch: *unplugs cable*. Everything runs on this laptop." |
 | "What if it's wrong?" | "It says 'I'm not sure' and routes to a human — and every human correction becomes new training data." |
 

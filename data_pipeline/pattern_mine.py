@@ -3,13 +3,16 @@ requirement as real statistics (ARCHITECTURE.md pattern bullet;
 fullstack-architect §3: lift-ranked co-occurrence on structured facets with
 n + Wilson CIs, honest stats, no runtime LLM tagging).
 
-Input : synthetic facet corpus — artifacts/synthetic/clean/*.jsonl +
-        artifacts/synthetic/raw_v2/*.jsonl (site / activity / barrier facets +
-        sif_potential label; the demo's OIL-analog data, ~9k rows).
-Output: artifacts/patterns/patterns.json          — served by GET /api/patterns
-        artifacts/patterns/demo_density_seed.json — site×activity density seed
+CORPUS MODE (offline seed-quality report; do NOT use for the served file —
+use data_pipeline/pattern_mine_live.py for that, which mines the live demo DB):
+Input : the labeled demo seed corpus — artifacts/demo/demo_seed_v2.jsonl
+        (site / activity / barrier / register facets + sif_potential label).
+Output: artifacts/patterns/patterns_corpus.json       — corpus-mode snapshot
+        artifacts/patterns/demo_density_seed_corpus.json — corpus density view
         artifacts/patterns/patterns.db            — same payload in SQLite
         (Storage.precomputed, key="patterns")
+        The SERVED artifacts/patterns/patterns.json + demo_density_seed.json
+        are produced by data_pipeline/pattern_mine_live.py from the live DB.
 
 Stats per cell: support n, SIF prevalence, lift vs corpus base rate,
 Wilson 95% CI on the SIF rate. Pattern families ranked by lift with
@@ -31,8 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 DEFAULT_GLOBS = (
-    "artifacts/synthetic/clean/*.jsonl",
-    "artifacts/synthetic/raw_v2/*.jsonl",
+    "artifacts/demo/demo_seed_v2.jsonl",
 )
 OUT_DIR = REPO_ROOT / "artifacts" / "patterns"
 MIN_SUPPORT = 10
@@ -54,7 +56,7 @@ def wilson(p: float, n: int, z: float = 1.96) -> tuple[float, float]:
 
 
 def load_rows(globs: tuple[str, ...] = DEFAULT_GLOBS) -> list[dict]:
-    """Load the synthetic facet corpus, deduped by id (first wins)."""
+    """Load the labeled corpus, deduped by id when present else by text."""
     seen: set[str] = set()
     rows: list[dict] = []
     for pattern in globs:
@@ -62,9 +64,10 @@ def load_rows(globs: tuple[str, ...] = DEFAULT_GLOBS) -> list[dict]:
             with open(path, encoding="utf-8") as fh:
                 for line in fh:
                     row = json.loads(line)
-                    if row["id"] in seen:
+                    key = str(row.get("id") or row.get("text", ""))
+                    if key in seen:
                         continue
-                    seen.add(row["id"])
+                    seen.add(key)
                     rows.append(row)
     return rows
 
@@ -213,8 +216,8 @@ def main() -> int:
     seed = density_seed(rows)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
-    patterns_path = args.out_dir / "patterns.json"
-    seed_path = args.out_dir / "demo_density_seed.json"
+    patterns_path = args.out_dir / "patterns_corpus.json"
+    seed_path = args.out_dir / "demo_density_seed_corpus.json"
     patterns_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     seed_path.write_text(json.dumps(seed, indent=2), encoding="utf-8")
 

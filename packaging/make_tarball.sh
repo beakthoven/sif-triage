@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # make_tarball.sh — build the USB demo tarball (bare-metal, offline target).
 #
-# Ships ONLY the demo runtime: app code, prebuilt dashboard, model artifacts,
-# precomputed pattern stats, frozen label spec, run.sh, wheels for offline
-# pip install. EXCLUDES data/ and runs/ raw research, dev/training code,
-# .venv, and git history (artifacts/ and *.onnx are gitignored — this
-# tarball is the transport for the model). Model payload is the ship variant
-# only (masked-v2, runs/run2/day2/ship_decision.md) — the other variants are
-# repo-side provenance, not demo payload (5.6 GB -> ~0.7 GB).
+# Ships ONLY the demo runtime: app code, prebuilt dashboard, model artifacts
+# (INT8 ship variant), the MiniLM near-dup runtime (vendored ONNX + precomputed
+# corpus index), precomputed pattern stats, frozen label spec, run.sh, wheels
+# for offline pip install. EXCLUDES data/ and runs/ raw research,
+# dev/training code, .venv, and git history (artifacts/ and *.onnx are
+# gitignored — this tarball is the transport for the model). The fp32 export
+# stays repo-side: run.sh (app resolution order) prefers sif_multitask_int8.onnx,
+# so shipping it would add ~599M of dead weight.
 #
 # Usage:
 #   packaging/make_tarball.sh                build (fails if model missing)
@@ -33,15 +34,24 @@ fi
 [ -f dashboard/dist/index.html ] || die "dashboard/dist missing — run: cd dashboard && npm ci && npm run build"
 [ -d packaging/wheels ] || die "packaging/wheels missing — run:
   .venv/bin/pip download -r requirements.txt -d packaging/wheels --only-binary=:all:"
+[ -f artifacts/embeddings/minilm/model.onnx ] || die "artifacts/embeddings/minilm/model.onnx missing —
+  the near-dup embedder (app/config.py:embed_model_dir) needs the vendored MiniLM ONNX"
+[ -f artifacts/embeddings/corpus_embeddings_fp16.npy ] || die "corpus index missing under artifacts/embeddings/ —
+  the near-dup banner needs corpus_embeddings_fp16.npy + corpus_ids.jsonl (app/storage.py)"
 
 STAMP="$(date +%Y%m%d)"
 OUT="packaging/sif-demo-usb-${STAMP}.tar.gz"
 
 tar -czf "$OUT" \
     --exclude='__pycache__' --exclude='*.pyc' --exclude='app/runtime.db*' \
+    --exclude='artifacts/models/masked-v2/sif_multitask_fp32.onnx' \
+    --exclude='artifacts/models/masked-v2/sif_multitask_fp32.onnx.data' \
     app \
     dashboard/dist \
     artifacts/models/masked-v2 \
+    artifacts/embeddings/minilm \
+    artifacts/embeddings/corpus_embeddings_fp16.npy \
+    artifacts/embeddings/corpus_ids.jsonl \
     artifacts/patterns \
     spec/label_spec.yaml \
     requirements.txt \

@@ -5,11 +5,10 @@
 ## What we built
 An AI triage tool for Oil India's safety reports. Workers write near-miss/unsafe-act reports → the tool flags the ones with fatal-accident potential, tags the relevant Life-Saving Rule, highlights the evidence words, and ranks the most dangerous sites/activities on a dashboard. Humans always make the final call.
 
-## The 5 numbers to remember
-| What | Number |
+## Key numbers and what they measure
+| Measurement | Result and scope |
 |---|---|
-| Flags that are right (precision) | **98%** |
-| Dangerous reports caught (recall) | **84%** |
+| Blind pooled-consensus human-gold result at historical single-text threshold 0.658108 | n=318; prevalence 89.9%; precision 0.976 [0.948, 0.989]; recall 0.836 [0.788, 0.874]. Source: [`artifacts/gold/gold_metrics_final.md`](../artifacts/gold/gold_metrics_final.md). These high-prevalence metrics do not transfer to deployment traffic or represent the current serving N=4 ensemble. Current-threshold single-text evaluation at 0.5647 (not the N=4 ensemble; partly overlapping tuning split) reports precision 0.972 [0.943, 0.986] and recall 0.843 [0.796, 0.880]; source: [`artifacts/gold/gold_metrics_current_point_20260926.md`](../artifacts/gold/gold_metrics_current_point_20260926.md). |
 | Speed per report | **~0.05 seconds** |
 | Works without internet | **Yes — fully** |
 | Cheaper than a cloud LLM per report | **~1000×** |

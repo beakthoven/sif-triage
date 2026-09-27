@@ -8,8 +8,9 @@ torch/transformers/numpy/sklearn/onnx/onnxruntime are lazy-imported inside
 functions. training/model.py is FROZEN — imported, never modified.
 
 Corpus contract (--corpus-dir must contain train/val/test.jsonl, 1 row/line):
-  text field    : "masked_text" preferred when --config masked, else "text";
-                  --config unmasked always reads "text". Fallbacks counted.
+  text field    : "masked_text" required when --config masked, else "text";
+                  --config unmasked reads "text". Masked fallback requires
+                  explicit --allow-masked-text-fallback and is counted.
   SIF label     : "sif" | "sif_potential" | "sif_label" | "label" in {0,1}
   rule labels   : "rules" as (a) list of rule names (synthetic schema),
                   (b) dict {rule: 0/1}, or (c) list of 7 ints in RULES order.
@@ -155,12 +156,16 @@ def load_jsonl(path):
     return rows
 
 
-def normalize_row(row, config, stats):
+def normalize_row(row, config, stats, allow_masked_text_fallback=False):
     """Extract (text, sif, rules[7]) tolerating the concurrent writers'
     schemas (synthetic generator vs OSHA pipeline)."""
     if config == "masked":
         text = row.get("masked_text")
         if text is None:
+            if not allow_masked_text_fallback:
+                raise ValueError(
+                    f"row {row.get('id', '?')}: masked config requires masked_text; "
+                    "pass --allow-masked-text-fallback to use text")
             text = row.get("text", "")
             stats["masked_fallback_to_text"] += 1
     else:
@@ -306,7 +311,8 @@ def dry_run(args):
         n_anchor = 0
         n_words = 0
         for row in rows:
-            text, sif, rv = normalize_row(row, args.config, stats)
+            text, sif, rv = normalize_row(
+                row, args.config, stats, args.allow_masked_text_fallback)
             n_pos += sif
             for i, v in enumerate(rv):
                 rule_pos[i] += v
@@ -340,11 +346,13 @@ def dry_run(args):
 
 # --- dataset (torch lazy) ------------------------------------------------------
 
-def build_features(rows, config, tokenizer, seq, lfs, stats):
+def build_features(rows, config, tokenizer, seq, lfs, stats,
+                   allow_masked_text_fallback=False):
     """Tokenize + derive span BIO labels. Mutates stats with drop counts."""
     feats = []
     for row in rows:
-        text, sif, rv = normalize_row(row, config, stats)
+        text, sif, rv = normalize_row(
+            row, config, stats, allow_masked_text_fallback)
         enc = tokenizer(text, truncation=True, max_length=seq,
                         return_offsets_mapping=True)
         anchors = anchor_spans(text, rv, lfs)
@@ -723,6 +731,8 @@ def parse_args(argv=None):
                    help="dir with train/val/test.jsonl")
     p.add_argument("--config", choices=("masked", "unmasked"),
                    default="masked")
+    p.add_argument("--allow-masked-text-fallback", action="store_true",
+                   help="allow masked config to use text when masked_text is absent")
     p.add_argument("--epochs", type=int, default=3)
     p.add_argument("--batch", type=int, default=32)
     p.add_argument("--seq", type=int, default=128)
@@ -776,13 +786,15 @@ def main(argv=None):
             "span_drop_no_anchor", "span_drop_misaligned",
             "span_negative_row")}
         t0 = time.time()
-        splits[split] = build_features(rows, args.config, tokenizer,
-                                       args.seq, lfs, st)
+        splits[split] = build_features(
+            rows, args.config, tokenizer, args.seq, lfs, st,
+            args.allow_masked_text_fallback)
         stats[split] = st
         print(f"[{split}] {len(rows)} rows featurized in "
               f"{time.time() - t0:.1f}s; span drops: no_anchor="
               f"{st['span_drop_no_anchor']} misaligned="
-              f"{st['span_drop_misaligned']}")
+              f"{st['span_drop_misaligned']}; "
+              f"masked text fallbacks={st['masked_fallback_to_text']}")
 
     train_feats, val_feats = splits["train"], splits["val"]
 
@@ -862,6 +874,9 @@ def main(argv=None):
             s: {k: stats[s][k] for k in ("span_drop_no_anchor",
                                          "span_drop_misaligned")}
             for s in stats}
+        metrics["schema_fallbacks"] = {
+            s: {"masked_fallback_to_text": stats[s]["masked_fallback_to_text"]}
+            for s in stats}
         metrics["epoch_seconds"] = round(time.time() - t0, 1)
         history.append(metrics)
         (out_dir / f"metrics-ep{epoch}.json").write_text(
@@ -914,7 +929,9 @@ def main(argv=None):
 
     manifest = {
         "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "config": args.config, "spec_sha256": SPEC_SHA256,
+        "config": args.config,
+        "allow_masked_text_fallback": args.allow_masked_text_fallback,
+        "spec_sha256": SPEC_SHA256,
         "backbone": BACKBONE, "seq": args.seq, "epochs": args.epochs,
         "export_gate_pass": gate.get("pass"),
         "files": {},

@@ -1,5 +1,11 @@
 # ARCHITECTURE v2 — SIF-Precursor Detection Engine (PS 26165)
 
+> **2026-09-25 (production overhaul):** this file is preserved as the adjudicated v2 record
+> (dev-time pipeline detail and Phase-1 rulings remain valid). The single accurate architecture
+> reference — runtime components, measured latencies, gate family, explanation two-tier,
+> human-in-the-loop loop, CLAIM BOUNDARY and honest limitations — is now
+> [`docs/architecture.md`](../../docs/architecture.md).
+
 Status: ADJUDICATED. Supersedes HANDOFF.md Part C where they conflict. Produced by Phase 1 swarm (12 specialists) + orchestrator adjudication, 2026-09-08. Rulings in `DECISION_LOG.md`; evidence in `phase0-validation/` and `phase1-architecture/`.
 
 Changes vs Part C are marked **[CHANGED]** / **[NEW]** / **[CUT]**.

@@ -33,6 +33,7 @@ from typing import Any, Callable
 
 from pydantic import BaseModel, Field, ValidationError
 
+from .classifier import RULE_CUE_RES
 from .schemas import RULE_DISPLAY, ExplanationOut, PredictionOut
 
 log = logging.getLogger(__name__)
@@ -47,45 +48,12 @@ DEFAULT_TIMEOUT_S = float(os.environ.get("SIF_EXPLAIN_TIMEOUT", "8"))
 # Template-only cache entries (LLM down/slow at build time) are served this
 # long before the LLM gets one upgrade retry.
 FALLBACK_TTL_S = float(os.environ.get("SIF_EXPLAIN_FALLBACK_TTL", "300"))
-EXPLANATION_VERSION = "v3-rule-aware-evidence"
+EXPLANATION_VERSION = "v5-serious-event"
 
-# Explanation-only attribution cues. These do not change classification;
-# they select exact report substrings that help a reviewer understand which
-# wording supports the strongest rule signals when the model span head is
-# empty. The returned phrases are always validated against the source text.
-_RULE_EVIDENCE_RES: dict[str, tuple[re.Pattern[str], ...]] = {
-    "line_of_fire": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\b(?:drop(?:ped|ping)?|fell|falling)\b",
-        r"\bstruck\b", r"\bcaught\b", r"\btrap(?:ped|ping)?\b", r"\bcrush", r"\bpinch",
-        r"\bline of fire\b", r"\bsuspended load\b", r"\boverhead\b",
-        r"\b(?:near|above|below|beneath|toward|onto)\b.{0,45}\b(?:worker|crew|person|roughneck|operator|leg|hand)\b",
-    )),
-    "working_at_height": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bheight\b", r"\bscaffold", r"\bladder\b", r"\bharness\b",
-        r"\bfall arrest\b", r"\broof\b", r"\belevated\b", r"\bderrick\b",
-    )),
-    "driving": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bvehicle\b", r"\bdriv", r"\bfork\s?lift\b", r"\bspeed",
-        r"\bseat belt\b", r"\brevers", r"\broad\b", r"\bjourney\b",
-    )),
-    "energy_isolation": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bloto\b", r"\block\s?out\b", r"\btag\s?out\b",
-        r"\benergiz", r"\bde-?energiz", r"\bstored energy\b",
-        r"\bisolat", r"\barc flash\b",
-    )),
-    "hot_work": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bhot work\b", r"\bweld", r"\bgrind", r"\btorch\b",
-        r"\bspark", r"\bcutting\b",
-    )),
-    "safe_mechanical_lifting": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bcrane\b", r"\blift", r"\brigging\b", r"\bhoist",
-        r"\bsling\b", r"\bsuspended load\b", r"\boverhead load\b",
-    )),
-    "confined_space": tuple(re.compile(p, re.IGNORECASE) for p in (
-        r"\bconfined space\b", r"\bmanhole\b", r"\btank entry\b",
-        r"\bvessel entry\b", r"\binside (?:the |a )?(?:tank|vessel|silo)\b",
-        r"\bgas test\b", r"\bventilat",
-    )),
+# Explanation cues share the classifier's consolidated per-rule table. The
+# well-control phrases remain separate: they are not one of the seven rules.
+_RULE_EVIDENCE_RES = {
+    rule: groups["evidence"] for rule, groups in RULE_CUE_RES.items()
 }
 _WELL_CONTROL_EVIDENCE_RES = tuple(re.compile(p, re.IGNORECASE) for p in (
     r"\bwell control\b", r"\bblowout\b", r"\bbop\b", r"\bwellhead\b",
@@ -103,23 +71,15 @@ REWORD_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
-_SYSTEM_PROMPT = """You turn structured triage notes into short plain-English paragraphs for an HSE review board.
+_SYSTEM_PROMPT = """Rewrite the supplied HSE report note as one or two short sentences for a field safety officer.
 
-Example input:
-Review trigger: triage score 0.83 crossed the 0.66 review threshold.
-Strongest IOGP rule signals: Hot Work (0.71), Energy Isolation (0.66).
-Report wording supporting those signals: "grinding near the live line", "LOTO was not applied".
+Focus on the actual worksite situation and any named safeguard that was missing. Use direct language, not model terminology. Keep every cited report phrase verbatim. Include the supplied triage score exactly as shown, but do not add thresholds, percentages, rule rankings, gate names, similarity values, or internal matching details. Do not add facts, severity, causation, or recommendations not present in the note. Never say an event was predicted or prevented. Return JSON only in the requested schema. If the note says the report is unclear, preserve that uncertainty.
 
-Example output:
-{"explanation": "This report entered HSE review because its triage score of 0.83 crossed the 0.66 threshold. Hot Work (0.71) and Energy Isolation (0.66) are the strongest rule signals, supported by \\"grinding near the live line\\" and \\"LOTO was not applied\\".", "spans_quoted": ["grinding near the live line", "LOTO was not applied"]}
+Example:
+Input: The report describes people exposed to a suspended load. Missing: a standby person. Report text: “the load passed over the crew”. Sent to a reviewer.
+Output: {\"explanation\": \"A suspended load passed over the crew, and no standby person was recorded.\", \"spans_quoted\": [\"the load passed over the crew\"]}"""
 
-Rules: keep every number exactly as given; quote evidence phrases verbatim; do not add facts, severities, or recommendations; never say the event was predicted or prevented; 2-3 sentences. Output JSON only."""
-
-# ponytail: the user message carries the TEMPLATE only, not the report. With
-# the report in-context qwen3:4b flips into analysis mode and burns the whole
-# num_predict budget on planning inside the JSON string fields (measured
-# twice, 2026-09-08); template-only + one-shot example yields clean rewrites.
-_USER_TEMPLATE = "Triage note:\n{template}"
+_USER_TEMPLATE = "HSE report note:\\n{template}"
 
 
 class RewordOut(BaseModel):
@@ -208,23 +168,31 @@ def evidence_phrases(pred: PredictionOut, text: str, limit: int = 3) -> list[str
     return phrases[:limit]
 
 
-def render_template(pred: PredictionOut, text: str,
-                    threshold: float = REVIEW_THRESHOLD) -> tuple[str, list[str]]:
-    """Deterministic human explanation from the prediction alone.
+# Plain-language meanings: describe the exposure, not the classifier's
+# ontology. Numeric probabilities live in the adjacent rule bars.
+_RULE_MEANING: dict[str, str] = {
+    "line_of_fire": "a person was exposed to a moving or released object",
+    "energy_isolation": "work involved equipment that may still be energised",
+    "hot_work": "hot work was carried out near flammable material",
+    "confined_space": "someone entered or worked inside a confined space",
+    "working_at_height": "work was carried out at height, with a fall risk",
+    "safe_mechanical_lifting": "a load was lifted over or near people",
+    "driving": "the report describes a driving or vehicle hazard",
+}
 
-    Returns (template_text, spans_quoted). Same input -> same output; every
-    quoted span is an exact substring of `text` by the span invariant.
-    """
-    flagged = pred.sif_score >= threshold
-    lines = [
-        (
-            f"Review trigger: triage score {pred.sif_score:.2f} crossed the "
-            f"{threshold:.2f} review threshold."
-            if flagged
-            else f"Triage score {pred.sif_score:.2f} is below the {threshold:.2f} review threshold."
-        )
-    ]
-    implicated = sorted(
+_BARRIER_MEANING: dict[str, str] = {
+    "energy_isolation_absent": "lock-out/tag-out or isolation",
+    "gas_test_absent": "a gas test before entry",
+    "permit_absent": "a permit to work",
+    "fire_watch_absent": "a fire watch",
+    "standby_absent": "a standby person",
+    "atmosphere_unmonitored": "atmosphere monitoring",
+    "fall_protection_absent": "fall protection or a harness",
+}
+
+
+def _implicated_rules(pred: PredictionOut) -> list[tuple[str, float]]:
+    return sorted(
         (
             (key, prob)
             for key, prob in pred.rule_probs.items()
@@ -235,24 +203,51 @@ def render_template(pred: PredictionOut, text: str,
         ),
         key=lambda kv: (-kv[1], kv[0]),
     )
-    if implicated:
-        shown = ", ".join(f"{RULE_DISPLAY[k]['display']} ({p:.2f})" for k, p in implicated)
-        lines.append(f"Strongest IOGP rule signals: {shown}.")
+
+
+def _triggered_barriers(pred: PredictionOut) -> list[str]:
+    return [
+        g.name
+        for g in pred.gate_states
+        if g.triggered and g.name in _BARRIER_MEANING
+    ]
+
+
+def _needs_review(pred: PredictionOut) -> bool:
+    return any(g.triggered and g.action in {"gray", "block"} for g in pred.gate_states)
+
+
+def render_template(pred: PredictionOut, text: str,
+                    threshold: float = REVIEW_THRESHOLD) -> tuple[str, list[str]]:
+    """Short, officer-first explanation: what happened and what needs review.
+
+    The score, band, threshold, and rule probabilities are already visible in
+    neighboring UI components; repeating them here obscures the actual exposure.
+    Returns (plain-language summary, the exact report phrase it cites).
+    """
+    cited = evidence_phrases(pred, text, limit=1)
+    quote = f' Report text: “{cited[0]}”' if cited else ""
+    rules = _implicated_rules(pred)
+    barriers = _triggered_barriers(pred)
+    uncertain_from = getattr(pred, "gray_band_low", None)
+    uncertain_from = uncertain_from if isinstance(uncertain_from, float) else 0.40
+
+    if barriers:
+        missing = ", ".join(_BARRIER_MEANING[b] for b in barriers)
+        lines = [f"Missing: {missing}.{quote}", "Sent to a reviewer."]
+        if pred.well_control:
+            lines.append("Well-control equipment is involved.")
+    elif pred.well_control:
+        lines = [f"The report involves well-control equipment; a person should review it.{quote}"]
+    elif pred.sif_score >= threshold:
+        lines = [f"This report describes a serious event; a person should review it.{quote}"]
+    elif pred.sif_score >= uncertain_from:
+        lines = [f"The report is unclear; a person should check it.{quote}"]
+    elif _needs_review(pred):
+        lines = [f"The report needs a review before it is closed.{quote}"]
     else:
-        lines.append("No IOGP rule crossed its display threshold.")
-    if pred.well_control:
-        lines.append("Well-control/barrier tag: raised.")
-    span_texts = evidence_phrases(pred, text)
-    if span_texts:
-        quoted = ", ".join(f'"{s}"' for s in span_texts)
-        lines.append(f"Report wording supporting those signals: {quoted}.")
-    else:
-        lines.append("No reliable supporting phrase could be isolated; inspect the full report before disposition.")
-    triggered = [g for g in pred.gate_states if g.triggered]
-    if triggered:
-        shown = "; ".join(f"{g.name} ({g.detail})" if g.detail else g.name for g in triggered)
-        lines.append(f"Advisory gates: {shown}.")
-    return "\n".join(lines), span_texts
+        lines = [f"No clear high-energy exposure or missing safeguard was identified.{quote}"]
+    return "\n".join(lines), cited
 
 
 def _http_transport(url: str, timeout: float) -> Callable[[dict], dict]:
@@ -400,7 +395,7 @@ def build_explanation(
 
     reworded: RewordOut | None = None
     if use_llm:
-        reworded = ollama_reword(text, template, f"{pred.sif_score:.2f}",
+        reworded = ollama_reword(text, template, f"{pred.sif_score:.3f}",
                                  url=url, model=model,
                                  timeout=timeout, transport=transport)
 

@@ -1,6 +1,8 @@
-# Build context for deploy/Dockerfile — only what the runtime image needs.
-# Weights are NOT baked in: the container pulls the runtime bundle from a
-# private HF dataset at cold start (deploy/entrypoint.sh + DEPLOY.md).
+# Build context for deploy/Dockerfile* — only what the runtime images need.
+# Model weights for the API are NOT baked in: the container pulls the runtime
+# bundle from a private dataset/release at cold start (deploy/entrypoint.sh).
+# The OLLAMA model (deploy/vendor/) IS baked into the full-feature image
+# (deploy/Dockerfile.ollama) — vendored, verified bits, no network needed.
 *
 !requirements.txt
 !app
@@ -14,4 +16,8 @@ app/**/__pycache__/**
 !dashboard/dist/**
 !deploy
 !deploy/entrypoint.sh
+!deploy/entrypoint-ollama.sh
 !deploy/fetch_bundle.py
+!deploy/precompute_explanations.py
+!deploy/vendor
+!deploy/vendor/**

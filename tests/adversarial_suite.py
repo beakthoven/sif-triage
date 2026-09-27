@@ -12,7 +12,7 @@ asserts each produces the expected gate state / no crash / valid schema.
 Exit code 0 = pass.
 
 Run: .venv/bin/python tests/adversarial_suite.py
-     SIF_MODEL_PATH=artifacts/models/masked-v1 SIF_TEST_PORT=8198 .venv/bin/python tests/adversarial_suite.py
+     SIF_MODEL_PATH=artifacts/models/masked-v2/sif_multitask_int8.onnx SIF_TEST_PORT=8238 .venv/bin/python tests/adversarial_suite.py
 """
 from __future__ import annotations
 
@@ -29,6 +29,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from app.config import Settings  # noqa: E402
+from app.gates import run_gates  # noqa: E402
 from app.schemas import PredictionOut  # noqa: E402
 
 PORT = int(os.environ.get("SIF_TEST_PORT", "8177"))  # override when the demo server owns :8177
@@ -87,18 +89,16 @@ CASES: list[dict] = [
             "negation gate forces gray review"),
     },
     {
-        "id": 2, "src": "B.3-2", "label": "sarcasm (score seeded into gray band)",
+        "id": 2, "src": "B.3-2", "label": "sarcasm (gray or clean LOW)",
         "text": "Fantastic, another leak nobody reported for two shifts, "
                 "truly outstanding vigilance at the site.",
-        # Mock sha256-seeds this into the confidence band; the real model
-        # correctly scores the sarcastic non-report LOW (0.01, demo_verification
-        # §5) — either disposition is acceptable, a false HIGH is not.
+        # The ensemble mean may sit in the confidence band or be a clean LOW;
+        # a false HIGH is the only unacceptable outcome.
         "expect": lambda g, p: _req(
             (g["confidence"].triggered and g["confidence"].action == "gray")
-            if IS_MOCK else
-            (p.sif_score < 0.40
-             and not any(gs.triggered and gs.action == "gray" for gs in g.values())),
-            f"sarcasm -> confidence gray band (mock) or clean LOW (real); score={p.sif_score}"),
+            or (p.sif_score < 0.40
+                and not any(gs.triggered and gs.action == "gray" for gs in g.values())),
+            f"sarcasm -> confidence gray or clean LOW; score={p.sif_score}"),
     },
     {
         "id": 3, "src": "B.3-3", "label": "romanized Hinglish (known PARTIAL — no crash)",
@@ -145,19 +145,17 @@ CASES: list[dict] = [
                 "fire watch; crane lift with certified rigging; confined space "
                 "entry with gas test; forklift route segregated; seat belts "
                 "worn on the journey.",
-        # Real-model contract (masked-v2 scores the all-compliance checklist
-        # 0.566 — dense hazard vocabulary with no event — inside the
-        # confidence band): a confidence-gray is the honest "routed to
-        # review" disposition. The hard guarantees: never a confident flag
-        # (below the tuned op 0.6581) and no OTHER gray route (a negation or
-        # drill gray here would be a gate misfire).
+        # Dense hazard vocabulary with controls explicitly present and no event.
+        # Confidence or stability gray is acceptable; absence gates must stay silent.
         "expect": lambda g, p: _req(
-            (not any(gs.triggered and gs.action == "gray" for gs in g.values()))
+            (not any(gs.triggered and gs.action == "gray" for name, gs in g.items()
+                     if name != "verdict_stability"))
             if IS_MOCK else
             (p.sif_score < 0.6581
-             and not any(gs.triggered and gs.action == "gray" and gs.name != "confidence"
+             and not any(gs.triggered and gs.action == "gray"
+                         and gs.name not in ("confidence", "verdict_stability")
                          for gs in g.values())),
-            f"clean full-rules report: no flag, no non-confidence gray (score={p.sif_score})"),
+            f"clean full-rules report: no flag, no unexpected gray (score={p.sif_score})"),
     },
     {
         "id": 8, "src": "B.3-8", "label": "'Fire drill completed' (5th gate)",
@@ -220,14 +218,15 @@ CASES: list[dict] = [
             f"near-dup banner fires on synthetic row ({g['near_dup'].detail})"),
     },
     {
-        "id": 15, "src": "new-e", "label": "first-aid non-SIF (expected GREEN)",
+        "id": 15, "src": "new-e", "label": "first-aid non-SIF (stability may route)",
         "text": "Worker received first aid for a small superficial cut on the "
                 "finger while opening a toolbox; cleaned, dressed, and "
                 "returned to normal duties.",
         "expect": lambda g, p: (
             _req(p.sif_score < 0.5, f"green triage (score={p.sif_score})"),
-            _req(not any(gs.triggered and gs.action == "gray" for gs in g.values()),
-                 "no gray gate on a clean first-aid case"),
+            _req(not any(gs.triggered and gs.action == "gray"
+                         for name, gs in g.items() if name != "verdict_stability"),
+                 "no content-based gray gate on a clean first-aid case"),
         ),
     },
     {
@@ -240,8 +239,19 @@ CASES: list[dict] = [
             _req(not g["negation"].triggered,
                  f"'without fire watch'/'could have been' must NOT gray "
                  f"({g['negation'].detail})"),
-            _req(not any(gs.triggered and gs.action == "gray" for gs in g.values()),
-                 "hero paste renders the scored triage card, no gray gate"),
+            # 2026-09-26: the barrier gate family (the D3 fix) made 'without
+            # fire watch' a DETECTED absent-barrier signal — graying here is
+            # the product working, not a negation false positive (the B1
+            # comment above says exactly this). Contract now: the card still
+            # scores, and the ONLY gray is the true barrier, never negation.
+            _req(g["fire_watch_absent"].triggered
+                 and g["fire_watch_absent"].action == "gray",
+                 f"'without fire watch' must route via fire_watch_absent "
+                 f"({g['fire_watch_absent'].detail})"),
+            _req(all(not (gs.triggered and gs.action == "gray")
+                     for name, gs in g.items()
+                     if name not in ("fire_watch_absent", "verdict_stability")),
+                 "no gray gate other than the true fire_watch_absent barrier or a genuine stability concern"),
             # hot_work-on-top is the mock's anchor ranking; the real model's
             # dominant bar is Line of Fire here — accepted per D22 (the UI
             # narrates the probability bar, never "the rule"). The real-model
@@ -280,7 +290,24 @@ CASES: list[dict] = [
     },
 ]
 
-GATE_ORDER = ["min_length", "negation", "language", "confidence", "drill", "near_dup", "long_input", "well_control_watch", "chunked_low_score"]
+def discover_gate_names() -> list[str]:
+    """Gate names lifted from run_gates' own dispatch — never a hand-kept
+    list (a 9-entry hand list drifted from the 10-gate run_gates and failed
+    every case; tests/test_gate_parity.py now re-checks this independently).
+    vec/base_hit are dummies so gate_near_dup never lazy-imports the
+    embedder; a gate that still raises is caught inside run_gates and keeps
+    its spec name, so the returned names are exactly the dispatch table."""
+    class _EmptyIndex:
+        def nearest_session(self, _vec): return None
+
+    states = run_gates(
+        "gate discovery probe", 0.5, _EmptyIndex(), Settings(),
+        vec=[0.0], base_hit=(None, 0.0),
+    )
+    return [s.name for s in states]
+
+
+GATE_ORDER = discover_gate_names()
 
 # Set from /api/health in main(). Three expectations below were tuned to the
 # mock's sha256-seeded Beta scores; the real model disposes of those inputs
@@ -367,6 +394,9 @@ def print_table(results: list[tuple[dict, str, dict[str, _Gate] | None, str]]) -
 def main() -> int:
     tmp = tempfile.TemporaryDirectory(prefix="sif-adv-")
     env = dict(os.environ, SIF_DB_PATH=str(Path(tmp.name) / "adv.db"))
+    model = REPO_ROOT / "artifacts" / "models" / "masked-v2" / "sif_multitask_int8.onnx"
+    if model.is_file():
+        env.setdefault("SIF_MODEL_PATH", str(model))
     server = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(PORT)],
         cwd=REPO_ROOT, env=env,

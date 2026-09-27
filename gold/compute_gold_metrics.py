@@ -1,47 +1,25 @@
-"""Gold metrics pipeline — the one-command final gold eval.
+"""Gold metrics pipeline — one-command consensus evaluation.
 
-Input : artifacts/gold/gold_items.jsonl      (500 items, frozen sample)
-        artifacts/gold/labels_merged.jsonl   (export_labels.py output; when the
-            merge is missing but artifacts/gold/labels/ has labeler files,
-            export_labels.py is run first automatically)
-        artifacts/models/masked-v1/          (int8 ONNX + D27 operating point)
-Output: artifacts/gold/model_scores.jsonl    score cache (idempotent, re-runnable)
-        artifacts/gold/adjudication_queue.jsonl
-        artifacts/gold/gold_metrics.json
-        artifacts/gold/gold_metrics.md       money-slide table (every figure: CI + n)
+Input : artifacts/gold/gold_items.jsonl and a merged labels export
+Output: single-text int8 scores plus metrics/queue (paths configurable by CLI)
+Default model: artifacts/models/masked-v2/ (int8 ONNX and metrics.json).
 
-Protocol (spec/label_spec.yaml gold:, runs/run2/phase1-architecture/
-eval-metrics-engineer.md, DECISION_LOG D19/D25/D27):
-  * Ship-path scoring: single-text per-row int8 (D27). Batch int8 shifts
-    logits with batch composition (D25), so batch=1 is the only legal scoring
-    path — it is also the exact chain the threshold was tuned on.
-  * The FROZEN operating point is applied ONCE: raw-sigmoid threshold from
-    metrics.json operating_point_test_tuned (0.821855; NOT thresholds.json's
-    vacuous val-frozen 6.58e-5, D19). Decisions on p_raw = sigmoid(logit).
-  * Per-stratum metrics (osha_2024_25 / asrs / synthetic) + real-only pooled
-    headline. Synthetic is reported separately, never pooled (spec).
-  * Wilson 95% CIs (z=1.96) on recall and precision; flags when real-pooled
-    precision < 0.80 (operating-point claim fails) or recall CI width > 0.12.
-  * Rules: macro-F1 over rules with >= 50 gold positives; smaller rules are
-    merged into 'Other' with disclosure (spec cs_ei_support_weakness).
-  * Fleiss' kappa is human-vs-human only, imported from export_labels.py and
-    cross-checked against its agreement.json when present.
-  * Gold truth = unanimous label across an item's raters. Any disagreement or
-    'unsure' goes to the adjudication queue and is excluded from metrics
-    until adjudicated. The queue is BLIND: no stratum, no model output.
-  * Adjudication: rulings in artifacts/gold/labels/adjudication.jsonl (written
-    by gold/adjudicate.py) are applied as a PRE-CONSENSUS step: a ruling is an
-    item-level override that SUPERSEDES the item's split votes (it is NOT a
-    5th rater and never enters the kappa computation), so the item becomes
-    unanimous-by-ruling and enters metrics with the ruled truth. A final
-    'unsure' ruling keeps the item excluded but clears it from the pending
-    queue. Latest ruling per item wins. No rulings file = current behavior.
+The historical gold snapshot used calibrated threshold 0.658108 (raw
+0.746401). The current serving operating point is calibrated 0.5647 (raw
+0.605638), tuned for the runtime N=4 ensemble. This evaluator scores one
+masked text at a time, so a run at the current threshold is a single-text
+proxy, not an N=4 serving-path evaluation. The dated snapshot
+artifacts/gold/gold_metrics_current_point_20260926.md documents that limitation
+and the gold-sample overlap with operating-point tuning.
+
+Protocol: the threshold is applied once to p_raw; per-stratum metrics and a
+real-only pooled headline are reported, synthetic is kept separate, and
+Wilson 95% CIs are reported for precision/recall. Disagreements and unsure
+labels remain excluded pending adjudication. Human agreement is human-vs-human
+only; rulings supersede split votes before consensus and never enter kappa.
 
 Run:        .venv/bin/python gold/compute_gold_metrics.py
 Self-check: .venv/bin/python gold/compute_gold_metrics.py --self-check
-            (Wilson unit checks + end-to-end in a temp dir on simulated
-            labels; never touches artifacts/gold/, leaves the pre-labeling
-            state untouched)
 """
 
 from __future__ import annotations
@@ -372,7 +350,16 @@ def fci(d: dict) -> str:
 def render_md(result: dict) -> str:
     md = []
     fp = result["model"]
-    md.append(f"# Gold metrics — final blind eval ({fp['model_dir']}, D27 ship path)")
+    md.append(f"# Gold metrics — consensus eval ({fp['model_dir']}, single-text int8)")
+    md.append("")
+    md.append("**Evaluation limitations:** This evaluates single-text int8 scores, "
+              "not the current serving N=4 ensemble; the ensemble's calibrated "
+              "threshold is converted to its raw-score equivalent and applied to "
+              "single-text scores. OSHA gold items were sampled from the same "
+              "`artifacts/corpus/test.jsonl` temporal test split used to tune the "
+              "operating point, so this is not a fully held-out evaluation. "
+              "Synthetic items are not excluded from training data and may "
+              "overlap training; their metrics are not generalization evidence.")
     md.append("")
     op = result["operating_point"]
     md.append(f"- Model: `{fp['model_dir']}` int8 (`{fp['onnx']}` sha "
@@ -494,6 +481,14 @@ def run(args: argparse.Namespace) -> int:
 
     gold = load_jsonl(gold_path)
     op = load_operating_point(model_dir)
+    if args.threshold_calibrated is not None:
+        if not 0.0 < args.threshold_calibrated < 1.0:
+            raise SystemExit("ERROR: --threshold-calibrated must be between 0 and 1")
+        logit = math.log(args.threshold_calibrated / (1.0 - args.threshold_calibrated))
+        op["threshold_calibrated"] = args.threshold_calibrated
+        op["threshold_raw"] = sigmoid(logit * op["temperature"])
+        op["source"] = "--threshold-calibrated override"
+        op["selection"] = "externally supplied calibrated operating point"
 
     # Step 1: score all gold items (idempotent cache).
     scores = score_gold(gold, scores_path, model_dir, op, args.threads, args.rescore)
@@ -936,6 +931,8 @@ def build_parser() -> argparse.ArgumentParser:
                          "pre-consensus superseding overrides. Absent file = no overrides.")
     ap.add_argument("--threads", type=int, default=4,
                     help="ONNX threads (default 4 — the demo server shares this box)")
+    ap.add_argument("--threshold-calibrated", type=float, default=None,
+                    help="apply an explicit threshold on the calibrated score scale")
     ap.add_argument("--seed", type=int, default=SEED)
     ap.add_argument("--rescore", action="store_true", help="ignore the score cache")
     ap.add_argument("--self-check", action="store_true")

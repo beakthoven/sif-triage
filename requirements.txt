@@ -1,6 +1,8 @@
 # Runtime dependencies — SIF-Precursor Detection Engine (PS 26165)
 # 100% local runtime: FastAPI + onnxruntime INT8 model + SQLite/numpy index.
 # NO torch here by design: training/export happens on Kaggle (see requirements-dev.txt).
+# pandas is pipeline-only (data_pipeline/build_corpus.py, oiics_maps.py); it is
+# retained here for the offline wheel closure. pyarrow is unused and removed.
 fastapi
 uvicorn[standard]
 pydantic>=2
@@ -8,5 +10,7 @@ numpy>=2
 threadpoolctl>=3  # BLAS thread pinning for the near-dup matmuls (ORT starvation fix, see app/storage.py)
 onnxruntime>=1.23
 tokenizers
-pandas>=2
-pyarrow
+# pandas>=2 — pipeline-only; imported by data_pipeline/build_corpus.py and oiics_maps.py.
+structlog>=24          # JSON logs via stdlib ProcessorFormatter (A5, app/main.py)
+prometheus-client>=0.20  # RED metrics + /metrics endpoint (A5, app/main.py)
+pydantic-settings>=2   # typed SIF_* env parsing (A5, replaces hand-rolled os.environ coercion)

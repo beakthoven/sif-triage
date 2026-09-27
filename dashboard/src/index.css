@@ -1,144 +1,452 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./lib/devanagari.css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * Theme switching: `.dark` on <html> (set by lib/theme.tsx, pre-paint by the
+ * inline script in index.html). Every Astryx semantic token below has a
+ * light AND a dark value, so `dark:` utilities are rarely needed — surfaces
+ * follow the token swap.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * SIF dashboard theme — "Industrial Trust Blue" (DESIGN.md is the binding
+ * contract) expressed in the Astryx semantic vocabulary the app already
+ * speaks. Light values are DESIGN.md §2/§9 verbatim. Dark values are derived
+ * from the same palette hues; every text pair was measured with the WCAG
+ * relative-luminance formula (≥4.5:1 text, ≥3:1 non-text).
+ *
+ * Orange (--action-primary / --ring-focus) is reserved for primary actions,
+ * the active nav indicator and focus rings. Status hues carry verdict/safety
+ * meaning only and are always paired with an icon + word.
+ *
+ * The ONLY raw hex values in the app live in this file.
+ */
+:root {
+    color-scheme: light;
+
+    /* Surface */
+    --surface-canvas: #f7f9fc;               /* color-bg */
+    --surface-card: #ffffff;                 /* color-surface */
+    --surface-raised: #ffffff;               /* popovers, dialogs, menus */
+    --surface-sunken: #f0f4f9;               /* insets, row hover (DESIGN §5.5) */
+    --surface-zebra: #fbfcfe;                /* table zebra (DESIGN §5.5) */
+    --surface-overlay: rgba(11, 37, 69, 0.4); /* modal scrim (DESIGN §5.9) */
+
+    /* Structural chrome — header / nav (DESIGN §5.7) */
+    --chrome-bg: #0b2545;                    /* color-primary */
+    --chrome-bg-hover: #123a6b;              /* color-primary-hover */
+    --chrome-fg: #ffffff;                    /* 15.39:1 */
+    --chrome-fg-muted: #b8c7d9;              /* 8.95:1 */
+    --chrome-border: #1b4b8a;
+
+    /* Content */
+    --content-primary: #1c2b36;              /* color-text — 13.75:1 on bg */
+    --content-secondary: #5a6b78;            /* color-text-muted — 5.23:1 on bg */
+    --content-muted: #5a6b78;                /* placeholders / disabled (DESIGN §5.1) */
+    --content-inverse: #ffffff;
+    --content-link: #1b4b8a;                 /* color-secondary — 8.23:1 */
+
+    /* Border / ring */
+    --border-subtle: #dce3ea;                /* color-border */
+    --border-default: #dce3ea;
+    --border-strong: #8a99a6;                /* 3:1 non-text emphasis */
+    --ring-focus: #ff6b1a;                   /* DESIGN §5.1 focus-visible */
+
+    /* Action */
+    --action-primary: #ff6b1a;               /* color-accent */
+    --action-primary-hover: #e55a0d;         /* color-accent-hover */
+    --action-primary-fg: #1c2b36;            /* 5.09:1 — never white (DESIGN §2.3) */
+    --action-secondary: #f0f4f9;             /* subtle selected/filled state */
+    --action-secondary-fg: #1b4b8a;          /* secondary/tertiary buttons */
+    --action-ghost-hover: #f0f4f9;
+    --action-disabled: #dce3ea;
+    --action-disabled-fg: #5a6b78;
+
+    /* Verdict — the product's core semantic; ALWAYS paired with icon + word.
+     * text = text-safe shade, chip = tint bg, fill = dots/bars/charts. */
+    --verdict-high: #b3261e;                 /* critical text — 5.5:1 on chip */
+    --verdict-high-chip: #fbe7e5;
+    --verdict-high-fill: #d62828;
+    --verdict-moderate: #8a5a00;             /* warning text — 5.24:1 on chip */
+    --verdict-moderate-chip: #fbf0d9;
+    --verdict-moderate-fill: #f2a900;
+    --verdict-low: #5a6b78;
+    --verdict-low-chip: #f0f4f9;
+    --verdict-low-fill: #8a99a6;
+    --verdict-clear: #17603f;                /* good text — 6.59:1 on chip */
+    --verdict-clear-chip: #e4f3ec;
+    --verdict-clear-fill: #2e9e6b;
+    --verdict-uncertain: #1b4b8a;            /* needs human review — steel blue */
+    --verdict-uncertain-chip: #e6eef8;
+    --verdict-uncertain-fill: #1b4b8a;
+
+    /* Status */
+    --status-ok: #17603f;
+    --status-warn: #8a5a00;
+    --status-danger: #b3261e;
+    --status-danger-fill: #d62828;           /* destructive button bg (white 5.01:1) */
+    --status-info: #1b4b8a;
+    --status-quiet: #5a6b78;
+
+    /* Evidence highlight + selection */
+    --highlight-bg: #e6eef8;
+    --highlight-edge: #1b4b8a;
+    --selection-bg: #cfddf0;
+
+    /* Elevation (DESIGN §4.4) */
+    --elevation-sm: 0 1px 2px rgba(11, 37, 69, 0.06);
+    --elevation-md: 0 4px 8px rgba(11, 37, 69, 0.08);
+    --elevation-lg: 0 12px 24px rgba(11, 37, 69, 0.12);
+
+    /* Motion (DESIGN §7.1) */
+    --motion-instant: 50ms;
+    --motion-fast: 150ms;
+    --motion-standard: 220ms;
+    --motion-medium: 320ms;
+    --motion-slow: 400ms;
+
+    /* Font stacks (DESIGN §3.1). Devanagari stack is owned by
+     * src/lib/devanagari.css; there is no Plex Mono Devanagari, so mono falls
+     * through to the Sans Devanagari face for Devanagari glyphs. */
+    --font-stack-sans: "Inter Variable", "Inter", "IBM Plex Sans", var(--font-devanagari-stack), -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-stack-mono: "IBM Plex Mono", "JetBrains Mono", var(--font-devanagari-stack), "SF Mono", Consolas, monospace;
+
+    /* Chart series (features/analytics/charts.tsx) */
+    --chart-1: var(--verdict-high-fill);
+    --chart-2: var(--content-secondary);
+    --chart-3: var(--verdict-uncertain-fill);
+    --chart-4: var(--border-strong);
+    --chart-5: var(--border-default);
+}
+
+.dark {
+    color-scheme: dark;
+
+    --surface-canvas: #06111f;
+    --surface-card: #0b1d35;
+    --surface-raised: #11294a;
+    --surface-sunken: #081729;
+    --surface-zebra: #0d213c;
+    --surface-overlay: rgba(2, 8, 16, 0.64);
+
+    --chrome-bg: #0b2545;
+    --chrome-bg-hover: #123a6b;
+    --chrome-fg: #f7f9fc;
+    --chrome-fg-muted: #afbdcb;
+    --chrome-border: #18304f;
+
+    --content-primary: #f7f9fc;              /* 16.04:1 on card */
+    --content-secondary: #afbdcb;            /* 8.83:1 on card */
+    --content-muted: #7f93a8;                /* 5.35:1 on card */
+    --content-inverse: #0b1d35;
+    --content-link: #8db6ec;                 /* 8.08:1 on card */
+
+    --border-subtle: #18304f;
+    --border-default: #23406a;
+    --border-strong: #4a6a93;                /* 3.04:1 on card */
+    --ring-focus: #ff6b1a;                   /* 5.94:1 on card */
+
+    --action-primary: #ff6b1a;
+    --action-primary-hover: #e55a0d;
+    --action-primary-fg: #1c2b36;
+    --action-secondary: #11294a;
+    --action-secondary-fg: #8db6ec;
+    --action-ghost-hover: #11294a;
+    --action-disabled: #18304f;
+    --action-disabled-fg: #7f93a8;
+
+    --verdict-high: #ff8a80;                 /* 6.95:1 on chip */
+    --verdict-high-chip: #3a1720;
+    --verdict-high-fill: #ff6a5c;
+    --verdict-moderate: #f2b630;             /* 7.81:1 on chip */
+    --verdict-moderate-chip: #35290c;
+    --verdict-moderate-fill: #f2a900;
+    --verdict-low: #afbdcb;
+    --verdict-low-chip: #11294a;
+    --verdict-low-fill: #7f93a8;
+    --verdict-clear: #5bc99a;                /* 6.59:1 on chip */
+    --verdict-clear-chip: #0e3528;
+    --verdict-clear-fill: #2e9e6b;
+    --verdict-uncertain: #8db6ec;            /* 6.14:1 on chip */
+    --verdict-uncertain-chip: #14325a;
+    --verdict-uncertain-fill: #8db6ec;
+
+    --status-ok: #5bc99a;
+    --status-warn: #f2b630;
+    --status-danger: #ff8a80;
+    --status-danger-fill: #d62828;
+    --status-info: #8db6ec;
+    --status-quiet: #afbdcb;
+
+    --highlight-bg: #14325a;
+    --highlight-edge: #8db6ec;
+    --selection-bg: #23406a;
+
+    --elevation-sm: 0 1px 2px rgba(0, 0, 0, 0.32);
+    --elevation-md: 0 4px 8px rgba(0, 0, 0, 0.36);
+    --elevation-lg: 0 12px 24px rgba(0, 0, 0, 0.48);
+}
+
+/* shadcn compile-compat aliases — legacy names resolve onto the Astryx
+ * tokens above, so they follow the theme too. No new colors. */
+:root {
+    --background: var(--surface-canvas);
+    --foreground: var(--content-primary);
+    --card: var(--surface-card);
+    --card-foreground: var(--content-primary);
+    --popover: var(--surface-raised);
+    --popover-foreground: var(--content-primary);
+    --primary: var(--action-primary);
+    --primary-foreground: var(--action-primary-fg);
+    --secondary: var(--action-secondary);
+    --secondary-foreground: var(--content-primary);
+    --muted: var(--surface-sunken);
+    --muted-foreground: var(--content-secondary);
+    --accent: var(--action-ghost-hover);
+    --accent-foreground: var(--content-primary);
+    --destructive: var(--status-danger);
+    --border: var(--border-default);
+    --input: var(--border-default);
+    --ring: var(--ring-focus);
+    --verdict: var(--verdict-high);
+    --ok: var(--verdict-clear);
+    --quiet: var(--verdict-uncertain);
+}
+
+/* Utility mappings — Astryx vocabulary. */
 @theme inline {
-    --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    --font-heading: var(--font-sans);
+    --color-surface-canvas: var(--surface-canvas);
+    --color-surface-card: var(--surface-card);
+    --color-surface-raised: var(--surface-raised);
+    --color-surface-sunken: var(--surface-sunken);
+    --color-surface-zebra: var(--surface-zebra);
+    --color-surface-overlay: var(--surface-overlay);
+
+    --color-chrome-bg: var(--chrome-bg);
+    --color-chrome-bg-hover: var(--chrome-bg-hover);
+    --color-chrome-fg: var(--chrome-fg);
+    --color-chrome-fg-muted: var(--chrome-fg-muted);
+    --color-chrome-border: var(--chrome-border);
+
+    --color-content-primary: var(--content-primary);
+    --color-content-secondary: var(--content-secondary);
+    --color-content-muted: var(--content-muted);
+    --color-content-inverse: var(--content-inverse);
+    --color-content-link: var(--content-link);
+
+    --color-border-subtle: var(--border-subtle);
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    --color-ring-focus: var(--ring-focus);
+
+    --color-action-primary: var(--action-primary);
+    --color-action-primary-hover: var(--action-primary-hover);
+    --color-action-primary-fg: var(--action-primary-fg);
+    --color-action-secondary: var(--action-secondary);
+    --color-action-secondary-fg: var(--action-secondary-fg);
+    --color-action-ghost-hover: var(--action-ghost-hover);
+    --color-action-disabled: var(--action-disabled);
+    --color-action-disabled-fg: var(--action-disabled-fg);
+
+    --color-verdict-high: var(--verdict-high);
+    --color-verdict-high-chip: var(--verdict-high-chip);
+    --color-verdict-high-fill: var(--verdict-high-fill);
+    --color-verdict-moderate: var(--verdict-moderate);
+    --color-verdict-moderate-chip: var(--verdict-moderate-chip);
+    --color-verdict-moderate-fill: var(--verdict-moderate-fill);
+    --color-verdict-low: var(--verdict-low);
+    --color-verdict-low-chip: var(--verdict-low-chip);
+    --color-verdict-low-fill: var(--verdict-low-fill);
+    --color-verdict-clear: var(--verdict-clear);
+    --color-verdict-clear-chip: var(--verdict-clear-chip);
+    --color-verdict-clear-fill: var(--verdict-clear-fill);
+    --color-verdict-uncertain: var(--verdict-uncertain);
+    --color-verdict-uncertain-chip: var(--verdict-uncertain-chip);
+    --color-verdict-uncertain-fill: var(--verdict-uncertain-fill);
+
+    --color-status-ok: var(--status-ok);
+    --color-status-warn: var(--status-warn);
+    --color-status-danger: var(--status-danger);
+    --color-status-danger-fill: var(--status-danger-fill);
+    --color-status-info: var(--status-info);
+    --color-status-quiet: var(--status-quiet);
+
+    --color-highlight-bg: var(--highlight-bg);
+    --color-highlight-edge: var(--highlight-edge);
+
+    --shadow-sm: var(--elevation-sm);
+    --shadow-md: var(--elevation-md);
+    --shadow-lg: var(--elevation-lg);
+    --shadow-xl: var(--elevation-lg);
+
+    /* Legacy (shadcn-era) color utilities, aliased to spec tokens. */
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
     --color-verdict: var(--verdict);
     --color-ok: var(--ok);
     --color-quiet: var(--quiet);
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-chart-5: var(--chart-5);
-    --color-chart-4: var(--chart-4);
-    --color-chart-3: var(--chart-3);
-    --color-chart-2: var(--chart-2);
-    --color-chart-1: var(--chart-1);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/*
- * SIF dashboard theme — "reading room" light palette (client: simple, clear,
- * not cluttered). Paper background, ink text, hairline borders, ONE amber
- * (#B45309, 5.9:1 on white — WCAG AA) reserved for review-priority verdicts,
- * quiet green for clear/ok, slate for gray/humility states. No red/green
- * pairing anywhere: band semantics are words + position, never hue alone.
- */
-:root {
-    --paper: #f5f4f0;
-    --verdict: #b45309;
-    --ok: #047857;
-    --quiet: #64748b;
-    --background: #f5f4f0;
-    --foreground: #202226;
-    --card: #fdfdfb;
-    --card-foreground: #1c1e21;
-    --popover: #ffffff;
-    --popover-foreground: #1c1e21;
-    --primary: #1c1e21;
-    --primary-foreground: #ffffff;
-    --secondary: #f0eee8;
-    --secondary-foreground: #1c1e21;
-    --muted: #f0eee8;
-    --muted-foreground: #5b6470;
-    --accent: #edeae2;
-    --accent-foreground: #1c1e21;
-    --destructive: #b42318;
-    --border: #dedcd4;
-    --input: #d8d5cc;
-    --ring: #1c1e21;
-    --chart-1: #b45309;
-    --chart-2: #5b6470;
-    --chart-3: #64748b;
-    --chart-4: #94a3b8;
-    --chart-5: #cbd5e1;
-    --radius: 0.625rem;
-    --sidebar: #f8f7f4;
-    --sidebar-foreground: #1c1e21;
-    --sidebar-primary: #1c1e21;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f0eee8;
-    --sidebar-accent-foreground: #1c1e21;
-    --sidebar-border: #e4e2da;
-    --sidebar-ring: #1c1e21;
+@theme {
+    --font-sans: var(--font-stack-sans);
+    --font-mono: var(--font-stack-mono);
+    --font-heading: var(--font-stack-sans);
+    --font-devanagari: var(--font-devanagari-stack);
+
+    /* Type scale — DESIGN §3.2, exact px. Weights applied by the consumer. */
+    --text-xs: 12px;
+    --text-xs--line-height: 16px;
+    --text-sm: 14px;
+    --text-sm--line-height: 20px;
+    --text-base: 16px;
+    --text-base--line-height: 24px;
+    --text-lg: 18px;
+    --text-lg--line-height: 28px;
+    --text-xl: 20px;
+    --text-xl--line-height: 28px;
+    --text-2xl: 24px;
+    --text-2xl--line-height: 32px;
+    --text-3xl: 28px;
+    --text-3xl--line-height: 36px;
+    --text-4xl: 36px;
+    --text-4xl--line-height: 44px;
+    --text-5xl: 48px;
+    --text-5xl--line-height: 56px;
+    --text-kpi: 36px;
+    --text-kpi--line-height: 1.1;
+
+    /* Legacy semantic sizes, mapped onto the DESIGN scale. */
+    --text-display: 28px;
+    --text-display--line-height: 36px;
+    --text-title: 24px;
+    --text-title--line-height: 32px;
+    --text-subtitle: 18px;
+    --text-subtitle--line-height: 28px;
+    --text-body: 16px;
+    --text-body--line-height: 24px;
+    --text-label: 14px;
+    --text-label--line-height: 20px;
+    --text-caption: 12px;
+    --text-caption--line-height: 16px;
+    --text-mono: 14px;
+    --text-mono--line-height: 20px;
+
+    /* Spacing — utilities are 4px × N; DESIGN §4.1 tokens are the steps
+     * 1/2/4/6/8/12/16 (4/8/16/24/32/48/64). */
+    --spacing: 4px;
+
+    /* Radius — DESIGN §4.3 (xs/xl/4xl are compat aliases). */
+    --radius-xs: 4px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 12px;
+    --radius-4xl: 12px;
+    --radius-full: 999px;
+
+    /* Easing — DESIGN §7.2; the only curves allowed. `ease-out`/`ease-in`/
+     * `ease-in-out` utilities alias onto them. */
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-in-out: cubic-bezier(0.2, 0, 0, 1);
+
+    --animate-flash: flash 400ms var(--ease-standard) 1;
+
+    /* Hover/focus state changes default to motion-fast. */
+    --default-transition-duration: 150ms;
+    --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@keyframes flash {
+    0% { background-color: var(--action-secondary); }
+    100% { background-color: transparent; }
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-    }
+    @apply border-border;
+  }
   html {
     @apply font-sans;
-    font-size: 18px; /* spec: base 18px, min 16px — projector-legible */
-    }
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
   body {
     @apply bg-background text-foreground;
     font-variant-numeric: tabular-nums;
     line-height: 1.5;
     text-rendering: optimizeLegibility;
-    }
+    transition: background-color var(--motion-standard) var(--ease-standard);
+  }
+  /*
+   * Un-removable focus ring (WCAG 2.4.7, DESIGN §5.1/§8.3): 2px orange, 2px
+   * offset. !important beats every `outline-none` in feature or primitive
+   * code so no sibling can regress it.
+   */
+  :focus-visible {
+    outline: 2px solid var(--ring-focus) !important;
+    outline-offset: 2px;
+  }
+  a {
+    color: inherit;
+  }
 }
 
 @layer components {
   .page-shell {
-    @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8;
+    @apply mx-auto w-full min-w-0 max-w-[1200px] px-4 md:px-6;
   }
-  .eyebrow {
-    @apply mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase;
+  @media (min-width: 1440px) {
+    .page-shell { max-width: 1320px; }
   }
   .page-title {
-    @apply max-w-3xl text-2xl font-semibold tracking-tight text-foreground sm:text-3xl;
+    @apply max-w-3xl text-2xl font-bold text-content-primary md:text-3xl;
+    overflow-wrap: anywhere;
   }
-  /* Evidence-span highlight: quiet warm tint on paper, ink text, medium
-   * weight — never color-only (weight + tint both carry the mark). */
+  .eyebrow {
+    @apply mb-1 text-xs font-medium text-content-secondary;
+  }
+  .text-kpi-num {
+    @apply font-mono text-kpi font-bold tabular-nums;
+  }
+  /* Evidence-span highlight: tint + edge + weight, never color alone. */
   .span-highlight {
-    @apply rounded-sm px-0.5 font-medium;
-    background-color: #efe9dc;
-    color: var(--foreground);
+    @apply rounded-xs px-0.5 font-medium;
+    background-color: var(--highlight-bg);
+    box-shadow: inset 0 -2px 0 var(--highlight-edge);
+    color: var(--content-primary);
   }
-  /* 6px status dot — replaces pill chips everywhere except the verdict. */
   .status-dot {
-    @apply inline-block size-1.5 shrink-0 rounded-full;
+    @apply inline-block size-2 shrink-0 rounded-full;
   }
 }
 
 ::selection {
-  background: #e8ddca;
-  color: var(--foreground);
+  background: var(--selection-bg);
+  color: var(--content-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -146,5 +454,6 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

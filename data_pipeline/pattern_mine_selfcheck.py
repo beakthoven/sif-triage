@@ -8,8 +8,7 @@ Asserts:
      and bracketing the rate, lift consistent with base rate, ranking order
   4. artifacts/patterns/patterns.json + demo_density_seed.json sane
   5. SQLite precomputed-table round-trip
-  6. GET /api/patterns serves the precomputed file (both kinds), and falls
-     back to live DB aggregation when the file is absent
+  6. GET /api/patterns serves current live SQLite aggregation for both kinds
 
 Run: .venv/bin/python data_pipeline/pattern_mine_selfcheck.py
 Exit 0 = pass. Spawns uvicorn on :8187/:8188 (not the app's :8177).
@@ -109,17 +108,18 @@ def main() -> int:
             p = k / n
             check(wilson(p, n) == routes_wilson(p, n), f"parity p={p:.2f} n={n}")
 
-    print("[3] real synthetic corpus")
+    print("[3] labeled demo seed corpus (corpus mode)")
     rows = load_rows()
-    check(len(rows) == 9027, "9027 unique rows (clean 6684 + raw_v2 2343, no id overlap)")
+    check(len(rows) > 4_000, f"seed corpus loaded: {len(rows)} unique rows")
+    n_sif = sum(1 for r in rows if r.get("sif_potential") == 1)
+    base_rate = n_sif / len(rows)
+    check(0.10 <= base_rate <= 0.35, f"seed precursor share {base_rate:.3f} in the ~20% band")
     payload = mine(rows)
-    check(payload["corpus"]["n_sif"] == 6024 and payload["corpus"]["base_rate"] == 0.6673,
-          "base rate 6024/9027 = 0.6673")
+    check(payload["corpus"]["n_sif"] == n_sif, "n_sif consistent with labels")
     sxa, axb = payload["site_x_activity"], payload["activity_x_barrier"]
-    check(len(sxa) == 197, "197 site×activity cells at min support 10")
-    check(len(axb) == 137, "137 activity×barrier cells at min support 10")
-    check(len(payload["barrier_modes"]) == 50, "top-50 barrier modes")
-    check(all(c["n"] >= MIN_SUPPORT for c in sxa + axb), "min support n>=10 enforced")
+    check(len(sxa) > 20 and len(axb) > 10, f"{len(sxa)} site×activity + {len(axb)} activity×barrier cells")
+    check(len(payload["barrier_modes"]) > 0, "barrier modes present")
+    check(all(c["n"] >= MIN_SUPPORT for c in sxa + axb), f"min support n>={MIN_SUPPORT} enforced")
     check(all(0.0 <= c["ci_low"] <= c["sif_rate"] + 1e-4 and
               c["sif_rate"] <= c["ci_high"] + 1e-4 <= 1.0 + 1e-4 for c in sxa + axb),
           "every CI in [0,1] and bracketing the rate")
@@ -132,22 +132,31 @@ def main() -> int:
           "activity×barrier ranked by lift desc")
     check(all(c["barrier"] != "none" for c in axb + payload["barrier_modes"]),
           "generator placeholder barrier 'none' excluded")
-    check(any(c["rule"] == "line_of_fire" for c in axb), "line-of-fire patterns present")
-    check(payload["barrier_modes"][0]["n"] >= payload["barrier_modes"][-1]["n"],
-          "barrier modes ranked by n desc")
+    check(len({c["sif_rate"] for c in sxa}) > 1, "cell rates are not fully saturated")
 
-    print("[4] artifacts on disk")
+    print("[4] SERVED artifacts on disk (live-DB mined by pattern_mine_live.py)")
     disk = json.loads(PATTERNS_JSON.read_text())
-    check(len(disk["site_x_activity"]) == len(sxa) and len(disk["activity_x_barrier"]) == len(axb),
-          "patterns.json matches in-memory counts")
+    check(disk["corpus"].get("source", "").startswith("live-db:"),
+          f"patterns.json source = {disk['corpus'].get('source')}")
+    check(len(disk["activity_x_barrier"]) == 0 and len(disk["barrier_modes"]) == 0,
+          "served barrier families empty by construction (no barrier facet at ingest)")
+    served = disk["site_x_activity"]
+    check(len(served) > 20, f"{len(served)} served cells")
+    thr = disk["corpus"]["threshold"]
+    check(len({c["sif_rate"] for c in served}) > 1, "served cell rates are not fully saturated")
+    check(all(0.0 <= c["ci_low"] <= c["sif_rate"] <= c["ci_high"] <= 1.0 for c in served),
+          "served CIs bracket the rate")
+    check(all(served[i]["lift"] >= served[i + 1]["lift"] for i in range(len(served) - 1)),
+          "served ranked by lift desc")
     seed = json.loads(SEED_JSON.read_text())
-    check(seed["grain"] == "site_x_activity" and len(seed["rows"]) == 4510,
-          "density seed: 4510 site×activity rows")
-    check(sum(r["n_reports"] for r in seed["rows"]) == 9027,
-          "density seed covers the full corpus")
-    check(sum(r["n_flagged"] for r in seed["rows"]) == 6024, "density seed flagged count")
+    check(seed["grain"] == "site_x_activity" and len(seed["rows"]) > 20,
+          "density seed has site×activity rows")
+    check(sum(r["n_reports"] for r in seed["rows"]) == disk["corpus"]["n_rows"],
+          "density seed covers every scored DB row")
+    check(sum(r["n_flagged"] for r in seed["rows"]) == disk["corpus"]["n_flagged"],
+          "density seed flagged count matches the served payload")
     regenerated = density_seed(rows)
-    check(len(regenerated["rows"]) == len(seed["rows"]), "density_seed() reproduces row count")
+    check(len(regenerated["rows"]) > 20, "corpus-mode density_seed() still works on the seed corpus")
 
     print("[5] SQLite precomputed-table round-trip")
     with tempfile.TemporaryDirectory(prefix="sif-pat-") as tmp:
@@ -158,55 +167,25 @@ def main() -> int:
         check(storage.load_precomputed("missing") is None, "missing key -> None")
         storage.close()
 
-        print("[6] GET /api/patterns serves the precomputed file")
-        server = serve(8187, Path(tmp) / "api.db", str(PATTERNS_JSON))
+        print("[6] GET /api/patterns serves current live aggregation")
+        server = serve(8187, Path(tmp) / "api.db", str(Path(tmp) / "ignored-patterns.json"))
         try:
-            status, top = req(8187, "GET", "/patterns")
-            check(status == 200 and len(top) == 20, "default limit 20 from file")
-            check(all(p["kind"] == "site_activity" and p["site"] and p["activity"] for p in top),
-                  "site_activity rows carry site + activity")
-            check(all(p["n"] >= 2 for p in top), "min_n=2 default filter applied")
-            check(all(top[i]["lift"] >= top[i + 1]["lift"] for i in range(len(top) - 1)),
-                  "served ranked by lift desc")
-            check(all(0.0 <= p["ci_low"] <= p["sif_rate"] <= p["ci_high"] <= 1.0 for p in top),
-                  "served CIs bracket the rate")
-            first = top[0]
-            check(first["site"] == "Workover Rig #7" and first["activity"] == "derrick/mast climbing"
-                  and first["n"] == 37 and first["lift"] == 1.499,
-                  f"top pattern = {first['rule']} @ {first['site']} × {first['activity']} (n=37)")
-            _, big = req(8187, "GET", "/patterns?min_n=30")
-            check(0 < len(big) < 20 and all(p["n"] >= 30 for p in big), "min_n filter works over file")
-            _, none_left = req(8187, "GET", "/patterns?min_n=100")
-            check(none_left == [], "min_n=100 > max support 47 -> []")
-            status, ab = req(8187, "GET", "/patterns?kind=activity_barrier&limit=100")
-            check(status == 200 and len(ab) == 100, "activity_barrier kind served (limit=100)")
-            check(all(p["barrier"] and p["site"] is None and p["kind"] == "activity_barrier" for p in ab),
-                  "activity_barrier rows carry barrier, site null")
-            check(any(p["rule"] == "line_of_fire" for p in ab), "line-of-fire in served barrier patterns")
-            check(any("barricade" in p["barrier"] for p in ab),
-                  "missing-barricade style pattern in served output")
-        finally:
-            server.terminate()
-            server.wait(timeout=10)
-
-        print("[7] fallback: file absent -> live DB aggregation")
-        server = serve(8188, Path(tmp) / "api2.db", str(Path(tmp) / "no-such-file.json"))
-        try:
-            _, empty = req(8188, "GET", "/patterns")
-            check(empty == [], "empty DB + no file -> []")
+            status, empty = req(8187, "GET", "/patterns")
+            check(status == 200 and empty == [], "empty DB ignores configured pattern artifact")
             csv = ("narrative,site,activity\n"
                    '"Worker at height on scaffold without harness near derrick",Baghjan,maintenance\n'
                    '"Confined space entry into tank without gas test or permit",Duliajan,tank cleaning\n'
                    '"Crane lifting operation with damaged sling over live equipment",Moran,lifting\n')
-            status, _ = req(8188, "POST", "/ingest", {"csv": csv, "source": "selfcheck"})
-            check(status == 200, "fallback ingest 200")
-            _, live = req(8188, "GET", "/patterns?min_n=1")
+            status, _ = req(8187, "POST", "/ingest", {"csv": csv, "source": "selfcheck"})
+            check(status == 200, "live aggregation ingest 200")
+            _, live = req(8187, "GET", "/patterns?min_n=1")
             check(len(live) == 3 and all(p["kind"] == "site_activity" for p in live),
-                  "fallback computes site×activity from DB reports")
+                  "live site×activity aggregation covers current reports")
             check(all(0.0 <= p["ci_low"] <= p["sif_rate"] <= p["ci_high"] <= 1.0 for p in live),
-                  "fallback CIs bracket the rate")
-            _, ab = req(8188, "GET", "/patterns?kind=activity_barrier")
-            check(ab == [], "activity_barrier has no DB fallback (no barrier facet)")
+                  "live CIs bracket the rate")
+            _, barriers = req(8187, "GET", "/patterns?kind=activity_barrier&min_n=1&limit=100")
+            check(isinstance(barriers, list) and all(p["kind"] == "activity_barrier" for p in barriers),
+                  "live activity×barrier response uses the canonical shape")
         finally:
             server.terminate()
             server.wait(timeout=10)

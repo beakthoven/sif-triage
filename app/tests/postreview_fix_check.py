@@ -10,10 +10,12 @@ explain_embed.md against the REAL masked-v2 int8 artifact (no server, no
      (12 -> <=5, min score > 0.20; residual discount is inherent to CLS
      pooling — documented at RealOnnxClassifier.STRIDE). SEV2-6: a 200k-char
      paste is capped at 10k chars and scores in <5s, no 15.9s hang.
-  3. SEV2-1 D27: int8 predict == per-window-solo max (delta 0.0; was 0.26).
-  4. SEV2 spans: 13 demo cards + 20 corpus rows — every span a valid,
-     meaningful phrase (>=3 chars, alphabetic, not stopword-only, no
-     punctuation fragments); keyword-attribution fallback works (D2).
+  3. SEV2-1 D27: each of the shipped N=4 masked surface variants matches its
+     per-window solo score, and their mean matches predict (masked-v2 INT8).
+  4. SEV2 spans: 13 shipped demo cards — every span a valid, meaningful
+     phrase (>=3 chars, alphabetic, not stopword-only, no punctuation
+     fragments); keyword-attribution fallback works (D2). The additional
+     research-corpus sample requires an unavailable artifact and is skipped.
   5. SEV1 explain: ValueError / http.client.HTTPException / garbage-HTTP /
      timeout=-1 all fall back to template (return None), never raise.
   6. SEV2 explain score guard: "10.83"/"0.833" mutations rejected, a
@@ -46,6 +48,8 @@ from app.classifier import (  # noqa: E402
     RULE_HEAD_ORDER,
     RealOnnxClassifier,
     _sigmoid,
+    mask_with_src,
+    surface_variants,
 )
 from app.explain import _validate, ollama_reword  # noqa: E402
 from app.gates import gate_drill, gate_long_input, gate_chunked_low_score  # noqa: E402
@@ -86,6 +90,7 @@ def solo_window_max(clf: RealOnnxClassifier, text: str) -> float:
 
 
 def main() -> int:
+    corpus = REPO_ROOT / "artifacts" / "corpus" / "test.jsonl"
     clf = RealOnnxClassifier(MODEL_DIR)
     print(f"model: {clf.model_version} quant={clf.quant} "
           f"supports_exact_batch={clf.supports_exact_batch} stride={clf.STRIDE}")
@@ -150,18 +155,33 @@ def main() -> int:
     hot = "Worker fell 6 meters from scaffold without harness, taken to hospital. "
     for name, t in {"benign+hot": benign + hot, "hot+benign": hot + benign,
                     "hot@100": (" ".join(["ok"] * 100)) + " " + hot + (" ".join(["fine"] * 60))}.items():
-        delta = abs(clf.predict(t).sif_score - solo_window_max(clf, t))
-        check(delta < 1e-4,  # 4-decimal score rounding in PredictionOut
-              f"{name}: predict == solo-window max (delta={delta:.2e}, was 0.26)")
+        masked, _, _ = mask_with_src(t[:MAX_INPUT_CHARS])
+        solo_scores = [solo_window_max(clf, v)
+                       for v in surface_variants(masked, clf.n_variants)]
+        pred = clf.predict(t)
+        variant_deltas = [abs(a - b) for a, b in zip(pred.variant_scores, solo_scores)]
+        # 2026-09-26 masked-v2 INT8: max Δ=4.59e-5 across these cases;
+        # 1e-4 leaves rounding margin for four-decimal PredictionOut scores.
+        check(max(variant_deltas, default=0.0) < 1e-4,
+              f"{name}: every masked variant matches solo-window score "
+              f"(max delta={max(variant_deltas, default=0.0):.2e})")
+        mean_delta = abs(pred.sif_score - round(float(np.mean(solo_scores)), 4))
+        check(mean_delta < 1e-4,
+              f"{name}: predict matches rounded solo-window mean "
+              f"(delta={mean_delta:.2e}; measured raw-text comparison is not parity: "
+              "variant ensemble + outcome masking differ)")
 
-    print("[4] SEV2 span quality: 13 demo cards + 20 corpus rows")
+    print("[4] SEV2 span quality: shipped demo cards")
     texts = [json.loads(line)["text"] for line in
              (REPO_ROOT / "artifacts" / "demo" / "demo_corpus.jsonl").read_text().splitlines()]
-    rows = []
-    for line in itertools.islice(open(REPO_ROOT / "artifacts" / "corpus" / "test.jsonl"), 400):
-        d = json.loads(line)
-        rows.append(d.get("text") or d.get("masked_text") or "")
-    texts += [r for r in rows if r][:20]
+    if corpus.is_file():
+        rows = []
+        for line in itertools.islice(corpus.open(encoding="utf-8"), 400):
+            d = json.loads(line)
+            rows.append(d.get("text") or d.get("masked_text") or "")
+        texts += [r for r in rows if r][:20]
+    else:
+        print(f"      skip research sample: requires unavailable research artifact {corpus.relative_to(REPO_ROOT)} — see docs/architecture.md and packaging/manifest.md")
     n_empty = 0
     for t in texts:
         p = clf.predict(t)

@@ -24,7 +24,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from app.classifier import RealOnnxClassifier  # noqa: E402
 
-MODEL_DIR = REPO_ROOT / "artifacts" / "export-gate" / "final-green"
+MODEL_DIR = REPO_ROOT / "artifacts" / "models" / "masked-v2"
 
 # ~135 words -> >=126 body tokens -> exactly fills one seq-128 window.
 SEQ128_TEXT = (

@@ -16,11 +16,15 @@ command -v hf >/dev/null 2>&1 || {
 }
 
 STAGE="$(mktemp -d /tmp/sif-space-XXXXXX)"
-mkdir -p "$STAGE/app" "$STAGE/dashboard"
+mkdir -p "$STAGE/app" "$STAGE/dashboard" "$STAGE/deploy"
 
 cp "$REPO_ROOT/deploy/space-README.md" "$STAGE/README.md"
-cp "$REPO_ROOT/deploy/Dockerfile" "$REPO_ROOT/deploy/entrypoint.sh" \
-   "$REPO_ROOT/deploy/fetch_bundle.py" "$REPO_ROOT/requirements.txt" "$STAGE/"
+cp "$REPO_ROOT/requirements.txt" "$STAGE/"
+# Space build context = repo root; keep the deploy/ layout so the Dockerfile
+# COPY paths are identical to the local build (deploy/Dockerfile, context .).
+cp "$REPO_ROOT/deploy/Dockerfile" "$STAGE/Dockerfile"
+cp "$REPO_ROOT/deploy/entrypoint.sh" "$REPO_ROOT/deploy/fetch_bundle.py" \
+   "$STAGE/deploy/"
 
 rsync -a \
     --exclude '__pycache__' \

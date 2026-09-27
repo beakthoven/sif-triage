@@ -1,7 +1,8 @@
 """Gold set sampler — anti-circularity artifact for blind human labeling.
 
 Composition (FROZEN spec/label_spec.yaml `gold:` + DECISION_LOG D7/D8):
-  300 OSHA 2024-25  from artifacts/corpus/test.jsonl (temporal held-out pool;
+  300 OSHA 2024-25  from artifacts/corpus/test.jsonl (temporal test pool also
+                    used for operating-point tuning; not fully held out;
                     up to 150 oil-gas NAICS 211/213 rows — 364 available)
   100 ASRS          from artifacts/asrs/asrs-aviation-reports-train.jsonl,
                     SAME prescreen as data_pipeline/build_corpus.py (drop
@@ -126,6 +127,9 @@ def osha_event_titles(csv_path: str) -> dict:
 
 
 def sample_osha(test_rows: list[dict], titles: dict, seed: int) -> tuple[list[dict], dict]:
+    # Disclosure: this gold stratum is sampled from artifacts/corpus/test.jsonl,
+    # the same temporal test split used to tune the operating point; it is not
+    # a fully held-out evaluation. Do not re-sample without human re-adjudication.
     oil_gas = [r for r in test_rows if (r.get("naics") or "").startswith(OIL_GAS_NAICS)]
     rest = [r for r in test_rows if not (r.get("naics") or "").startswith(OIL_GAS_NAICS)]
     n_og = min(N_OIL_GAS_MAX, len(oil_gas))
@@ -240,6 +244,8 @@ def sample_asrs(asrs_path: str, train_ids: set[str], seed: int) -> tuple[list[di
 
 
 def sample_synthetic(path: str, seed: int) -> tuple[list[dict], dict]:
+    # Disclosure: this sampler does not exclude synthetic rows used in training;
+    # this stratum may overlap training and is not generalization evidence.
     rows = load_jsonl(path)
     sample = rng_for(seed, "synthetic").sample(rows, N_SYNTH)
     items = []

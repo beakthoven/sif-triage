@@ -2,6 +2,8 @@
 classifier must satisfy them exactly when it replaces the mock."""
 from __future__ import annotations
 
+import re
+from datetime import date
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
@@ -49,12 +51,22 @@ RULE_DISPLAY: dict[str, dict[str, Any]] = {
 
 
 class ReportIn(BaseModel):
-    text: str = Field(min_length=1)
+    text: str = Field(min_length=1, max_length=100_000)
     date: str | None = None
     site: str | None = None
     activity: str | None = None
     contractor: str | None = None
     source: str = "api"
+
+    @model_validator(mode="after")
+    def _validate_date(self) -> "ReportIn":
+        if self.date is not None:
+            try:
+                if len(self.date) != 10 or date.fromisoformat(self.date).isoformat() != self.date:
+                    raise ValueError
+            except ValueError as exc:
+                raise ValueError("date must be a valid YYYY-MM-DD date") from exc
+        return self
 
 
 class EvidenceSpan(BaseModel):
@@ -94,6 +106,39 @@ class PredictionOut(BaseModel):
     # True when the input overflowed seq_len and the sliding-window path ran
     # (max-pooled head scores, best-window spans). False for the mock.
     chunked: bool = False
+    # --- self-consistency ensemble (D1 reliability; classifier.py) -----------
+    # sif_score is the MEAN over n_variants deterministic surface variants of
+    # the outcome-masked text (variant 0 = the report as submitted), so one
+    # reviewer phrasing cannot flip the verdict by itself
+    # (docs/discovery/60-orchestrator-novel-probe.md Result 3/5).
+    # score_spread: population sd of variant_scores — how much the model's
+    #   reading depends on surface phrasing.
+    # verdict_stability: fraction of variants whose flag verdict agrees with
+    #   the mean-score verdict (1.0 = unanimous).
+    # Reliability only: a low spread can still be a WRONG consensus — the
+    # spread is exposed so gates can gray unstable verdicts, not to assert
+    # correctness. All defaulted so predictions stored before this change
+    # still parse (storage.py rebuilds PredictionOut from columns).
+    score_spread: float = Field(default=0.0, ge=0.0, le=1.0)
+    n_variants: int = Field(default=1, ge=1)
+    variant_scores: list[float] = Field(default_factory=list)
+    verdict_stability: float = Field(default=1.0, ge=0.0, le=1.0)
+    # --- server-owned operating point (CLASSIFIER-BAND; classifier.py) -------
+    # band: HIGH >= the artifact's tuned flag threshold, MODERATE >= the gray
+    # band floor, LOW otherwise — computed by the classifier (band_for) from
+    # the SAME rounded score that is reported as sif_score. The threshold and
+    # gray-band bounds ride along so the UI can STATE the operating point it
+    # was banded against. All defaulted so predictions stored before this
+    # change still parse (storage.py rebuilds PredictionOut from columns);
+    # band None = "scored under an operating point this response cannot vouch
+    # for" — the UI must show that honestly, never invent a band.
+    band: Literal["HIGH", "MODERATE", "LOW"] | None = None
+    flag_threshold: float | None = Field(default=None, ge=0.0, le=1.0)
+    gray_band_low: float | None = Field(default=None, ge=0.0, le=1.0)
+    gray_band_high: float | None = Field(default=None, ge=0.0, le=1.0)
+    # Annotation-only text cues; never affect routing or scoring. Recomputed
+    # from report text on classify and stored-report reads, never persisted.
+    rule_cue_hits: dict[str, bool] | None = None
     # Filled only by POST /classify?explain=1 (never by the classifier itself,
     # never persisted) — None on plain classify calls.
     explanation: ExplanationOut | None = None
@@ -102,6 +147,24 @@ class PredictionOut(BaseModel):
     # 404-ing on an optimistic placeholder (audit F4). None on stateless calls
     # and never persisted (the row id already keys the predictions table).
     report_id: int | None = None
+
+
+class ClusterOut(BaseModel):
+    exemplar_id: int
+    member_ids: list[int]
+    n: int
+    reviewed_member_ids: list[int]
+    max_cos: float
+
+
+class ClustersOut(BaseModel):
+    threshold: float
+    n_scored: int
+    n_skipped: int
+    dim: int
+    n_clusters: int
+    n_members: int
+    clusters: list[ClusterOut]
 
 
 class StoredReport(BaseModel):
@@ -187,6 +250,56 @@ class StoredOverride(OverrideIn):
     created_at: str
 
 
+ActionStatus = Literal["open", "in_progress", "closed"]
+
+
+class ActionCreate(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    report_id: int
+    override_id: int
+    owner: str = Field(min_length=1)
+    due_date: str | None = None
+    status: ActionStatus = "open"
+
+    @model_validator(mode="after")
+    def _validate_due_date(self) -> "ActionCreate":
+        if self.due_date is not None:
+            _check_iso_date(self.due_date)
+        return self
+
+
+class ActionPatch(BaseModel):
+    model_config = {"extra": "forbid"}
+
+    owner: str | None = Field(default=None, min_length=1)
+    due_date: str | None = None
+    status: ActionStatus | None = None
+
+    @model_validator(mode="after")
+    def _validate_due_date(self) -> "ActionPatch":
+        if self.due_date is not None:
+            _check_iso_date(self.due_date)
+        return self
+
+
+def _check_iso_date(value: str) -> None:
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
+        raise ValueError("due_date must be YYYY-MM-DD")
+    date.fromisoformat(value)
+
+
+class ActionOut(BaseModel):
+    id: int
+    report_id: int
+    override_id: int
+    owner: str
+    due_date: str | None
+    status: ActionStatus
+    created_at: str
+    updated_at: str
+
+
 class DensityRow(BaseModel):
     key: str
     n_reports: int
@@ -237,3 +350,13 @@ class MetricsSummary(BaseModel):
     gate_trigger_counts: dict[str, int]
     model_version: str
     classifier: str
+    ece: float | None = None
+    brier: float | None = None
+    calibration_n: int | None = None
+    calibration_split: str | None = None
+    # Server-owned decision threshold so no client ever hardcodes one again
+    # (the analytics slice shipped a stale 0.658 copy after the ensemble
+    # re-tune moved the served point to 0.5647).
+    flag_threshold: float | None = None
+    gray_band_low: float | None = None
+    gray_band_high: float | None = None

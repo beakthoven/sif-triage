@@ -25,3 +25,9 @@ packaging/pendrive/stick/runtimes/
 packaging/pendrive/stick/extras/*.tar.gz
 packaging/pendrive/stick/extras/*.webm
 packaging/pendrive/*.log
+
+# local QA and deployment artifacts
+.qa/
+dashboard/test-results/
+data/demo_pre.db
+deploy/vendor/
