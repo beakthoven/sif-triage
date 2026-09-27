@@ -19,11 +19,11 @@ route uncertain and barrier-failure cases to review; an HSE reviewer decides.
 
 - Paste a report or bulk-ingest CSV → triage score + rule probabilities +
   evidence spans, with the server's operating point named on every screen.
-- 18 deterministic gates, including six barrier-absence families
-  (energy isolation, gas test, permit, fire watch, standby, fall protection)
-  and verdict-stability routing for ensemble-unstable scores.
+- 18 deterministic gates, including seven barrier-absence families
+  (energy isolation, gas test, permit, fire watch, standby, atmosphere monitoring,
+  fall protection) and verdict-stability routing for ensemble-unstable scores.
 - Duplicate clustering: near-identical reports collapse under one row —
-  44% register compression on the demo data (1,019 groups over 4,559 rows).
+  44% register compression on the demo data (1,019 groups over 4,548 rows).
 - Full decision audit trail: reviewer identity, rationale, timestamps.
 
 > **Claim boundary:** triage, evidence extraction, and queue compression
